@@ -4,7 +4,7 @@ import rospy
 from alpha1.msg import CustomMessage
 
 def callback(data):
-	rospy.loginfo(rospy.get_caller_id() + '\nThe id is %s and the message is \'%s\'', data.id, data.message)
+	rospy.loginfo('{0}\nThe id is {1} and the message is \'{2}\''.format(rospy.get_caller_id(), data.id, data.message))
 
 def listener():
 	rospy.init_node('listener', anonymous = True)
