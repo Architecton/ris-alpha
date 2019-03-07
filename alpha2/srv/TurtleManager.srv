@@ -1,0 +1,4 @@
+string trajection
+uint64 duration
+---
+string lastmovement
