@@ -1,0 +1,6 @@
+exercise 1: Create a service that checks if number is prime
+and a client that uses the datetime module and sends the current 
+seconds to the service for it to check if the number is prime.
+
+Client should do this for a specified number of seconds.
+The script should print a set of all found prime numbers.
