@@ -1,0 +1,10 @@
+(cl:defpackage alpha2-srv
+  (:use )
+  (:export
+   "TURTLEMANAGER"
+   "<TURTLEMANAGER-REQUEST>"
+   "TURTLEMANAGER-REQUEST"
+   "<TURTLEMANAGER-RESPONSE>"
+   "TURTLEMANAGER-RESPONSE"
+  ))
+
