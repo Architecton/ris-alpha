@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="turtlesim" name="turtlesim_node" type="turtlesim_node"/>
+  <node pkg="alpha2" name="service" type="service.py"/>
+  <node pkg="alpha2" name="test_client" type="test_client.py"/>
+</launch>
