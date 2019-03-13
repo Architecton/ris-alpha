@@ -23,7 +23,8 @@ if __name__ == "__main__":
     # Define list of test commands.
     test_req = [["circle", 10], ["rectangle", 10], ["triangle", 10], ["random", 10]]
     for req in test_req:
-        print "Requesting movement '{0}' for duration:={1}.".format(req[0], req[1])
+        print "Requesting movement '{0}' for duration:={1} @ {2}.".format(req[0],\
+                                        req[1], datetime.datetime.now().isoformat())
         last_move = movement_manager_test_client(*req).lastmovement
         print "Received ACK for movement '{0}' @ {1}.".format(last_move,\
                                         datetime.datetime.now().isoformat())
