@@ -3,76 +3,96 @@
 import rospy
 from alpha2.srv import TurtleManager
 from geometry_msgs.msg import Twist
+import math
+import random
 
-def handle_rectangular_mvm(step):
+# //////// Movement Handlers ////////
+
+
+# Handle rectangular movement
+def handle_rectangular_mvm(pub, duration, rate):
     twist = Twist()
-    twist.linear.x = 0.1
-    step = step % 20
-
-    if step % 5 == 0:
-        twist.linear.x = 0
-        twist.angular.z = 1.57 #(90 / 360) * 2 * 3.14
-
-    return twist
-
-def handle_triangular_mvm(step):
-    pass
-
-def handle_circular_mvm(step):
-    twist = Twist()
-    twist.linear.x = 0.07
-
-    if step % 2 == 0:
-        twist.linear.x = 0
-        twist.angular.z = 0.157
-
-    return twist
-
-def handle_random_mvm(step):
-    pass    
-
-def handle_movement_manager(req):
-
-    pub = rospy.Publisher('turtle1/cmd_vel', Twist, queue_size = 1000)
-
-    step = 0.0
-
-    beginTime = rospy.get_time() # to vraca sekunde
-    endTime = beginTime + req.duration # predvidevamo da je tudi req.duration v sekundah
-
-    print 'Got request' 
-    print 'Begin time: %f' % beginTime
-    print 'End time: %f' % endTime
-
-    rate = rospy.Rate(1)
-
-    while rospy.get_time() < endTime:
-        if req.trajection == 'rectangle':
-            twist = handle_rectangular_mvm(step)
-        elif req.trajection == 'triangle':
-            twist = handle_triangular_mvm(step)
-        elif req.trajection == 'circle':
-            twist = handle_circular_mvm(step)
-        elif req.trajection == 'random':
-            twist = handle_random_mvm(step) 
-        
+    begin_time = rospy.get_time()
+    step = 0
+    while rospy.get_time() - begin_time < duration:
+        twist.linear.x = 1.5
+        twist.angular.z = 0
+        if step % 3 == 0:
+            twist.linear.x = 0
+            twist.angular.z = math.pi/2.0
         pub.publish(twist)
-        step = step + 1.0
+        rate.sleep()
+        step += 1
+
+
+# Handle triangular movement
+def handle_triangular_mvm(pub, duration, rate):
+    twist = Twist()
+    begin_time = rospy.get_time()
+    step = 0
+    while rospy.get_time() - begin_time < duration:
+        twist.linear.x = 1.5
+        twist.angular.z = 0
+        if step % 3 == 0:
+            twist.linear.x = 0
+            twist.angular.z = math.pi - math.pi/3.0
+        pub.publish(twist)
+        rate.sleep()
+        step += 1
+
+
+# Handle circular movement
+def handle_circular_mvm(pub, duration, rate):
+    twist = Twist()
+    begin_time = rospy.get_time()
+    while rospy.get_time() - begin_time < duration:
+        twist.linear.x = 1.5
+        twist.angular.z = 1.0
+        pub.publish(twist)
         rate.sleep()
 
 
+# Handle random movement
+def handle_random_mvm(pub, duration, rate):
+    twist = Twist()
+    begin_time = rospy.get_time()
+    while rospy.get_time() - begin_time < duration:
+        twist.linear.x = random.uniform(-2, 2)
+        twist.angular.z = random.uniform(-2, 2)
+        pub.publish(twist)
+        rate.sleep()
+
+# //////// /Movement Handlers ////////
+
+
+# handle_movement_manager: service request handler function
+def handle_movement_manager(req):
+    # Initialize publisher that publishes to the turtle1 velocity topic.
+    pub = rospy.Publisher('turtle1/cmd_vel', Twist, queue_size = 1000)
+
+    # Handle requests
+    if req.trajection == 'rectangle':
+        twist = handle_rectangular_mvm(pub, req.duration, rospy.Rate(1))
+    elif req.trajection == 'triangle':
+        twist = handle_triangular_mvm(pub, req.duration, rospy.Rate(1))
+    elif req.trajection == 'circle':
+        twist = handle_circular_mvm(pub, req.duration, rospy.Rate(1))
+    elif req.trajection == 'random':
+        twist = handle_random_mvm(pub, req.duration, rospy.Rate(1)) 
+
     return req.trajection
 
+
+# movement_manager_server: node and service initialization
 def movement_manager_server():
+    # initialize node and service.
     rospy.init_node('movement_manager_server')
-    s = rospy.Service('movement_manager', TurtleManager, handle_movement_manager)
+    rospy.Service('movement_manager', TurtleManager, handle_movement_manager)
 
-    print('Ready to handle requests.')
+    print('movement_manager online')
 
+    # Wait for requests.
     rospy.spin()
 
 if __name__ == '__main__':
     movement_manager_server()
-
-# Neki ros neki rospin neki rosspinonce neki
-# 
