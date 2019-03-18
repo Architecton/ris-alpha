@@ -17,40 +17,14 @@ while(not ac.wait_for_server(rospy.Duration.from_sec(2.0))):  # Wait for server.
 
 goal_list = [MoveBaseGoal() for k in range(5)]
 
-# First goal *
-goal_list[0].target_pose.header.frame_id = "map"
-goal_list[0].target_pose.header.stamp = rospy.Time.now()
-goal_list[0].target_pose.pose.position.x = -1.276
-goal_list[0].target_pose.pose.position.y = 2.121
-goal_list[0].target_pose.pose.orientation.w = 0.850
-
-# Second goal *
-goal_list[1].target_pose.header.frame_id = "map"
-goal_list[1].target_pose.header.stamp = rospy.Time.now()
-goal_list[1].target_pose.pose.position.x = 0.421
-goal_list[1].target_pose.pose.position.y = 0.166
-goal_list[1].target_pose.pose.orientation.w = 0.597
-
-# Third goal *
-goal_list[2].target_pose.header.frame_id = "map"
-goal_list[2].target_pose.header.stamp = rospy.Time.now()
-goal_list[2].target_pose.pose.position.x = 2.195
-goal_list[2].target_pose.pose.position.y = 0.723
-goal_list[2].target_pose.pose.orientation.w = 0.999
-
-# Fourth goal *
-goal_list[3].target_pose.header.frame_id = "map"
-goal_list[3].target_pose.header.stamp = rospy.Time.now()
-goal_list[3].target_pose.pose.position.x = 1.832
-goal_list[3].target_pose.pose.position.y = 2.986
-goal_list[3].target_pose.pose.orientation.w = 0.882
-
-# Fifth goal
-goal_list[4].target_pose.header.frame_id = "map"
-goal_list[4].target_pose.header.stamp = rospy.Time.now()
-goal_list[4].target_pose.pose.position.x = 0.036
-goal_list[4].target_pose.pose.position.y = 2.124
-goal_list[4].target_pose.pose.orientation.w = 0.855
+xyw = np.array([[-1.276, 2.121, 0.850], [0.421, 0.166, 0.597], [2.195, 0.723, 0.999], [1.832, 2.986, 0.882], [0.036, 2.124, 0.855]];
+for k, goal in enumerate(goal_list):
+    goal.target_pose.header.frame_id = "map"
+    goal.target_pose.header.stamp = rospy.Time.now()
+    goal.target_pose.pose.position.x = xyw[k, 0]
+    goal.target_pose.pose.position.y = xyw[k, 1]
+    goal.target_pose.pose.orientation.w = xyw[k, 2]
+    
 
 for i, goal in enumerate(goal_list):
 
@@ -67,11 +41,9 @@ for i, goal in enumerate(goal_list):
             rospy.loginfo("Goal aborted.")  
             break
 
-        #Possible States Are: PENDING, ACTIVE, RECALLED, REJECTED, PREEMPTED, ABORTED, SUCCEEDED, LOST.
-
         if not goal_state == GoalStatus.SUCCEEDED:
             rospy.loginfo("The goal has not been reached yet! Checking again in 1s.")
         else:
             rospy.loginfo("The goal was reached!")
+            GoalStatus.SUCCEEDED
 
-    GoalStatus.SUCCEEDED
