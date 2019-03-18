@@ -63,7 +63,7 @@ for i, goal in enumerate(goal_list):
 
         ac.wait_for_result(rospy.Duration(1))
         goal_state = ac.get_state()
-        if goal_state == GoalStatus.ABORTED or GoalStatus.REJECTED:
+        if goal_state == GoalStatus.ABORTED or goal_state == GoalStatus.REJECTED:
             rospy.loginfo("Goal aborted.")  
             break
 
