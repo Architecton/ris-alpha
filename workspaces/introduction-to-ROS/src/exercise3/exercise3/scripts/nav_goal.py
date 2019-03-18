@@ -54,6 +54,8 @@ goal_list[4].target_pose.pose.orientation.w = 0.855
 
 for i, goal in enumerate(goal_list):
 
+	goal_state = GoalStatus.LOST
+
 	rospy.loginfo("Sending goal {0}".format(i))
 	ac.send_goal(goal)
 
