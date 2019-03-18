@@ -61,12 +61,13 @@ for i, goal in enumerate(goal_list):
 
 	while (not goal_state == GoalStatus.SUCCEEDED):
 
-		ac.wait_for_result(rospy.Duration(2))
+		ac.wait_for_result(rospy.Duration(1))
 		goal_state = ac.get_state()
+		print goal_state
 		#Possible States Are: PENDING, ACTIVE, RECALLED, REJECTED, PREEMPTED, ABORTED, SUCCEEDED, LOST.
 
 		if not goal_state == GoalStatus.SUCCEEDED:
-			rospy.loginfo("The goal has not been reached yet! Checking again in 2s.")
+			rospy.loginfo("The goal has not been reached yet! Checking again in 1s.")
 		else:
 			rospy.loginfo("The goal was reached!")
 
