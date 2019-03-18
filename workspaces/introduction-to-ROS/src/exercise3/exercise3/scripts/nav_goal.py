@@ -54,21 +54,24 @@ goal_list[4].target_pose.pose.orientation.w = 0.855
 
 for i, goal in enumerate(goal_list):
 
-	goal_state = GoalStatus.LOST
+    goal_state = GoalStatus.LOST
 
-	rospy.loginfo("Sending goal {0}".format(i))
-	ac.send_goal(goal)
+    rospy.loginfo("Sending goal {0}".format(i))
+    ac.send_goal(goal)
 
-	while (not goal_state == GoalStatus.SUCCEEDED):
+    while (not goal_state == GoalStatus.SUCCEEDED):
 
-		ac.wait_for_result(rospy.Duration(1))
-		goal_state = ac.get_state()
-		print goal_state
-		#Possible States Are: PENDING, ACTIVE, RECALLED, REJECTED, PREEMPTED, ABORTED, SUCCEEDED, LOST.
+        ac.wait_for_result(rospy.Duration(1))
+        goal_state = ac.get_state()
+        if goal_state == GoalStatus.ABORTED or GoalStatus.REJECTED:
+            rospy.loginfo("Goal aborted.")  
+            break
 
-		if not goal_state == GoalStatus.SUCCEEDED:
-			rospy.loginfo("The goal has not been reached yet! Checking again in 1s.")
-		else:
-			rospy.loginfo("The goal was reached!")
+        #Possible States Are: PENDING, ACTIVE, RECALLED, REJECTED, PREEMPTED, ABORTED, SUCCEEDED, LOST.
 
-	GoalStatus.SUCCEEDED
+        if not goal_state == GoalStatus.SUCCEEDED:
+            rospy.loginfo("The goal has not been reached yet! Checking again in 1s.")
+        else:
+            rospy.loginfo("The goal was reached!")
+
+    GoalStatus.SUCCEEDED
