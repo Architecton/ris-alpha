@@ -20,7 +20,7 @@ xyw = np.array([[-1.276, 2.121, 0.850], [0.421, 0.166, 0.597], [2.195, 0.723, 0.
 # Allocate list for goals.
 goal_list = np.empty(xyw.shape[0], dtype=object)
 for k in np.arrange(xyw.shape[0]):  # Initialize goals and add to list.
-    goal = MoveBaseGoal;
+    goal = MoveBaseGoal();
     goal.target_pose.header.frame_id = "map"
     goal.target_pose.header.stamp = rospy.Time.now()
     goal.target_pose.pose.position.x = xyw[k, 0]
