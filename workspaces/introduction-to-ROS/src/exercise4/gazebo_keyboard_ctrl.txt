@@ -1,1 +1,5 @@
+nastimaj ROS_MASTER_URI="http://localhost:11311"
+roslaunch turtlebot_bringup minimal.launch
+roslaunch turtlebot_navigation amcl_demo.launch
 roslaunch kobuki_keyop keyop.launch
+roslaunch exercise4 rins_world.launch
