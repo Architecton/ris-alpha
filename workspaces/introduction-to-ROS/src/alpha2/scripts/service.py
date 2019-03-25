@@ -96,3 +96,4 @@ def movement_manager_server():
 
 if __name__ == '__main__':
     movement_manager_server()
+

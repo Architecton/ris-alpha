@@ -21,16 +21,24 @@ class Breadcrumbs():
 		self.trail_pub = rospy.Publisher(markers_topic, MarkerArray, queue_size=5) # Initialize trail publisher.
 		self.trail = []  # Initialize array for storing the trail.
 
+                ### Initialize service for getting the forward range ###
+
 		self.message_counter = 0  # Initialize message counter.
 
+                rospy.wait_for_service('range_finder')  # Wait for service to come online.
+                try:
+                    range_serv = rospy.ServiceProxy('range_finder', ForwardRange)
+                except rospy.ServiceProxy, e:
+                    print "range_finder error: {0}".format(e.message)
+
+                ###
+
+
 	def push_position(self):
-            """
-                TODO
-            """
 		try:
 			# Give me where is the 'base_link' frame relative to the 'map' frame at the latest available time
 			trans = self.tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
-
+                        print range_serv()
 			# Give me where is the 'base_link' frame relative to the 'map' frame now, wait for up to 2 seconds for the transform to become available
 
 			# trans = self.tf2_buffer.lookup_transform('map', 'base_link', rospy.Time.now(), rospy.Duration(2))
@@ -68,7 +76,7 @@ class Breadcrumbs():
 				marker = Marker()
 				marker.header.stamp = rospy.Time.now()
 				marker.header.frame_id = '/map'
-				marker.pose.position = Point(point.transform.translation.x, point.transform.translation.y - 0.5, point.transform.translation.z)
+				marker.pose.position = Point(point.transform.translation.x, point.transform.translation.y, point.transform.translation.z)
 				marker.type = Marker.CUBE
 				marker.action = Marker.ADD
 				marker.frame_locked = False
