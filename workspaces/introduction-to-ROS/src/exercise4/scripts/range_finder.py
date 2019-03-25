@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from sensor_msgs.msg import LaserScan
 from exercise4.srv import ForwardRange
 
