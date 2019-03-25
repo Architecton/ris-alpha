@@ -5,9 +5,11 @@ import rospy
 import sensor_msgs.msg
 import message_filters
 import tf2_ros
+import tf2_geometry_msgs
 from std_msgs.msg import String, Bool, ColorRGBA
 from visualization_msgs.msg import Marker, MarkerArray
-from geometry_msgs.msg import Point, Vector3
+from geometry_msgs.msg import Point, Vector3, PoseStamped
+from exercise4.srv import ForwardRange
 
 # Node for face detection.
 class Breadcrumbs():
@@ -23,11 +25,34 @@ class Breadcrumbs():
 
         self.message_counter = 0  # Initialize message counter.
 
-    def push_position(self):
+        rospy.wait_for_service('range_finder')
+
+        self.serv = None
 
         try:
+            self.serv = rospy.ServiceProxy('range_finder', ForwardRange)
+        except rospy.ServiceException, e:
+            print "Service error: {0}".format(e.message)
+
+    def push_position(self):
+
+
+
+        try:
+        
+            forward_distance = self.serv()
+
+
             # Give me where is the 'base_link' frame relative to the 'map' frame at the latest available time
             trans = self.tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
+
+            t = PoseStamped()
+            #print t
+            t.pose.position.x = forward_distance.distance
+
+            point_transformed = tf2_geometry_msgs.do_transform_pose(t, trans)
+
+            #print point_transformed
 
             # Give me where is the 'base_link' frame relative to the 'map' frame now, wait for up to 2 seconds for the transform to become available
 
@@ -52,6 +77,10 @@ class Breadcrumbs():
             #                           fixed_frame='world',
             #                           timeout=rospy.Duration(1.))
 
+            trans.transform.translation.x = point_transformed.pose.position.x
+            trans.transform.translation.y = point_transformed.pose.position.y
+            trans.transform.translation.z = point_transformed.pose.position.z
+
             self.trail.append(trans)
             
         except Exception as e:
@@ -66,7 +95,7 @@ class Breadcrumbs():
                 marker = Marker()
                 marker.header.stamp = rospy.Time.now()
                 marker.header.frame_id = '/map'
-                marker.pose.position = Point(point.transform.translation.x, point.transform.translation.y - 0.5, point.transform.translation.z)
+                marker.pose.position = Point(point.transform.translation.x, point.transform.translation.y, point.transform.translation.z)
                 marker.type = Marker.CUBE
                 marker.action = Marker.ADD
                 marker.frame_locked = False
