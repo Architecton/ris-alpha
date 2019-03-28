@@ -1,0 +1,61 @@
+1. set something to true.
+2. Inside the rgs frame it will be prealigned
+3. Inside exercise 5 -- demonstration exercise5/tests
+4. Load image from disk
+5. Get a copy
+
+# Showing an image in opencv
+
+# Wait for keypress
+
+# convert image to grayscale
+
+Histogram equalization improves the contrast.
+
+Thresholding
+
+Find_countorus finds all closed contours on image
+
+for each contour check if not very small and try to fit ellipse.
+
+We are looking for two ellipses with approximately the same center.
+
+Press enter to see ellipses.
+
+
+It will not always work this well.
+
+instead of doing grayscale and histrogram, you can use canny edge detector. Can also run on already improved image.
+
+Can speed up by cropping
+
+once with get ellipses, filter by centering. If one ellipse is like thih.
+
+If diameter discrepancies are large, not the target.
+
+
+
+We know focal distance for kinect in pixels. We can also get te center of ring 
+
+
+
+
+roslaunch view_navigation.launch
+
+detection script on finally on robot computer.
+
+When ring detected, publish marker array
+
+image display depth_registered image raw
+
+it uses mean --- better: use median
+
+ellipse in opencv
+
+e = ((x, y), (dig1, dig2), \theta)
+
+depth image: values correspond to millimeters
+
+
+
+get_pose: compute the position of the detected ellipse.
