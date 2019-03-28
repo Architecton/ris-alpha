@@ -7,7 +7,7 @@ import numpy as np
 
 
 # Load the image from a file
-cv_image = cv2.imread('/home/vicos/ROS/src/exercise5/imgs/ring1.png')
+cv_image = cv2.imread('../imgs/test.png')
 
 cv_original = cv_image.copy()
 
