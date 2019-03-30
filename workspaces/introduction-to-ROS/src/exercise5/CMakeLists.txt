@@ -14,7 +14,19 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package( OpenCV REQUIRED )
 
-catkin_package()
+add_message_files(
+  FILES
+  EllipseData.msg
+)
+
+generate_messages(
+	DEPENDENCIES
+	std_msgs
+)
+
+catkin_package(
+	CATKIN_DEPENDS message_runtime
+)
 
 #include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 #add_executable(map_goals src/map_goals.cpp)

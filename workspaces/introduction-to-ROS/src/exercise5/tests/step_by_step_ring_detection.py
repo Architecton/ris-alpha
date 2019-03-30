@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 from __future__ import print_function
 
 import sys
@@ -53,8 +53,7 @@ for cnt in contours:
     if cnt.shape[0] >= 20:
         ellipse = cv2.fitEllipse(cnt)
         elps.append(ellipse)
-	#
-	cv2.ellipse(cv_image, ellipse, (0, 255, 0))
+        cv2.ellipse(cv_image, ellipse, (0, 255, 0))
 
 cv2.imshow("Image window", cv_image)
 cv2.waitKey()

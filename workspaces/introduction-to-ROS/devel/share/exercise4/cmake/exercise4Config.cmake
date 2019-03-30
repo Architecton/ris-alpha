@@ -67,14 +67,14 @@ set(exercise4_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("TRUE" STREQUAL "TRUE")
-  set(exercise4_SOURCE_PREFIX /home/miha/Desktop/ris-alpha/workspaces/introduction-to-ROS/src/exercise4)
-  set(exercise4_DEVEL_PREFIX /home/miha/Desktop/ris-alpha/workspaces/introduction-to-ROS/devel)
+  set(exercise4_SOURCE_PREFIX /home/dkalsan/ris-alpha/workspaces/introduction-to-ROS/src/exercise4)
+  set(exercise4_DEVEL_PREFIX /home/dkalsan/ris-alpha/workspaces/introduction-to-ROS/devel)
   set(exercise4_INSTALL_PREFIX "")
   set(exercise4_PREFIX ${exercise4_DEVEL_PREFIX})
 else()
   set(exercise4_SOURCE_PREFIX "")
   set(exercise4_DEVEL_PREFIX "")
-  set(exercise4_INSTALL_PREFIX /home/miha/Desktop/ris-alpha/workspaces/introduction-to-ROS/install)
+  set(exercise4_INSTALL_PREFIX /home/dkalsan/ris-alpha/workspaces/introduction-to-ROS/install)
   set(exercise4_PREFIX ${exercise4_INSTALL_PREFIX})
 endif()
 
@@ -91,9 +91,9 @@ endif()
 # flag project as catkin-based to distinguish if a find_package()-ed project is a catkin project
 set(exercise4_FOUND_CATKIN_PROJECT TRUE)
 
-if(NOT "/home/miha/Desktop/ris-alpha/workspaces/introduction-to-ROS/devel/include " STREQUAL " ")
+if(NOT "/home/dkalsan/ris-alpha/workspaces/introduction-to-ROS/devel/include " STREQUAL " ")
   set(exercise4_INCLUDE_DIRS "")
-  set(_include_dirs "/home/miha/Desktop/ris-alpha/workspaces/introduction-to-ROS/devel/include")
+  set(_include_dirs "/home/dkalsan/ris-alpha/workspaces/introduction-to-ROS/devel/include")
   if(NOT " " STREQUAL " ")
     set(_report "Check the issue tracker '' and consider creating a ticket if the problem has not been reported yet.")
   elseif(NOT " " STREQUAL " ")
@@ -110,7 +110,7 @@ if(NOT "/home/miha/Desktop/ris-alpha/workspaces/introduction-to-ROS/devel/includ
         message(FATAL_ERROR "Project 'exercise4' specifies '${idir}' as an include dir, which is not found.  It does not exist in '${include}'.  ${_report}")
       endif()
     else()
-      message(FATAL_ERROR "Project 'exercise4' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/miha/Desktop/ris-alpha/workspaces/introduction-to-ROS/src/exercise4/${idir}'.  ${_report}")
+      message(FATAL_ERROR "Project 'exercise4' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/dkalsan/ris-alpha/workspaces/introduction-to-ROS/src/exercise4/${idir}'.  ${_report}")
     endif()
     _list_append_unique(exercise4_INCLUDE_DIRS ${include})
   endforeach()
@@ -129,7 +129,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/miha/Desktop/ris-alpha/workspaces/introduction-to-ROS/devel/lib;/home/miha/Desktop/ris-alpha/workspaces/introduction-to-ROS/devel/lib;/home/miha/Desktop/ROS_test/devel/lib;/home/miha/Desktop/ROS/devel/lib;/opt/ros/kinetic/lib)
+    foreach(path /home/dkalsan/ris-alpha/workspaces/introduction-to-ROS/devel/lib;/home/dkalsan/ris-alpha/workspaces/introduction-to-ROS/devel/lib;/opt/ros/kinetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
