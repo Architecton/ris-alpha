@@ -74,7 +74,11 @@ ellipse_locator = rospy.ServiceProxy('ellipse_locator', EllipseLocator)
 while checkpoints.shape[0] > 0:
 
     # Get index of closest checkpoint.
-    idx_nxt = np.argmin((lambda x1, x2: np.sum(np.abs(x1 - x2)**2)**(1/2))(robot_pos, checkpoints))
+    if checkpoints.shape[0] > 1:
+    	idx_nxt = np.argmin((lambda x1, x2: np.sum(np.abs(x1 - x2)**2, 1)**(1/2))(robot_pos, checkpoints))
+    else:
+    	idx_nxt = np.argmin((lambda x1, x2: np.sum(np.abs(x1 - x2)**2)**(1/2))(robot_pos, checkpoints))
+
     
     # Create goal for next checkpoint.
     goal_chkpt = MoveBaseGoal()
