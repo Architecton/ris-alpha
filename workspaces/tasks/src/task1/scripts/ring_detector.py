@@ -18,6 +18,15 @@ class The_Ring:
     def __init__(self):
         rospy.init_node('image_converter', anonymous=True)
 
+        # Save latest laser scan and set flag when the image is being processed
+        # self.in_process = 1: an image is being processed
+        # self.in_process = 0: laser sensor readings are being updated
+        self.scan_ranges = None
+        self.scan_angle_min = 0.0
+        self.scan_angle_max = 0.0
+        self.scan_angle_increment = 0.0  
+        self.in_process = 0
+
         # An object we use for converting images between ROS format and OpenCV format
         self.bridge = CvBridge()
 
@@ -35,16 +44,7 @@ class The_Ring:
 
         # Object we use for transforming between coordinate frames
         self.tf_buf = tf2_ros.Buffer()
-        self.tf_listener = tf2_ros.TransformListener(self.tf_buf)  
-
-        # Save latest laser scan and set flag when the image is being processed
-        # self.in_process = 1: an image is being processed
-        # self.in_process = 0: laser sensor readings are being updated
-        self.in_process = 0
-        self.scan_ranges = None
-        self.scan_angle_min = 0.0
-        self.scan_angle_max = 0.0
-        self.scan_angle_increment = 0.0      
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buf)      
 
 
     def image_callback(self,data):
@@ -125,7 +125,7 @@ class The_Ring:
 
             center = (e1[0][0], e1[0][1])
 
-            print(center)
+            # print(center)
 
             # Drawing center
             cv2.line(img_original, (int(center[0]), int(center[1])), (int(center[0]), int(center[1])), (0, 0, 255), 10)
@@ -137,8 +137,8 @@ class The_Ring:
                 dpt = self.scan_ranges[x]
                 if not(np.isnan(dpt)):
                     # Calculate angle that is perpendicular to the detected ellipse face
-                    min_bnd = max(x-20, 0)
-                    max_bnd = min(x+20, len(self.scan_ranges))
+                    min_bnd = max(x-30, 0)
+                    max_bnd = min(x+30, len(self.scan_ranges))
                     dpts_arg = np.array(self.scan_ranges[min_bnd:max_bnd])
                     agls_arg = np.linspace(
                         max(self.scan_angle_min + min_bnd * self.scan_angle_increment, self.scan_angle_min),
@@ -147,6 +147,9 @@ class The_Ring:
                         endpoint=False)
                     filt = np.isnan(dpts_arg)
                     perp_agl, perp_y_itrcpt = self.get_ell_face_agl(dpts_arg[~filt], agls_arg[~filt])
+                    #t1 = dpts_arg[~filt]
+                    #t2 = agls_arg[~filt]
+                    #perp_agl, perp_y_itrcpt = self.get_ell_face_agl(np.hstack((t1[0], t1[len(t1)-1])), np.hstack((t2[0], t2[len(t2)-1])))
 
                     # Set values
                     ed.dpt.append(dpt)
@@ -189,11 +192,15 @@ class The_Ring:
         x_vals = np.cos(agls)*dpts
         y_vals = np.sin(agls)*dpts
 
+        #print("xvals: {0}".format(x_vals))
+        #print("yvals: {0}".format(y_vals))
+
+
         # interpolate line using least squares.
         k, m = np.linalg.lstsq(np.vstack((x_vals, np.ones(x_vals.shape[0]))).T, y_vals, rcond=-1)[0]
 
         # Return angle of perpendicular line.
-        return np.arctan(-1/k), m    
+        return np.arctan(k), m    
 
 
 def main():
