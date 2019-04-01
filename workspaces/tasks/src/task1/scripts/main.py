@@ -26,7 +26,8 @@ import time
 
 ### INITIALIZATIONS ###
 
-rospy.init_node('krneki')
+# Initialize main node.
+rospy.init_node('main')
 
 # Initialize TargetMarker instance.
 #tm = TargetMarker()
@@ -52,9 +53,8 @@ DISTINCT_ELL_THRESH = 1.0
 tf2_buffer = tf2_ros.Buffer()  # initialize coordinate transforms buffer.
 tf2_listener = tf2_ros.TransformListener(tf2_buffer)
 
-time.sleep(5)
-
 # Get robot position in map coordinates.
+time.sleep(2)
 trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
 robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z]) 
 
@@ -90,7 +90,6 @@ while checkpoints.shape[0] > 0:
     while not goal_chkpnt_status == GoalStatus.SUCCEEDED:
 
         # Check if any ellipses if buffer.
-        """
         try:
             # Query into ellipse data buffer.
             ellipse_data = ellipse_locator()
@@ -112,7 +111,7 @@ while checkpoints.shape[0] > 0:
                     ### /DEBUG PLOT ###
 
 
-
+                    """
                     
                     # Create goal to approach found ellipse.
                     goal_ell = MoveBaseGoal()
@@ -145,6 +144,8 @@ while checkpoints.shape[0] > 0:
                     resolved_ell = np.vstack((resolved_ell, np.array([ellipse_data[0], ellipse_data[1], ellipse_data[2]])))
                     # Resend preempted checkpoint goal.
                     ac_chkpnts.send_goal(goal)
+
+                    """
 
                 else:
                     pass
