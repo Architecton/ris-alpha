@@ -78,6 +78,7 @@ while checkpoints.shape[0] > 0:
     while not goal_chkpnt_status == GoalStatus.SUCCEEDED:
 
         # Check if any ellipses if buffer.
+        """
         try:
             # Query into ellipse data buffer.
             ellipse_data = ellipse_locator()
@@ -130,15 +131,20 @@ while checkpoints.shape[0] > 0:
 
                     # Add ellipse to array of resolved ellipses.
                     resolved_ell = np.vstack((resolved_ell, np.array([ellipse_data[0], ellipse_data[1], ellipse_data[2]])))
+                    # Resend preempted checkpoint goal.
+                    ac_chkpnts.send_goal(goal)
 
                 else:
                     pass
         except rospy.ServiceException, e:
             print "Service call failed: {0}".format(e)
-            
+        
+        """
+
+        ac_chkpnts.wait_for_result(rospy.Duration(1))
 
         # Get checkpoint resolution goal status.
-        goal_chkpnt_status = ac.get_state()
+        goal_chkpnt_status = ac_chkpnts.get_state()
 
         # Handle abortions
         if goal_state == GoalStatus.ABORTED or goal_state == GoalStatus.REJECTED:

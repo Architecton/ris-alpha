@@ -121,7 +121,7 @@ def req_handler(req):
 
     # Declare global buffer and pointer to top of buffer (stack).
     global buff
-    global buff_ptr
+    global buff_ptr 
 
     # Check if buffer not empty.
     if buff_ptr > 0:
