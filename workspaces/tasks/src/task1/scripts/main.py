@@ -90,7 +90,7 @@ while checkpoints.shape[0] > 0:
 
     goal_chkpnt_status = GoalStatus.LOST  # Set status for next checkpoint goal.
     ac_chkpnts.send_goal(goal_chkpt) # Send checkpoint goal.
-    rospy.loginfo("Resolving checkpoint {0}".format(checkpoint_ctr))
+    rospy.loginfo("Resolving checkpoint {0}".format(idx_nxt))
 
     # Loop for next checkpoint goal.
     while not goal_chkpnt_status == GoalStatus.SUCCEEDED:
