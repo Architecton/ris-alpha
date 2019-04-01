@@ -20,7 +20,7 @@ def req_handler(req):
 
     #rospy.wait_for_service('static_map')
 
-
+    print ros_map
     #checkpoints.points.append(p1)
     #checkpoints.points.append(p2)
     #checkpoints.points.append(p3)

@@ -3,5 +3,7 @@
   (:export
    "<CHECKPOINTS>"
    "CHECKPOINTS"
+   "<ELLIPSEDATA>"
+   "ELLIPSEDATA"
   ))
 

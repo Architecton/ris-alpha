@@ -17,6 +17,8 @@ from geometry_msgs.msg import Point, Vector3, PoseStamped
 
 from targetmarker import TargetMarker
 
+from task1.srv import EllipseLocator
+
 import time
 
 ### /IMPORTS ###
@@ -26,7 +28,8 @@ import time
 
 ### INITIALIZATIONS ###
 
-rospy.init_node('krneki')
+# Initialize main node.
+rospy.init_node('main')
 
 # Initialize TargetMarker instance.
 #tm = TargetMarker()
@@ -52,15 +55,14 @@ DISTINCT_ELL_THRESH = 1.0
 tf2_buffer = tf2_ros.Buffer()  # initialize coordinate transforms buffer.
 tf2_listener = tf2_ros.TransformListener(tf2_buffer)
 
-time.sleep(5)
-
 # Get robot position in map coordinates.
+time.sleep(2)
 trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
 robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z]) 
 
 # Wait for ellipse data buffer query service to come online.
-# rospy.wait_for_service('ellipse_locator')
-# ellipse_locator = rospy.ServiceProxy('ellipse_locator', EllipseLocator)
+rospy.wait_for_service('ellipse_locator')
+ellipse_locator = rospy.ServiceProxy('ellipse_locator', EllipseLocator)
 
 ### /INITIALIZATIONS ###
 
@@ -72,7 +74,11 @@ robot_pos = np.array([trans.transform.translation.x, trans.transform.translation
 while checkpoints.shape[0] > 0:
 
     # Get index of closest checkpoint.
-    idx_nxt = np.argmin((lambda x1, x2: np.sum(np.abs(x1 - x2)**2)**(1/2))(robot_pos, checkpoints))
+    if checkpoints.shape[0] > 1:
+    	idx_nxt = np.argmin((lambda x1, x2: np.sum(np.abs(x1 - x2)**2, 1)**(1/2))(robot_pos, checkpoints))
+    else:
+    	idx_nxt = np.argmin((lambda x1, x2: np.sum(np.abs(x1 - x2)**2)**(1/2))(robot_pos, checkpoints))
+
     
     # Create goal for next checkpoint.
     goal_chkpt = MoveBaseGoal()
@@ -90,7 +96,6 @@ while checkpoints.shape[0] > 0:
     while not goal_chkpnt_status == GoalStatus.SUCCEEDED:
 
         # Check if any ellipses if buffer.
-        """
         try:
             # Query into ellipse data buffer.
             ellipse_data = ellipse_locator()
@@ -107,12 +112,15 @@ while checkpoints.shape[0] > 0:
 
                     # DEBUG mark goal - mark ellipse center location.
                     tm.push_position(np.array(ellipse_data[:3]))
+
+                    rospy.loginfo("Ellipse detected")
+
                     # tm.push_position(np.array(ellipse_data[3:])) # if marking ellipse approach target.
 
                     ### /DEBUG PLOT ###
 
 
-
+                    """
                     
                     # Create goal to approach found ellipse.
                     goal_ell = MoveBaseGoal()
@@ -145,6 +153,8 @@ while checkpoints.shape[0] > 0:
                     resolved_ell = np.vstack((resolved_ell, np.array([ellipse_data[0], ellipse_data[1], ellipse_data[2]])))
                     # Resend preempted checkpoint goal.
                     ac_chkpnts.send_goal(goal)
+
+                    """
 
                 else:
                     pass

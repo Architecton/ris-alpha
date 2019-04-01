@@ -7,4 +7,8 @@
           AGL
           TIMESTAMP-VAL
           TIMESTAMP
+          PERP_AGL-VAL
+          PERP_AGL
+          PERP_Y_ITRCPT-VAL
+          PERP_Y_ITRCPT
 ))
