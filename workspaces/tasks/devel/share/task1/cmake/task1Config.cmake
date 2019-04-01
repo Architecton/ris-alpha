@@ -91,9 +91,9 @@ endif()
 # flag project as catkin-based to distinguish if a find_package()-ed project is a catkin project
 set(task1_FOUND_CATKIN_PROJECT TRUE)
 
-if(NOT " " STREQUAL " ")
+if(NOT "/home/miha/Desktop/ris-alpha/workspaces/tasks/devel/include " STREQUAL " ")
   set(task1_INCLUDE_DIRS "")
-  set(_include_dirs "")
+  set(_include_dirs "/home/miha/Desktop/ris-alpha/workspaces/tasks/devel/include")
   if(NOT " " STREQUAL " ")
     set(_report "Check the issue tracker '' and consider creating a ticket if the problem has not been reported yet.")
   elseif(NOT " " STREQUAL " ")
@@ -129,7 +129,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/miha/Desktop/ris-alpha/workspaces/tasks/devel/lib;/home/miha/Desktop/ris-alpha/workspaces/introduction-to-ROS/devel/lib;/opt/ros/kinetic/lib)
+    foreach(path /home/miha/Desktop/ris-alpha/workspaces/tasks/devel/lib;/home/miha/Desktop/ris-alpha/workspaces/tasks/devel/lib;/home/miha/Desktop/ris-alpha/workspaces/introduction-to-ROS/devel/lib;/opt/ros/kinetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
@@ -152,7 +152,7 @@ foreach(library ${libraries})
   endif()
 endforeach()
 
-set(task1_EXPORTED_TARGETS "")
+set(task1_EXPORTED_TARGETS "task1_generate_messages_cpp;task1_generate_messages_eus;task1_generate_messages_lisp;task1_generate_messages_nodejs;task1_generate_messages_py")
 # create dummy targets for exported code generation targets to make life of users easier
 foreach(t ${task1_EXPORTED_TARGETS})
   if(NOT TARGET ${t})
@@ -189,7 +189,7 @@ foreach(depend ${depends})
   list(APPEND task1_EXPORTED_TARGETS ${${task1_dep}_EXPORTED_TARGETS})
 endforeach()
 
-set(pkg_cfg_extras "")
+set(pkg_cfg_extras "task1-msg-extras.cmake")
 foreach(extra ${pkg_cfg_extras})
   if(NOT IS_ABSOLUTE ${extra})
     set(extra ${task1_DIR}/${extra})
