@@ -25,15 +25,19 @@ struct EllipseData_
 
   EllipseData_()
     : found(0)
-    , dpt(0.0)
-    , agl(0.0)
-    , timestamp(0.0)  {
+    , dpt()
+    , agl()
+    , timestamp()
+    , perp_agl()
+    , perp_y_itrcpt()  {
     }
   EllipseData_(const ContainerAllocator& _alloc)
     : found(0)
-    , dpt(0.0)
-    , agl(0.0)
-    , timestamp(0.0)  {
+    , dpt(_alloc)
+    , agl(_alloc)
+    , timestamp(_alloc)
+    , perp_agl(_alloc)
+    , perp_y_itrcpt(_alloc)  {
   (void)_alloc;
     }
 
@@ -42,14 +46,20 @@ struct EllipseData_
    typedef uint8_t _found_type;
   _found_type found;
 
-   typedef double _dpt_type;
+   typedef std::vector<double, typename ContainerAllocator::template rebind<double>::other >  _dpt_type;
   _dpt_type dpt;
 
-   typedef double _agl_type;
+   typedef std::vector<double, typename ContainerAllocator::template rebind<double>::other >  _agl_type;
   _agl_type agl;
 
-   typedef double _timestamp_type;
+   typedef std::vector<double, typename ContainerAllocator::template rebind<double>::other >  _timestamp_type;
   _timestamp_type timestamp;
+
+   typedef std::vector<double, typename ContainerAllocator::template rebind<double>::other >  _perp_agl_type;
+  _perp_agl_type perp_agl;
+
+   typedef std::vector<double, typename ContainerAllocator::template rebind<double>::other >  _perp_y_itrcpt_type;
+  _perp_y_itrcpt_type perp_y_itrcpt;
 
 
 
@@ -85,7 +95,7 @@ namespace message_traits
 
 
 
-// BOOLTRAITS {'IsFixedSize': True, 'IsMessage': True, 'HasHeader': False}
+// BOOLTRAITS {'IsFixedSize': False, 'IsMessage': True, 'HasHeader': False}
 // {'std_msgs': ['/opt/ros/kinetic/share/std_msgs/cmake/../msg'], 'exercise5': ['/home/dkalsan/ris-alpha/workspaces/introduction-to-ROS/src/exercise5/msg']}
 
 // !!!!!!!!!!! ['__class__', '__delattr__', '__dict__', '__doc__', '__eq__', '__format__', '__getattribute__', '__hash__', '__init__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_parsed_fields', 'constants', 'fields', 'full_name', 'has_header', 'header_present', 'names', 'package', 'parsed_fields', 'short_name', 'text', 'types']
@@ -95,12 +105,12 @@ namespace message_traits
 
 template <class ContainerAllocator>
 struct IsFixedSize< ::exercise5::EllipseData_<ContainerAllocator> >
-  : TrueType
+  : FalseType
   { };
 
 template <class ContainerAllocator>
 struct IsFixedSize< ::exercise5::EllipseData_<ContainerAllocator> const>
-  : TrueType
+  : FalseType
   { };
 
 template <class ContainerAllocator>
@@ -129,12 +139,12 @@ struct MD5Sum< ::exercise5::EllipseData_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "36c8d02dac602442e37993aa5885ef00";
+    return "d912b32b2cc4be2dc6d9a88df7bfe800";
   }
 
   static const char* value(const ::exercise5::EllipseData_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x36c8d02dac602442ULL;
-  static const uint64_t static_value2 = 0xe37993aa5885ef00ULL;
+  static const uint64_t static_value1 = 0xd912b32b2cc4be2dULL;
+  static const uint64_t static_value2 = 0xc6d9a88df7bfe800ULL;
 };
 
 template<class ContainerAllocator>
@@ -158,13 +168,19 @@ uint8 found\n\
 \n\
 #Depth value at pixel representing the centre of the found ellipse\n\
 #Contains garbage if found flag value equal to 0\n\
-float64 dpt\n\
+float64[] dpt\n\
 \n\
 #angle_min + index_center*angle_increment\n\
-float64 agl\n\
+float64[] agl\n\
 \n\
 #result of rospy.Time.now().to_time() when image taken\n\
-float64 timestamp\n\
+float64[] timestamp\n\
+\n\
+#angle of line perpendicular to the face of the ellipse\n\
+float64[] perp_agl\n\
+\n\
+#y intercept of the line perpendicular to the face of the ellips\n\
+float64[] perp_y_itrcpt\n\
 ";
   }
 
@@ -187,6 +203,8 @@ namespace serialization
       stream.next(m.dpt);
       stream.next(m.agl);
       stream.next(m.timestamp);
+      stream.next(m.perp_agl);
+      stream.next(m.perp_y_itrcpt);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -207,12 +225,36 @@ struct Printer< ::exercise5::EllipseData_<ContainerAllocator> >
   {
     s << indent << "found: ";
     Printer<uint8_t>::stream(s, indent + "  ", v.found);
-    s << indent << "dpt: ";
-    Printer<double>::stream(s, indent + "  ", v.dpt);
-    s << indent << "agl: ";
-    Printer<double>::stream(s, indent + "  ", v.agl);
-    s << indent << "timestamp: ";
-    Printer<double>::stream(s, indent + "  ", v.timestamp);
+    s << indent << "dpt[]" << std::endl;
+    for (size_t i = 0; i < v.dpt.size(); ++i)
+    {
+      s << indent << "  dpt[" << i << "]: ";
+      Printer<double>::stream(s, indent + "  ", v.dpt[i]);
+    }
+    s << indent << "agl[]" << std::endl;
+    for (size_t i = 0; i < v.agl.size(); ++i)
+    {
+      s << indent << "  agl[" << i << "]: ";
+      Printer<double>::stream(s, indent + "  ", v.agl[i]);
+    }
+    s << indent << "timestamp[]" << std::endl;
+    for (size_t i = 0; i < v.timestamp.size(); ++i)
+    {
+      s << indent << "  timestamp[" << i << "]: ";
+      Printer<double>::stream(s, indent + "  ", v.timestamp[i]);
+    }
+    s << indent << "perp_agl[]" << std::endl;
+    for (size_t i = 0; i < v.perp_agl.size(); ++i)
+    {
+      s << indent << "  perp_agl[" << i << "]: ";
+      Printer<double>::stream(s, indent + "  ", v.perp_agl[i]);
+    }
+    s << indent << "perp_y_itrcpt[]" << std::endl;
+    for (size_t i = 0; i < v.perp_y_itrcpt.size(); ++i)
+    {
+      s << indent << "  perp_y_itrcpt[" << i << "]: ";
+      Printer<double>::stream(s, indent + "  ", v.perp_y_itrcpt[i]);
+    }
   }
 };
 

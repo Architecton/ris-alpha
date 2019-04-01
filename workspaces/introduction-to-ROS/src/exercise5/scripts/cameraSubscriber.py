@@ -1,9 +1,5 @@
 #!/usr/bin/env python
-from __future__ import print_function
 
-# import time
-
-import sys
 import rospy
 import cv2
 import numpy as np
@@ -15,7 +11,6 @@ from geometry_msgs.msg import PointStamped, Vector3, Pose
 from cv_bridge import CvBridge, CvBridgeError
 from visualization_msgs.msg import Marker, MarkerArray
 from std_msgs.msg import ColorRGBA
-# from std_msgs.msg import String
 # TEMPORARY
 from exercise5.msg import EllipseData
 
@@ -32,24 +27,20 @@ class The_Ring:
         # Subscribe to the image and/or depth topic
         self.image_sub = rospy.Subscriber("/camera/rgb/image_raw", Image, self.image_callback)
 
-        # TODO: Subscribe to depth laser
-        # self.laser_sub = rospy.Subscriber("/scan", Scan, self.scan_callback)
-
-        #self.timePic = []
-
-        #self.timeDepth = []
-
         # TODO: Add ring publisher
         self.rings_pub = rospy.Publisher('rings', EllipseData, queue_size=1000)
 
-        # 
+        # Subsribe to depth laser
         self.laser_sub = rospy.Subscriber("/scan", LaserScan, self.scan_callback)
 
         # Object we use for transforming between coordinate frames
         self.tf_buf = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buf)  
 
-        # TEMPORARY: Save latest laser scan
+        # Save latest laser scan and set flag when the image is being processed
+        # self.in_process = 1: an image is being processed
+        # self.in_process = 0: laser sensor readings are being updated
+        self.in_process = 0
         self.scan_ranges = None
         self.scan_angle_min = 0.0
         self.scan_angle_max = 0.0
@@ -58,28 +49,12 @@ class The_Ring:
 
     def image_callback(self,data):
         timestamp = rospy.Time.now().to_time()
-
-        #t = time.time()
-        #print('[{0}]: I got a new image!'.format(t))
-        #self.timePic.append(t)
-
-        #tmpArr = []
-        #ix = 0
-        #while ix < len(self.timePic):
-        #    if(ix != 0):
-        #        tmpArr.append(self.timePic[ix] - self.timePic[ix-1])
-        #    ix += 1    
-
-        #mean = float(sum(tmpArr)) / max(len(tmpArr), 1)
-        #print("Avg: {0}".format(mean))        
+        self.in_process = 1     
 
         try:
             img = self.bridge.imgmsg_to_cv2(data, "bgr8")
         except CvBridgeError as e:
             print(e)
-
-        #cv2.imshow('Out', img)
-        #cv2.waitKey(1)
 
         # Load image
         img_original = img.copy()
@@ -87,7 +62,7 @@ class The_Ring:
         # Tranform image to grayscale
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        # Automatic parameter computation
+        # Automatic parameter computation for canny
         sigma = 0.33
         v = np.median(img)
         lower = int(max(0, (1.0 - sigma) * v))
@@ -96,17 +71,14 @@ class The_Ring:
         #upper, _ = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         #lower = 0.5 * upper
 
-        # print("lower: {0}".format(lower))
-        # print("upper: {0}".format(upper))
-
         # Find edges with canny
         edges = cv2.Canny(img, lower, upper)
 
         # Extract contours
         img2, contours, hierarchy = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
-        # Draw contours
-        cv2.drawContours(img_original, contours, -1, (255, 0, 0), 3)
+        # DEVONLY: Draw contours
+        # cv2.drawContours(img_original, contours, -1, (255, 0, 0), 3)
 
         # Fit elipses to all extracted contours
         elps = []
@@ -129,16 +101,16 @@ class The_Ring:
                 e1 = elps[n]
                 e2 = elps[m]
                 dist = np.sqrt(((e1[0][0] - e2[0][0]) ** 2 + (e1[0][1] - e2[0][1]) ** 2))
-                # print dist
 
                 if dist < 5:
-                    candidates.append((e1,e2))
+                    # TODO: Preprocess the candidates that are the same candidate but detected multiple times
+                    candidates.append((e1,e2))      
 
 
-        # TODO: Preprocess the candidates that are the same candidate but detected multiple times
+        # Build an array of detected Rings
+        ed = EllipseData()
+        ed.found = 0
 
-
-        # Preparing to extract the depth from the image
         for c in candidates:
 
             # candidate structure: Box2D
@@ -147,69 +119,81 @@ class The_Ring:
             e1 = c[0]
             e2 = c[1]
 
-            # Draw the detections
+            # DEVONLY: Draw the detections
             cv2.ellipse(img_original, e1, (0, 255, 0), 2)
             cv2.ellipse(img_original, e2, (0, 255, 0), 2)
 
-            size = (e1[1][0]+e1[1][1])/2
             center = (e1[0][0], e1[0][1])
 
             print(center)
 
-            x1 = int(center[0] - size / 2)
-            x2 = int(center[0] + size / 2)
-            x_min = x1 if x1>0 else 0
-            x_max = x2 if x2<img.shape[0] else img.shape[0]
-
-            y1 = int(center[1] - size / 2)
-            y2 = int(center[1] + size / 2)
-            y_min = y1 if y1 > 0 else 0
-            y_max = y2 if y2 < img.shape[1] else img.shape[1]
-
             # Drawing center
             cv2.line(img_original, (int(center[0]), int(center[1])), (int(center[0]), int(center[1])), (0, 0, 255), 10)
-            #cv2.line(img_original, (x_min, y_min), (x_min, y_min), (150, 30, 60), 10)
-            #cv2.line(img_original, (x_max, y_min), (x_max, y_min), (150, 30, 60), 10)
-            #cv2.line(img_original, (x_max, y_max), (x_max, y_max), (150, 30, 60), 10)
-            #cv2.line(img_original, (x_min, y_max), (x_min, y_max), (150, 30, 60), 10)
 
-            # print("[{0}]: {1}".format(rospy.Time.now().to_time(), agl))
-
-            # Publish an array of detections here
+            # Add a detected ring to the array
             if (self.scan_ranges != None):
+                x = int(round(center[0]))
                 agl = self.scan_angle_min + center[0] * self.scan_angle_increment
-                dpt = self.scan_ranges[int(center[0])]
-                ed = EllipseData()
-                ed.found = 0 if np.isnan(dpt) else 1
-                ed.dpt = dpt 
-                ed.agl = agl
-                ed.timestamp = timestamp
+                dpt = self.scan_ranges[x]
+                if not(np.isnan(dpt)):
+                    # Calculate angle that is perpendicular to the detected ellipse face
+                    min_bnd = max(x-20, 0)
+                    max_bnd = min(x+20, len(self.scan_ranges))
+                    dpts_arg = np.array(self.scan_ranges[min_bnd:max_bnd])
+                    agls_arg = np.linspace(
+                        max(self.scan_angle_min + min_bnd * self.scan_angle_increment, self.scan_angle_min),
+                        min(self.scan_angle_min + max_bnd * self.scan_angle_increment, self.scan_angle_max),
+                        max_bnd-min_bnd,
+                        endpoint=False)
+                    filt = np.isnan(dpts_arg)
+                    perp_agl, perp_y_itrcpt = self.get_ell_face_agl(dpts_arg[~filt], agls_arg[~filt])
 
+                    # Set values
+                    ed.dpt.append(dpt)
+                    ed.agl.append(agl)
+                    ed.timestamp.append(timestamp)
+                    ed.perp_agl.append(perp_agl)
+                    ed.perp_y_itrcpt.append(perp_y_itrcpt)
+                    ed.found = 1
+  
+        if (ed.found == 1):
             self.rings_pub.publish(ed)
 
-        print("------------------------")    
+        self.in_process = 0
 
+        # DEVONLY: Visualize camera output
         cv2.imshow('Live feed', img_original)
         cv2.waitKey(1)
 
     def scan_callback(self, data):
-        # TODO: tf2 scan messages with delay?
-        #data.ranges[len(data.ranges)//2]
-        self.scan_ranges = data.ranges
-        self.scan_angle_min = data.angle_min
-        self.scan_angle_max = data.angle_max
-        self.scan_angle_increment = data.angle_increment
+        if(self.in_process == 0):
+            self.scan_ranges = data.ranges
+            self.scan_angle_min = data.angle_min
+            self.scan_angle_max = data.angle_max
+            self.scan_angle_increment = data.angle_increment
 
-        #past = rospy.Time.now() - rospy.Duration(5.0)
-        #trans = self.tf_buf.lookup_transform_full(
-        #    target_frame='base_link', 
-        #    target_time=rospy.Time.now(),
-        #    source_frame='scan',
-        #    source_time=past,
-        #    fixed_frame=world,
-        #    timeout=rospy.Duration(2.0)
-        #)
-        pass 
+    def get_ell_face_agl(self, dpts, agls):
+        """
+        Get angle that is perpendicular to the face of the ellipse
+
+        Args:
+            dpts : Array[np.float64] -- depths measurements around ellipse center
+            agls : Array[np.float64] -- angles corresponding to the depth measurements
+
+        Returns:
+            np.float64 -- angle that is perpendicular to the ellipse face
+            np.float64 -- y intercept of the line that is perpendicular to the ellipse face
+        """
+
+        # Get x and y values of depth points.
+        x_vals = np.cos(agls)*dpts
+        y_vals = np.sin(agls)*dpts
+
+        # interpolate line using least squares.
+        k, m = np.linalg.lstsq(np.vstack((x_vals, np.ones(x_vals.shape[0]))).T, y_vals, rcond=-1)[0]
+
+        # Return angle of perpendicular line.
+        return np.arctan(-1/k), m    
 
 
 def main():
