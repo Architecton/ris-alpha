@@ -17,6 +17,8 @@ from geometry_msgs.msg import Point, Vector3, PoseStamped
 
 from targetmarker import TargetMarker
 
+from task1.srv import EllipseLocator
+
 import time
 
 ### /IMPORTS ###
@@ -59,8 +61,8 @@ trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
 robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z]) 
 
 # Wait for ellipse data buffer query service to come online.
-# rospy.wait_for_service('ellipse_locator')
-# ellipse_locator = rospy.ServiceProxy('ellipse_locator', EllipseLocator)
+rospy.wait_for_service('ellipse_locator')
+ellipse_locator = rospy.ServiceProxy('ellipse_locator', EllipseLocator)
 
 ### /INITIALIZATIONS ###
 
@@ -106,6 +108,9 @@ while checkpoints.shape[0] > 0:
 
                     # DEBUG mark goal - mark ellipse center location.
                     tm.push_position(np.array(ellipse_data[:3]))
+
+                    rospy.loginfo("Ellipse detected")
+
                     # tm.push_position(np.array(ellipse_data[3:])) # if marking ellipse approach target.
 
                     ### /DEBUG PLOT ###
