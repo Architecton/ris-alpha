@@ -3,15 +3,22 @@
 
 ### IMPORTS ###
 import numpy as np
+import roslib
+roslib.load_manifest('task1')
 import rospy
+import sensor_msgs.msg
 import actionlib
 from actionlib_msgs.msg import GoalStatus
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 
 import tf2_ros
 import tf2_geometry_msgs
+from geometry_msgs.msg import Point, Vector3, PoseStamped
 
 from targetmarker import TargetMarker
+
+import time
+
 ### /IMPORTS ###
 
 
@@ -19,8 +26,10 @@ from targetmarker import TargetMarker
 
 ### INITIALIZATIONS ###
 
+rospy.init_node('krneki')
+
 # Initialize TargetMarker instance.
-tm = TargetMarker()
+#tm = TargetMarker()
 
 # example of marking a target:
 # tm.push_position(np.array([0.2, 0.3, 0.5]))
@@ -40,11 +49,14 @@ resolved_ell = np.empty((0, 2), dtype=float)
 # Set distance threshold to consider ellipse as unresolved.
 DISTINCT_ELL_THRESH = 1.0
 
-self.tf2_buffer = tf2_ros.Buffer()  # initialize coordinate transforms buffer.
+tf2_buffer = tf2_ros.Buffer()  # initialize coordinate transforms buffer.
+tf2_listener = tf2_ros.TransformListener(tf2_buffer)
+
+time.sleep(5)
 
 # Get robot position in map coordinates.
-trans = self.tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
-robot_pos = np.array([trans.translation.x, trans.translation.y, trans.translation.z]) 
+trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
+robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z]) 
 
 # Wait for ellipse data buffer query service to come online.
 # rospy.wait_for_service('ellipse_locator')
@@ -147,16 +159,16 @@ while checkpoints.shape[0] > 0:
         goal_chkpnt_status = ac_chkpnts.get_state()
 
         # Handle abortions
-        if goal_state == GoalStatus.ABORTED or goal_state == GoalStatus.REJECTED:
+        if goal_chkpnt_status == GoalStatus.ABORTED or goal_chkpnt_status == GoalStatus.REJECTED:
             rospy.loginfo("Checkpoint resolution goal aborted")
             break
 
 
     
     # Remove checkpoint from checkpoints array
-    checkpoints = numpy.delete(checkpoints, (idx_nxt), axis=0)
+    checkpoints = np.delete(checkpoints, (idx_nxt), axis=0)
 
     # Get robot position in map coordinates.
-    trans = self.tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
-    robot_pos = np.array([trans.translation.x, trans.translation.y, trans.translation.z])
+    trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
+    robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z])
     checkpoint_ctr += 1  # Increment checkpoint counter.
