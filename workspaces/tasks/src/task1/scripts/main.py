@@ -63,15 +63,15 @@ while checkpoints.shape[0] > 0:
     idx_nxt = np.argmin((lambda x1, x2: np.sum(np.abs(x1 - x2)**2)**(1/2))(robot_pos, checkpoints))
     
     # Create goal for next checkpoint.
-    goal = MoveBaseGoal()
-    goal.target_pose.header.frame_id = "map"
-    goal.target_pose.header.stamp = rospy.Time.now()
-    goal.target_pose.pose.position.x = checkpoints[idx_nxt, 0]
-    goal.target_pose.pose.position.y = checkpoints[idx_nxt, 1]
-    goal.target_pose.pose.orientation.w = checkpoints[idx_nxt, 2]
+    goal_chkpt = MoveBaseGoal()
+    goal_chkpt.target_pose.header.frame_id = "map"
+    goal_chkpt.target_pose.header.stamp = rospy.Time.now()
+    goal_chkpt.target_pose.pose.position.x = checkpoints[idx_nxt, 0]
+    goal_chkpt.target_pose.pose.position.y = checkpoints[idx_nxt, 1]
+    goal_chkpt.target_pose.pose.orientation.w = checkpoints[idx_nxt, 2]
 
     goal_chkpnt_status = GoalStatus.LOST  # Set status for next checkpoint goal.
-    ac_chkpnts.send_goal(goal) # Send checkpoint goal.
+    ac_chkpnts.send_goal(goal_chkpt) # Send checkpoint goal.
     rospy.loginfo("Resolving checkpoint {0}".format(checkpoint_ctr))
 
     # Loop for next checkpoint goal.

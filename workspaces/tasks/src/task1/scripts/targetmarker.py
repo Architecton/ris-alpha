@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import roslib
-roslib.load_manifest('exercise4')
+roslib.load_manifest('task1')
 import rospy
 import sensor_msgs.msg
 import message_filters
