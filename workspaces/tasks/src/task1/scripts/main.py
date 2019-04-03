@@ -2,6 +2,7 @@
 
 
 ### IMPORTS ###
+
 import numpy as np
 import roslib
 roslib.load_manifest('task1')
