@@ -72,8 +72,8 @@ class The_Ring:
         # img = cv2.medianBlur(img, 5)
 
         # Apply sharpening (approx 0.01s additional processing time)
-        # kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
-        # img = cv2.filter2D(img, -1, kernel)
+        kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
+        img = cv2.filter2D(img, -1, kernel)
 
         # Take only subset of image inside the lower and upper ellipse boundary
         img = img[self.upp_bnd_elps:self.low_bnd_elps, 0:len(img)]
@@ -116,12 +116,12 @@ class The_Ring:
         elps = []
         for cnt in contours:
             # Threshold for size of ellipses (number of pixels in contour)
-            if cnt.shape[0] >= 40:
+            if cnt.shape[0] >= 50:
                 # Checking ellipse shape and whether the centre is within the search boundaries
                 x,y,w,h = cv2.boundingRect(cnt)
                 aspect_ratio = min(float(w)/h, float(h)/w)
 
-                if(aspect_ratio > 0.9 and y+h/2 >= self.upp_bnd_ctr and y+h/2 <= self.low_bnd_ctr):
+                if(aspect_ratio > 0.8 and y+h/2 >= self.upp_bnd_ctr and y+h/2 <= self.low_bnd_ctr):
                     ellipse = cv2.fitEllipse(cnt)
                     elps.append(ellipse)
                     cv2.ellipse(img, ellipse, (0, 255, 0))
@@ -139,20 +139,21 @@ class The_Ring:
                 dist = np.sqrt(((e1[0][0] - e2[0][0]) ** 2 + (e1[0][1] - e2[0][1]) ** 2))
 
                 # Check if we detected this candidate already and the ratio between the ellipses should correspond to a ring
-                is_unique = False
-
-                # if dist < 5:
-                #     for can in candidates:
-                #         dist2 = np.sqrt(((e1[0][0] - can[0][0][0]) ** 2 + (e1[0][1] - can[0][0][1]) ** 2))
-                #         
-                #         if(dist2 > 10):
-                #             is_unique = True
-                # 
-                #     if ((is_unique or len(candidates) == 0) and (1.2 < max(e1[1][0]/e2[1][0], e2[1][0]/e1[1][0]) < 1.5)):
-                #         candidates.append((e1,e2))   
+                is_unique = True
 
                 if dist < 5:
-                    candidates.append((e1, e2))                                   
+                    for can in candidates:
+                        dist2 = np.sqrt(((e1[0][0] - can[0][0][0]) ** 2 + (e1[0][1] - can[0][0][1]) ** 2))
+                        
+                        if(dist2 < 10):
+                            is_unique = False
+                
+                    if ((is_unique or len(candidates) == 0) and (1.2 < max(e1[1][0]/e2[1][0], e2[1][0]/e1[1][0]) < 1.5)):
+                    # if (is_unique or len(candidates) == 0):
+                        candidates.append((e1,e2))   
+
+                # if dist < 5:
+                #     candidates.append((e1, e2))                                   
 
         # Build an array of detected Rings
         ed = EllipseData()
