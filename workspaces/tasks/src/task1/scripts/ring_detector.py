@@ -68,6 +68,12 @@ class The_Ring:
         # Following line used with Weiner filtering
         # img = color.rgb2gray(img_original)
 
+        # Black top hat? Promising?
+        # img = sp.ndimage.morphology.black_tophat(img, size=20)
+        # cv2.imshow('Filtered', img)
+        # cv2.waitKey(1)
+        # return
+
         # Apply the median filter to remove noise
         # img = cv2.medianBlur(img, 5)
 
