@@ -83,15 +83,14 @@ def callback(data):
             # m -- y intercept of the line perpendicular to the face of the ellipse 
             
             c = 0.5
-            a = pos_nxt.pose.position.x
-            b = pos_nxt.pose.position.y
+            # alternative: b = a*k + m
             k = np.tan(data.perp_agl[k])
             m = data.perp_y_itrcpt[k]
 
             # Necessary change in x to achieve position 1.0 units before the ellipse face.
             # NOTE: two solutions to quadratic equation.
-            dx1 = (-np.sqrt(-(a*k - b + m)**2) + a + b*k - k*m)/(k**2 + 1)
-            dx2 = (np.sqrt(-(a*k - b + m)**2) + a + b*k - k*m)/(k**2 + 1)
+            dx1 = -(c**2/np.sqrt(k**2 + 1))
+            dx2 = c**2/np.sqrt(k**2 + 1)
 
             # Get goal point in front of the face of the ellipse.
             pos_nxt_approach_pt = PoseStamped()
