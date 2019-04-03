@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+
+### IMPORTS ###
 import roslib
 roslib.load_manifest('task1')
 import rospy
@@ -9,12 +11,12 @@ import tf2_geometry_msgs
 from std_msgs.msg import String, Bool, ColorRGBA
 from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Point, Vector3, PoseStamped
+### /IMPORTS ###
+
 
 class TargetMarker():
     def __init__(self):  
-        self.rate = rospy.get_param('~rate', 1)  # Set publishing rate
-        markers_topic = rospy.get_param('~markers_topic')  # Set topic on which to publish markers.
-        self.trail_pub = rospy.Publisher(markers_topic, MarkerArray, queue_size=5)  # Initialize trail publisher.
+        self.target_pub = rospy.Publisher('robot_trail', MarkerArray, queue_size=5)  # Initialize target publisher that publishes to /robot_trail topic.
 
         # Initialize buffer for storing targets to mark.
         self.target_buff = np.zeros((0, 3), dtype=float)
@@ -46,15 +48,6 @@ class TargetMarker():
                 markers.markers.append(marker)  # Append marker to array of markers.
                 id_ctr = id_ctr + 1  # Increment id counter.
 
-        self.trail_pub.publish(markers)  # Publish markers.
+        self.target_pub.publish(markers)  # Publish markers.
         self.message_counter = self.message_counter + 1  # Increment message counter.
 
-
-
-# how to run... GENERAL IDEA
-#
-# tm = TargetMarker()
-# r = rospy.Rate(tm.rate)
-# while not rospy.is_shutdown():
-#   tm.push_position()
-#   r.sleep()

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+### IMPORTS ###
 import rospy
 import roslib
 
@@ -11,19 +12,14 @@ import tf2_geometry_msgs
 from std_msgs.msg import String, Bool, ColorRGBA
 from geometry_msgs.msg import PoseStamped
 
-from task1.msg import EllipseSearch
-from task1.srv import EllipseLocation
+# Import message type received as data retrieved from callback.
+from task1.msg import EllipseData
+# Import service that is implemented by this file.
+from task1.srv import EllipseLocator
 
 import numpy as np
 
-# Define buffer and allocate array for storing arrays containing data about
-# found ellipses.
-BUFF_SIZE = 50
-buff = np.empty((BUFF_SIZE, 6), dtype=object)
-
-# Initialize coordinate transform buffer and listener.
-self.tf2_buffer = tf2_ros.Buffer()
-self.tf2_listener = tf2_ros.TransformListener(self.tf2_buffer) 
+### /IMPORTS ###
 
 def callback(data):
     """ 
@@ -41,11 +37,12 @@ def callback(data):
 
     # Declare global buffer and pointer to top of buffer (stack).
     global buff
+    global BUFF_SIZE
     global buff_ptr
-
+    
+    # If data.found flag set to 1...
     if data.found:
-        for k in np.arange(len(data.dpt)):
-            # TODO handle all found ellipses
+        for k in np.arange(len(data.dpt)):  # Go over all found ellipses.
 
             # Check for buffer overflow.
             if buff_ptr >= BUFF_SIZE:
@@ -60,11 +57,19 @@ def callback(data):
                                     source_time=rospy.Time.now()-delta_time,\
                                     fixed_frame='world')
 
-            # Get point corresponding to the ellipse.
+            # Get point in map coordiates corresponding to the ellipse.
             pos_nxt = PoseStamped()
             pos_nxt.pose.position.x = data.dpt[k]*np.cos(data.agl[k])
-            pos_nxt.pose.position.y = (data.dpt[k]*np.cos(data.agl[k]))*np.tan(data.agl[k])
+            pos_nxt.pose.position.y = data.dpt[k]*np.sin(data.agl[k])
             pos_nxt_transformed = tf2_geometry_msgs.do_transform_pose(pos_nxt, trans)
+
+            # Check if ellipse already in buffer.
+            if buff.shape[0] > 0:
+                if np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([pos_nxt_transformed.pose.position.x, pos_nxt_transformed.pose.position.y]), buff[:, :2]) < DIFF_THRESH):
+                    break
+            else:  # No need to check if buffer empty.
+                pass
+
 
             # NOTE: If angle is positive, reduce x, if angle is negative, increase x.
 
@@ -77,26 +82,30 @@ def callback(data):
             # k -- tan of the angle of the line perpendicular to the face of the ellipse 
             # m -- y intercept of the line perpendicular to the face of the ellipse 
             
-            c = 1.0
-            a = pos_nxt.position.x
-            b = pos_nxt.position.y
-            k = data.perp_agl[k]
+            c = 0.5
+            # alternative: b = a*k + m
+            k = np.tan(data.perp_agl[k])
             m = data.perp_y_itrcpt[k]
 
-            # Necessary change in x to achieve position 1.0 units before the ellipse face. 
-            dx1 = (-np.sqrt(-(a*k - b + m)**2) + a + b*k - k*m)/(k**2 + 1)
-            dx2 = (np.sqrt(-(a*k - b + m)**2) + a + b*k - k*m)/(k**2 + 1)
+            # Necessary change in x to achieve position 1.0 units before the ellipse face.
+            # NOTE: two solutions to quadratic equation.
+            dx1 = -(c**2/np.sqrt(k**2 + 1))
+            dx2 = c**2/np.sqrt(k**2 + 1)
 
             # Get goal point in front of the face of the ellipse.
             pos_nxt_approach_pt = PoseStamped()
+
+            # Increment/Decrement x and y to get position in front of the ellipse perpendicular to its face.
             pos_nxt_approach_pt.pose.position.x = pos_nxt.pose.position.x + dx1 if data.agl[k] < 0 else pos_nxt.pose.position.x + dx2
             pos_nxt_approach_pt.pose.position.y = pos_nxt.pose.position.y + dx1*k + m if data.agl[k] < 0 else pos_nxt.pose.position.y + dx2*k + m
             pos_nxt_approach_pt.pose.position.z = np.arctan(k)
 
-            # Transform position to world coordinate system
+            # Transform approach goal position to map coordinate system.
             pos_nxt_approach_transformed = tf2_geometry_msgs.do_transform_pose(pos_nxt_approach_pt, trans)
 
             # Save resuls in buffer.
+            # First three elements correspond to the coordinates of the face of the ellipse and the last three correspond to the target spot in front
+            # of the ellipse face, perpendicular to it.
             res = np.empty(6, dtype=float)
             res[:3] = np.array([pos_nxt_transformed.pose.position.x, pos_nxt_transformed.pose.position.y, pos_nxt_transformed.pose.position.z])
             res[3:] = np.array([pos_nxt_approach_transformed.pose.position.x, pos_nxt_approach_transformed.pose.position.y, pos_nxt_approach_transformed.pose.position.z])
@@ -127,9 +136,9 @@ def req_handler(req):
     # Check if buffer not empty.
     if buff_ptr > 0:
         return buff[buff_ptr-1, :]
-        buff_ptr -= 1
+        buff_ptr -= 1  # Decrement buffer pointer.
     else:
-        return None
+        return None  # If buffer empty, return none.
 
 
 def ellipse_locator_server():
@@ -140,8 +149,21 @@ def ellipse_locator_server():
     the data in the buffer.
     """
 
-    # Subscribe to /ellipses topic broadcasted by the robot.
-    rospy.Subscriber('ellipses', EllipseData, callback)
+    # Set threshold for declaring a distinct ellise.
+    # TODO: empirically set threshold.
+    DIFF_THRESH = 0.5
+
+
+    # Define buffer and allocate array for storing arrays containing data about
+    # found ellipses.
+
+
+    # Initialize coordinate transform buffer and listener.
+    self.tf2_buffer = tf2_ros.Buffer()
+    self.tf2_listener = tf2_ros.TransformListener(self.tf2_buffer) 
+
+    # Subscribe to /rings topic broadcasted by the robot's computer.
+    rospy.Subscriber('rings', EllipseData, callback)
     # Initialize service.
     rospy.init_node('ellipse_locator')
     rospy.Service('ellipse_locator', EllipseLocator, req_handler)
@@ -149,4 +171,10 @@ def ellipse_locator_server():
     rospy.spin()
 
 if __name__ == '__main__':
+    # Initialize buffer.
+
+    BUFF_SIZE = 50
+    buff = np.empty((BUFF_SIZE, 6), dtype=object)
+    buff_ptr = 0  # Initialize buffer pointer.
+
     ellipse_locator_server()

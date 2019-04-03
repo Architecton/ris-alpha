@@ -67,6 +67,7 @@ find_package( OpenCV REQUIRED )
 add_service_files(
   FILES
   Checkpoint_res.srv
+  EllipseLocator.srv
 )
 
 ## Generate actions in the 'action' folder
