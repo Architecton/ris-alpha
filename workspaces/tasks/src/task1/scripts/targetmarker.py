@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 ### IMPORTS ###
+import numpy as np
 import roslib
 roslib.load_manifest('task1')
 import rospy
@@ -33,7 +34,7 @@ class TargetMarker():
         markers = MarkerArray()  # Initialize markers array.
 
         id_ctr = 0  # Define id counter
-        for point in self.trail:
+        for point in self.target_buff:
                 marker = Marker()  # Initialize marker
                 marker.header.stamp = rospy.Time.now()  # Stamp marker with time.
                 marker.header.frame_id = '/map'  # Set header frame id.

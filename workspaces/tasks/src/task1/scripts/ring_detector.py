@@ -3,13 +3,13 @@
 import rospy
 import cv2
 import numpy as np
-import scipy as sp
+# import scipy as sp
 import tf2_geometry_msgs
 import tf2_ros
 import time
-from skimage import color, restoration
-from skimage import img_as_ubyte
-from scipy.signal import convolve2d as conv2
+# from skimage import color, restoration
+# from skimage import img_as_ubyte
+# from scipy.signal import convolve2d as conv2
 from sensor_msgs.msg import Image
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import PointStamped, Vector3, Pose
@@ -17,7 +17,7 @@ from cv_bridge import CvBridge, CvBridgeError
 from visualization_msgs.msg import Marker, MarkerArray
 from std_msgs.msg import ColorRGBA
 # TEMPORARY
-from exercise5.msg import EllipseData
+from task1.msg import EllipseData
 
 class The_Ring:
     def __init__(self):

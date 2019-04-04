@@ -64,11 +64,13 @@ def req_handler(req):
     means = get_means(points)
 
     for clas, point in means.items():
-        pointMeters = mapIndexToMeters(start, point, res, offset)
-        p = Point()
-        p.x = pointMeters['x']
-        p.y = pointMeters['y']
-        checkpoints.points.append(p)
+        if new_img[point['y'], point['x']] == 0:
+            pointMeters = mapIndexToMeters(start, point, res, offset)
+            p = Point()
+            p.x = pointMeters['x']
+            p.y = pointMeters['y']
+            p.z = 0.850
+            checkpoints.points.append(p)
     
     #visualize(new_img, points, means)
 
@@ -88,10 +90,11 @@ def visualize(img, points, means):
     colors = ['red', 'blue', 'green', 'yellow', 'orange', 'olive', 'aqua', 'seagreen', 'pink', 'purple', 'plum', 'maroon', 'khaki', 'silver']
 
     for clas in means:
-        plt.scatter(means[clas]['x'], means[clas]['y'], s=50, c=colors[int(clas)], marker='o')
+        if img[means[clas]['y'], means[clas]['x']] == 0:
+            plt.scatter(means[clas]['x'], means[clas]['y'], s=50, c=colors[int(clas)], marker='o')
 
     #for clas in points:
-    #    plt.scatter(points[clas]['x'], points[clas]['y'], s=50, c=colors[int(clas)], marker='o')
+    #   plt.scatter(points[clas]['x'], points[clas]['y'], s=50, c=colors[int(clas)], marker='o')
         
 
     plt.show()

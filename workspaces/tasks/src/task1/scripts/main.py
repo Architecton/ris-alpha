@@ -19,11 +19,16 @@ from geometry_msgs.msg import Point, Vector3, PoseStamped
 from targetmarker import TargetMarker
 from task1.srv import EllipseLocator
 
+from task1.srv import Checkpoint_res
+from task1.msg import Checkpoints
+
 from sound_play.msg import SoundRequest
 from sound_play.libsoundplay import SoundClient
 
 import time
 
+
+import sys
 ### /IMPORTS ###
 
 
@@ -43,7 +48,29 @@ ac_ellipses = actionlib.SimpleActionClient("move_base", MoveBaseAction)
 
 # Initialize checkpoints array.
 # TODO: integrate with Miha's part.
-checkpoints = np.array([[-1.276, 2.121, 0.850], [0.421, 0.166, 0.597], [2.195, 0.723, 0.999], [1.832, 2.986, 0.882], [0.036, 2.124, 0.855]])
+
+rospy.wait_for_service('get_checkpoints')
+
+try:
+    serv = rospy.ServiceProxy('get_checkpoints', Checkpoint_res)
+except rospy.ServiceException, e:
+    print "Service error: {0}".format(e.message)
+
+checkpoints_res = serv()
+
+checkpoints = [] 
+
+
+for point in checkpoints_res.points.points:
+    checkpoints.append([point.x, point.y, point.z])
+
+checkpoints = np.array(checkpoints)
+
+
+#checkpoints = np.array([[-1.276, 2.121, 0.850], [0.421, 0.166, 0.597], [2.195, 0.723, 0.999], [1.832, 2.986, 0.882], [0.036, 2.124, 0.855]])
+
+#sys.exit()
+
 checkpoint_ctr = 0  # Initialize found ellipses counter.
 
 # Initialize found ellipses storage.
@@ -53,14 +80,14 @@ resolved_ell_ctr = 0  # Initialize resolved ellipses counter.
 
 # Set distance threshold to consider ellipse as unresolved.
 # TODO: empirically determine best threshold.
-DISTINCT_ELL_THRESH = 0.7
+DISTINCT_ELL_THRESH = 0.3
 
 # Initialize coordinate transforms buffer.
 tf2_buffer = tf2_ros.Buffer()
 tf2_listener = tf2_ros.TransformListener(tf2_buffer)
 
 # Get robot position in map coordinates.
-rospy.sleep(1)  # Wait for cache to fill.
+rospy.sleep(5)  # Wait for cache to fill.
 trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
 robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z]) 
 
@@ -69,12 +96,12 @@ rospy.wait_for_service('ellipse_locator')
 ellipse_locator = rospy.ServiceProxy('ellipse_locator', EllipseLocator)
 
 # Initialize sound node.
-rospy.init_node('say', anonymous = True)
+
+#rospy.init_node('say', anonymous = True)
 soundhandle = SoundClient()
 rospy.sleep(1)
 voice = 'voice_kal_diphone'
 volume = 1.0
-
 
 ### /INITIALIZATIONS ###
 
@@ -100,14 +127,13 @@ while checkpoints.shape[0] > 0:
 
     # Loop for next checkpoint goal.
     while not goal_chkpnt_status == GoalStatus.SUCCEEDED:
-
         # Check if any ellipses if buffer.
         try:  # Initialize resolved ellipses counter.
             # Query into ellipse data buffer.
-            ellipse_data = ellipse_locator()
+            ellipse_data = ellipse_locator().target
             
             # If ellipse data found in buffer, create new ellipse resolution goal.
-            if ellipse_data:
+            if len(ellipse_data) > 0:
 
                 # Check if ellipse had not yet been resolved.
                 if not np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([ellipse_data[0], ellipse_data[1], ellipse_data[5]]), resolved_ell) < DISTINCT_ELL_THRESH):
@@ -126,7 +152,7 @@ while checkpoints.shape[0] > 0:
                     ### /DEBUG PLOT ###
 
 
-
+                    """
                     # Create goal to approach found ellipse.
                     goal_ell = MoveBaseGoal()
                     goal_ell.target_pose.header.frame_id = "map"
@@ -162,6 +188,7 @@ while checkpoints.shape[0] > 0:
                     resolved_ell_ctr += 1
                     # Resend preempted checkpoint goal.
                     ac_chkpnts.send_goal(goal_chkpt)
+                    """
                 else:
                     pass
             else:

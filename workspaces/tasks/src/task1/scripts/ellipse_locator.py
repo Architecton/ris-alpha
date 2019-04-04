@@ -19,10 +19,14 @@ from task1.srv import EllipseLocator
 
 import numpy as np
 
+tf2_buffer = None
+tf2_listener = None
+
 ### /IMPORTS ###
 
 def callback(data):
-    """ 
+
+    """
     callback for processing data retrieved from the subscribed topic
 
     Args:
@@ -39,9 +43,14 @@ def callback(data):
     global buff
     global BUFF_SIZE
     global buff_ptr
+
+    # Declare global tf2 buffer and listener.
+    global tf2_buffer
+    global tf2_listener
     
     # If data.found flag set to 1...
     if data.found:
+        print "ellipse in view"
         for k in np.arange(len(data.dpt)):  # Go over all found ellipses.
 
             # Check for buffer overflow.
@@ -51,7 +60,7 @@ def callback(data):
             # NOTE: This may raise an exception if data not available!
             # Get transformation of point using robot position and map position when the image was taken.
             delta_time = rospy.Time.now() - rospy.Time.from_seconds(data.timestamp[k])  # get delta time.
-            trans = self.tf2_buffer.lookup_transform_full(target_frame='base_link',\
+            trans = tf2_buffer.lookup_transform_full(target_frame='base_link',\
                                     target_time=rospy.Time.now()-delta_time,\
                                     source_frame='map',\
                                     source_time=rospy.Time.now()-delta_time,\
@@ -66,6 +75,7 @@ def callback(data):
             # Check if ellipse already in buffer.
             if buff.shape[0] > 0:
                 if np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([pos_nxt_transformed.pose.position.x, pos_nxt_transformed.pose.position.y]), buff[:, :2]) < DIFF_THRESH):
+                    print "Ellipse already in buffer! breaking..."
                     break
             else:  # No need to check if buffer empty.
                 pass
@@ -110,6 +120,8 @@ def callback(data):
             res[:3] = np.array([pos_nxt_transformed.pose.position.x, pos_nxt_transformed.pose.position.y, pos_nxt_transformed.pose.position.z])
             res[3:] = np.array([pos_nxt_approach_transformed.pose.position.x, pos_nxt_approach_transformed.pose.position.y, pos_nxt_approach_transformed.pose.position.z])
 
+            print "Adding following to buffer"
+
             # Add data to buffer and increment buffer pointer.
             buff[buff_ptr, :] = res
             buff_ptr += 1
@@ -138,7 +150,7 @@ def req_handler(req):
         return buff[buff_ptr-1, :]
         buff_ptr -= 1  # Decrement buffer pointer.
     else:
-        return None  # If buffer empty, return none.
+        return []  # If buffer empty, return none.
 
 
 def ellipse_locator_server():
@@ -158,14 +170,11 @@ def ellipse_locator_server():
     # found ellipses.
 
 
-    # Initialize coordinate transform buffer and listener.
-    self.tf2_buffer = tf2_ros.Buffer()
-    self.tf2_listener = tf2_ros.TransformListener(self.tf2_buffer) 
+    
 
     # Subscribe to /rings topic broadcasted by the robot's computer.
     rospy.Subscriber('rings', EllipseData, callback)
     # Initialize service.
-    rospy.init_node('ellipse_locator')
     rospy.Service('ellipse_locator', EllipseLocator, req_handler)
     # Wait for requests.
     rospy.spin()
@@ -176,5 +185,10 @@ if __name__ == '__main__':
     BUFF_SIZE = 50
     buff = np.empty((BUFF_SIZE, 6), dtype=object)
     buff_ptr = 0  # Initialize buffer pointer.
+    # Initialize coordinate transform buffer and listener.
+    rospy.init_node('ellipse_locator')
+    tf2_buffer = tf2_ros.Buffer()
+    tf2_listener = tf2_ros.TransformListener(tf2_buffer)
 
     ellipse_locator_server()
+    
