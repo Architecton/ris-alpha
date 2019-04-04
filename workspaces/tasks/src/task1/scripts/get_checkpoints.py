@@ -28,6 +28,8 @@ def req_handler(req):
 
     checkpoints = Checkpoints()
 
+    num_of_checkpoints = req.num_of_checkpoints
+
     #rospy.wait_for_service('static_map')
 
     #print(info);
@@ -60,7 +62,7 @@ def req_handler(req):
 
     #points = getRandomPoints(new_img, 400, 5)
 
-    points = k_means(new_img, 400, 8, 4)
+    points = k_means(new_img, 400, num_of_checkpoints, 4)
     means = get_means(points)
 
     for clas, point in means.items():
@@ -72,7 +74,7 @@ def req_handler(req):
             p.z = 0.850
             checkpoints.points.append(p)
     
-    #visualize(new_img, points, means)
+    visualize(new_img, points, means)
 
     #cv2.imshow("image", ros_map);
     #cv2.waitKey();

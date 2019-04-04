@@ -1,0 +1,4 @@
+<launch>
+	<node pkg="task1" type="ring_detector.py" name="image_converter" output="screen" />
+	<node pkg="task1" type="ellipse_locator.py" name="ellipse_locator" output="screen" />
+</launch>
