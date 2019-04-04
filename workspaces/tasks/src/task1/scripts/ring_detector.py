@@ -249,7 +249,7 @@ class The_Ring:
         k, m = np.linalg.lstsq(np.vstack((x_vals, np.ones(x_vals.shape[0]))).T, y_vals, rcond=-1)[0]
 
         # Return angle of perpendicular line.
-        return np.arctan(k), m    
+        return np.arctan(-1/k), m    
 
 
 def main():

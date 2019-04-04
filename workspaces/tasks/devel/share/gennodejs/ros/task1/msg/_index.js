@@ -1,10 +1,10 @@
 
 "use strict";
 
-let EllipseData = require('./EllipseData.js');
 let Checkpoints = require('./Checkpoints.js');
+let EllipseData = require('./EllipseData.js');
 
 module.exports = {
-  EllipseData: EllipseData,
   Checkpoints: Checkpoints,
+  EllipseData: EllipseData,
 };

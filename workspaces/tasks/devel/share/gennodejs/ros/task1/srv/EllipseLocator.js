@@ -122,7 +122,6 @@ class EllipseLocatorResponse {
     return `
     float64[] target
     
-    
     `;
   }
 

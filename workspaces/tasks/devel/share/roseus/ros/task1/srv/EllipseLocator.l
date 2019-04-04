@@ -107,7 +107,6 @@
 (setf (get task1::EllipseLocatorRequest :definition-)
       "---
 float64[] target
-
 ")
 
 (setf (get task1::EllipseLocatorResponse :md5sum-) "7b497188d656d59d92c0ddf8ac50fe8a")
@@ -115,7 +114,6 @@ float64[] target
 (setf (get task1::EllipseLocatorResponse :definition-)
       "---
 float64[] target
-
 ")
 
 

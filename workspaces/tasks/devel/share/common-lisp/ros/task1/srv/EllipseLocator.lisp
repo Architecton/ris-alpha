@@ -125,10 +125,10 @@
   "7b497188d656d59d92c0ddf8ac50fe8a")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<EllipseLocator-response>)))
   "Returns full string definition for message of type '<EllipseLocator-response>"
-  (cl:format cl:nil "float64[] target~%~%~%~%"))
+  (cl:format cl:nil "float64[] target~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'EllipseLocator-response)))
   "Returns full string definition for message of type 'EllipseLocator-response"
-  (cl:format cl:nil "float64[] target~%~%~%~%"))
+  (cl:format cl:nil "float64[] target~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:serialization-length ((msg <EllipseLocator-response>))
   (cl:+ 0
      4 (cl:reduce #'cl:+ (cl:slot-value msg 'target) :key #'(cl:lambda (ele) (cl:declare (cl:ignorable ele)) (cl:+ 8)))
