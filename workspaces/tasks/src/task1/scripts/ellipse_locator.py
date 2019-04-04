@@ -71,7 +71,8 @@ def callback(data):
 
             trans = tf2_buffer.lookup_transform(target_frame='map',\
                                     source_frame='base_link',\
-                                    time=rospy.Time.from_seconds(data.timestamp[ell_idx]),\
+                                    #time=rospy.Time.from_seconds(data.timestamp[ell_idx]),\
+                                    time=rospy.Time.now() - rospy.Duration(1.),\
                                     timeout=rospy.Duration(1.0))
 
             # pdb.set_trace()
@@ -82,15 +83,12 @@ def callback(data):
             pos_nxt.pose.position.y = -data.dpt[ell_idx]*np.sin(data.agl[ell_idx])
             pos_nxt_transformed = tf2_geometry_msgs.do_transform_pose(pos_nxt, trans)
 
-            pdb.set_trace()
-
             # Check if ellipse already in buffer.
             if buff_ptr > 0:
                 if np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([pos_nxt_transformed.pose.position.x, pos_nxt_transformed.pose.position.y]), buff[:, :2]) < DIFF_THRESH):
                     print "Ellipse already in buffer! breaking..."
                     break
             else:  # No need to check if buffer empty.
-                tm.push_position(np.array([pos_nxt_transformed.pose.position.x, pos_nxt_transformed.pose.position.y, pos_nxt_transformed.pose.position.z]))
                 pass
 
 
@@ -105,10 +103,11 @@ def callback(data):
             # k -- tan of the angle of the line perpendicular to the face of the ellipse 
             # m -- y intercept of the line perpendicular to the face of the ellipse 
             
-            c = 0.5
+            c = 0.8
             # alternative: b = a*k + m
             k = np.tan(data.perp_agl[ell_idx])
-            m = data.perp_y_itrcpt[ell_idx]
+            m = pos_nxt.pose.position.y - k*pos_nxt.pose.position.y 
+            # m = data.perp_y_itrcpt[ell_idx]
 
             # Necessary change in x to achieve position 1.0 units before the ellipse face.
             # NOTE: two solutions to quadratic equation.
@@ -117,6 +116,8 @@ def callback(data):
 
             # Get goal point in front of the face of the ellipse.
             pos_nxt_approach_pt = PoseStamped()
+
+            # pdb.set_trace()
 
             # Increment/Decrement x and y to get position in front of the ellipse perpendicular to its face.
             pos_nxt_approach_pt.pose.position.x = pos_nxt.pose.position.x + dx1 if data.agl[ell_idx] < 0 else pos_nxt.pose.position.x + dx2
@@ -132,6 +133,10 @@ def callback(data):
             res = np.empty(6, dtype=float)
             res[:3] = np.array([pos_nxt_transformed.pose.position.x, pos_nxt_transformed.pose.position.y, pos_nxt_transformed.pose.position.z])
             res[3:] = np.array([pos_nxt_approach_transformed.pose.position.x, pos_nxt_approach_transformed.pose.position.y, pos_nxt_approach_transformed.pose.position.z])
+
+            #tm.push_position(res[:3])
+            #tm.push_position(res[3:])
+
 
             print "Adding following to buffer:"
             print res

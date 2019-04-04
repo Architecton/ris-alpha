@@ -17,7 +17,7 @@ from geometry_msgs.msg import Point, Vector3, PoseStamped
 
 class TargetMarker():
     def __init__(self):  
-        self.target_pub = rospy.Publisher('robot_trail', MarkerArray, queue_size=1)  # Initialize target publisher that publishes to /robot_trail topic.
+        self.target_pub = rospy.Publisher('robot_trail', MarkerArray, queue_size=100)  # Initialize target publisher that publishes to /robot_trail topic.
 
         # Initialize buffer for storing targets to mark.
         self.target_buff = np.zeros((0, 3), dtype=float)

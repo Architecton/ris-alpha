@@ -79,7 +79,7 @@ resolved_ell_ctr = 0  # Initialize resolved ellipses counter.
 
 # Set distance threshold to consider ellipse as unresolved.
 # TODO: empirically determine best threshold.
-DISTINCT_ELL_THRESH = 0.3
+DISTINCT_ELL_THRESH = 1.5
 
 # Initialize coordinate transforms buffer.
 tf2_buffer = tf2_ros.Buffer()

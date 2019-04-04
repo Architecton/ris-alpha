@@ -74,7 +74,7 @@ def req_handler(req):
             p.z = 0.850
             checkpoints.points.append(p)
     
-    visualize(new_img, points, means)
+    #visualize(new_img, points, means)
 
     #cv2.imshow("image", ros_map);
     #cv2.waitKey();
