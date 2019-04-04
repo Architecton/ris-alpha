@@ -56,7 +56,7 @@ try:
 except rospy.ServiceException, e:
     print "Service error: {0}".format(e.message)
 
-checkpoints_res = serv()
+checkpoints_res = serv(8)
 
 checkpoints = [] 
 
@@ -69,7 +69,6 @@ checkpoints = np.array(checkpoints)
 
 #checkpoints = np.array([[-1.276, 2.121, 0.850], [0.421, 0.166, 0.597], [2.195, 0.723, 0.999], [1.832, 2.986, 0.882], [0.036, 2.124, 0.855]])
 
-#sys.exit()
 
 checkpoint_ctr = 0  # Initialize found ellipses counter.
 
