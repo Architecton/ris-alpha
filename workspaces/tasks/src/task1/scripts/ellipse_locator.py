@@ -64,7 +64,7 @@ def callback(data):
             trans = tf2_buffer.lookup_transform(target_frame='base_link',\
                                     source_frame='map',\
                                     time=rospy.Time.now()-delta_time,\
-                                    rospy.Duration(0.1))
+                                    timeout=rospy.Duration(0.1))
 
             # Get point in map coordiates corresponding to the ellipse.
             pos_nxt = PoseStamped()
