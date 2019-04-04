@@ -262,7 +262,7 @@ if __name__ == '__main__':
             sys.exit(1)
 
         # environment at generation time
-        CMAKE_PREFIX_PATH = '/home/dkalsan/ris-alpha/workspaces/tasks/devel;/home/dkalsan/ris-alpha/workspaces/introduction-to-ROS/devel;/opt/ros/kinetic'.split(';')
+        CMAKE_PREFIX_PATH = '/home/miha/Desktop/ris-alpha/workspaces/tasks/devel;/opt/ros/kinetic'.split(';')
         # prepend current workspace if not already part of CPP
         base_path = os.path.dirname(__file__)
         if base_path not in CMAKE_PREFIX_PATH:

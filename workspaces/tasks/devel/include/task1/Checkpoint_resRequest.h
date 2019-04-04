@@ -24,14 +24,17 @@ struct Checkpoint_resRequest_
   typedef Checkpoint_resRequest_<ContainerAllocator> Type;
 
   Checkpoint_resRequest_()
-    {
+    : num_of_checkpoints(0)  {
     }
   Checkpoint_resRequest_(const ContainerAllocator& _alloc)
-    {
+    : num_of_checkpoints(0)  {
   (void)_alloc;
     }
 
 
+
+   typedef uint64_t _num_of_checkpoints_type;
+  _num_of_checkpoints_type num_of_checkpoints;
 
 
 
@@ -68,7 +71,7 @@ namespace message_traits
 
 
 // BOOLTRAITS {'IsFixedSize': True, 'IsMessage': True, 'HasHeader': False}
-// {'task1': ['/home/dkalsan/ris-alpha/workspaces/tasks/src/task1/msg'], 'std_msgs': ['/opt/ros/kinetic/share/std_msgs/cmake/../msg'], 'geometry_msgs': ['/opt/ros/kinetic/share/geometry_msgs/cmake/../msg']}
+// {'task1': ['/home/miha/Desktop/ris-alpha/workspaces/tasks/src/task1/msg'], 'std_msgs': ['/opt/ros/kinetic/share/std_msgs/cmake/../msg'], 'geometry_msgs': ['/opt/ros/kinetic/share/geometry_msgs/cmake/../msg']}
 
 // !!!!!!!!!!! ['__class__', '__delattr__', '__dict__', '__doc__', '__eq__', '__format__', '__getattribute__', '__hash__', '__init__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_parsed_fields', 'constants', 'fields', 'full_name', 'has_header', 'header_present', 'names', 'package', 'parsed_fields', 'short_name', 'text', 'types']
 
@@ -111,12 +114,12 @@ struct MD5Sum< ::task1::Checkpoint_resRequest_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "d41d8cd98f00b204e9800998ecf8427e";
+    return "db60db3ba58061c23afcd04151ecbaf1";
   }
 
   static const char* value(const ::task1::Checkpoint_resRequest_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0xd41d8cd98f00b204ULL;
-  static const uint64_t static_value2 = 0xe9800998ecf8427eULL;
+  static const uint64_t static_value1 = 0xdb60db3ba58061c2ULL;
+  static const uint64_t static_value2 = 0x3afcd04151ecbaf1ULL;
 };
 
 template<class ContainerAllocator>
@@ -135,7 +138,7 @@ struct Definition< ::task1::Checkpoint_resRequest_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "\n\
+    return "uint64 num_of_checkpoints\n\
 ";
   }
 
@@ -152,8 +155,10 @@ namespace serialization
 
   template<class ContainerAllocator> struct Serializer< ::task1::Checkpoint_resRequest_<ContainerAllocator> >
   {
-    template<typename Stream, typename T> inline static void allInOne(Stream&, T)
-    {}
+    template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)
+    {
+      stream.next(m.num_of_checkpoints);
+    }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
   }; // struct Checkpoint_resRequest_
@@ -169,8 +174,11 @@ namespace message_operations
 template<class ContainerAllocator>
 struct Printer< ::task1::Checkpoint_resRequest_<ContainerAllocator> >
 {
-  template<typename Stream> static void stream(Stream&, const std::string&, const ::task1::Checkpoint_resRequest_<ContainerAllocator>&)
-  {}
+  template<typename Stream> static void stream(Stream& s, const std::string& indent, const ::task1::Checkpoint_resRequest_<ContainerAllocator>& v)
+  {
+    s << indent << "num_of_checkpoints: ";
+    Printer<uint64_t>::stream(s, indent + "  ", v.num_of_checkpoints);
+  }
 };
 
 } // namespace message_operations
