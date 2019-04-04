@@ -60,11 +60,12 @@ def callback(data):
             # NOTE: This may raise an exception if data not available!
             # Get transformation of point using robot position and map position when the image was taken.
             delta_time = rospy.Time.now() - rospy.Time.from_seconds(data.timestamp[k])  # get delta time.
+            print delta_time
             trans = tf2_buffer.lookup_transform_full(target_frame='base_link',\
                                     target_time=rospy.Time.now()-delta_time,\
                                     source_frame='map',\
                                     source_time=rospy.Time.now()-delta_time,\
-                                    fixed_frame='world')
+                                    fixed_frame='map')
 
             # Get point in map coordiates corresponding to the ellipse.
             pos_nxt = PoseStamped()
@@ -189,6 +190,7 @@ if __name__ == '__main__':
     rospy.init_node('ellipse_locator')
     tf2_buffer = tf2_ros.Buffer()
     tf2_listener = tf2_ros.TransformListener(tf2_buffer)
+    rospy.sleep(3)
 
     ellipse_locator_server()
     
