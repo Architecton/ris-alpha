@@ -8,6 +8,14 @@ from sensor_msgs.msg import LaserScan
 from cv_bridge import CvBridge, CvBridgeError
 from task1.msg import EllipseData
 
+"""
+NOTES:
+- Median(3) filtering provides is quick and provides okay results
+- Bilateral has a bit better results (less noisy) but it takes 50x longer
+- Otsu works a little bit better than the other one
+
+"""
+
 class The_Ring:
     def __init__(self):
         rospy.init_node('image_converter', anonymous=True)
@@ -41,8 +49,8 @@ class The_Ring:
 
     def image_callback(self,data):
 
-        timestamp = rospy.Time.now().to_time()
-        self.in_process = 1     
+        self.in_process = 1  
+        timestamp = data.header.stamp.to_time()
 
         try:
             img = self.bridge.imgmsg_to_cv2(data, "bgr8")
@@ -55,7 +63,10 @@ class The_Ring:
         # Tranform image to grayscale
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         # Following line used with Weiner filtering
-        # img = color.rgb2gray(img_original)
+        # img = color.rgb2gray(img)
+
+        # Take only subset of image inside the lower and upper ellipse boundary
+        img = img[self.upp_bnd_elps:self.low_bnd_elps, 0:img.shape[1]]
 
         # Black top hat? Promising?
         # img = sp.ndimage.morphology.black_tophat(img, size=20)
@@ -64,14 +75,19 @@ class The_Ring:
         # return
 
         # Apply the median filter to remove noise
-        # img = cv2.medianBlur(img, 5)
+        # img = cv2.medianBlur(img, 3)
+
+        # Apply the bilateral filter to remove noise and preserve edges
+        img = cv2.bilateralFilter(
+            img,
+            sigmaColor=30,
+            d=5,
+            sigmaSpace=30
+        )
 
         # Apply sharpening (approx 0.01s additional processing time)
-        kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
-        img = cv2.filter2D(img, -1, kernel)
-
-        # Take only subset of image inside the lower and upper ellipse boundary
-        img = img[self.upp_bnd_elps:self.low_bnd_elps, 0:len(img)]
+        # kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
+        # img = cv2.filter2D(img, -1, kernel)
 
         # COMPUTATIONALY EXPENSIVE: Wiener filtering to deblur the image; 0.3s additional computation time
         # psf = np.ones((5, 5)) / 25
@@ -81,17 +97,28 @@ class The_Ring:
         # img = img_as_ubyte(img)
 
         # Automatic parameter computation for canny
-        sigma = 0.33
-        v = np.median(img)
-        lower = int(max(0, (1.0 - sigma) * v))
-        upper = int(min(255, (1.0 + sigma) * v))
+        # sigma = 0.33
+        # v = np.median(img)
+        # lower = int(max(0, (1.0 - sigma) * v))
+        # upper = int(min(255, (1.0 + sigma) * v))
 
         # Setting thresholds using the global otsu
-        # upper, _ = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-        # lower = 0.5 * upper
+        upper, _ = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        lower = 0.5 * upper
 
         # Find edges with canny
-        edges = cv2.Canny(img, lower, upper)
+        edges = cv2.Canny(
+            img, 
+            threshold1=lower, 
+            threshold2=upper,
+            L2gradient=True
+        )
+
+        # cv2.imshow('Filtered', edges)
+        # cv2.waitKey(1)
+        # cv2.imshow('Live', img_original)
+        # cv2.waitKey(1)
+        # return
 
         # Extract contours
         img2, contours, hierarchy = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
@@ -114,9 +141,10 @@ class The_Ring:
             if cnt.shape[0] >= 50:
                 # Checking ellipse shape and whether the centre is within the search boundaries
                 x,y,w,h = cv2.boundingRect(cnt)
-                aspect_ratio = min(float(w)/h, float(h)/w)
+                # aspect_ratio = min(float(w)/h, float(h)/w)
 
-                if(aspect_ratio > 0.8 and y+h/2 >= self.upp_bnd_ctr and y+h/2 <= self.low_bnd_ctr):
+                if(y+h/2 >= self.upp_bnd_ctr and y+h/2 <= self.low_bnd_ctr):
+                # if(aspect_ratio > 0.8 and y+h/2 >= self.upp_bnd_ctr and y+h/2 <= self.low_bnd_ctr):
                     ellipse = cv2.fitEllipse(cnt)
                     elps.append(ellipse)
                     cv2.ellipse(img, ellipse, (0, 255, 0))
