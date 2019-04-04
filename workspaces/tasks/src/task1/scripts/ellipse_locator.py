@@ -59,13 +59,12 @@ def callback(data):
             
             # NOTE: This may raise an exception if data not available!
             # Get transformation of point using robot position and map position when the image was taken.
+
             delta_time = rospy.Time.now() - rospy.Time.from_seconds(data.timestamp[k])  # get delta time.
-            print delta_time
-            trans = tf2_buffer.lookup_transform_full(target_frame='base_link',\
-                                    target_time=rospy.Time.now()-delta_time,\
+            trans = tf2_buffer.lookup_transform(target_frame='base_link',\
                                     source_frame='map',\
-                                    source_time=rospy.Time.now()-delta_time,\
-                                    fixed_frame='map')
+                                    time=rospy.Time.now()-delta_time,\
+                                    rospy.Duration(0.1))
 
             # Get point in map coordiates corresponding to the ellipse.
             pos_nxt = PoseStamped()
@@ -121,7 +120,8 @@ def callback(data):
             res[:3] = np.array([pos_nxt_transformed.pose.position.x, pos_nxt_transformed.pose.position.y, pos_nxt_transformed.pose.position.z])
             res[3:] = np.array([pos_nxt_approach_transformed.pose.position.x, pos_nxt_approach_transformed.pose.position.y, pos_nxt_approach_transformed.pose.position.z])
 
-            print "Adding following to buffer"
+            print "Adding following to buffer:"
+            print res
 
             # Add data to buffer and increment buffer pointer.
             buff[buff_ptr, :] = res
