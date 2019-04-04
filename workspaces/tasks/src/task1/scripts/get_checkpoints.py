@@ -60,25 +60,17 @@ def req_handler(req):
 
     #points = getRandomPoints(new_img, 400, 5)
 
-    points = k_means(new_img, 400, 10, 4)
-
-    plt.figure()
-    plt.imshow(new_img, cmap="gray")
-
-    
-    colors = ['red', 'blue', 'green', 'yellow', 'orange', 'olive', 'aqua', 'seagreen', 'pink', 'purple', 'plum', 'maroon', 'khaki', 'silver']
-
+    points = k_means(new_img, 400, 8, 4)
     means = get_means(points)
 
-    for clas in means:
-        plt.scatter(means[clas]['x'], means[clas]['y'], s=50, c=colors[int(clas)], marker='o')
-        
-
-    #for clas in points:
-    #    plt.scatter(points[clas]['x'], points[clas]['y'], s=50, c=colors[int(clas)], marker='o')
-        
-
-    plt.show()
+    for clas, point in means.items():
+        pointMeters = mapIndexToMeters(start, point, res, offset)
+        p = Point()
+        p.x = pointMeters['x']
+        p.y = pointMeters['y']
+        checkpoints.points.append(p)
+    
+    #visualize(new_img, points, means)
 
     #cv2.imshow("image", ros_map);
     #cv2.waitKey();
@@ -88,6 +80,21 @@ def req_handler(req):
     #checkpoints.points.append(p3)
 
     return checkpoints
+
+def visualize(img, points, means):
+    plt.figure()
+    plt.imshow(img, cmap="gray")
+    
+    colors = ['red', 'blue', 'green', 'yellow', 'orange', 'olive', 'aqua', 'seagreen', 'pink', 'purple', 'plum', 'maroon', 'khaki', 'silver']
+
+    for clas in means:
+        plt.scatter(means[clas]['x'], means[clas]['y'], s=50, c=colors[int(clas)], marker='o')
+
+    #for clas in points:
+    #    plt.scatter(points[clas]['x'], points[clas]['y'], s=50, c=colors[int(clas)], marker='o')
+        
+
+    plt.show()
 
 def k_means(img, n, k, iterations):
     #for i in range(it):
@@ -149,9 +156,22 @@ def getRandomPoints(img, n, k):
     offset_x = 0.1*img.shape[1]
     offset_y = 0.1*img.shape[0]
 
-    x = np.random.randint(low=offset_x, high=img.shape[1]-offset_x, size=n)
-    y = np.random.randint(low=offset_y, high=img.shape[0]-offset_y, size=n)
-    c = np.random.randint(low=0, high=k, size=n)
+    x = []
+    y = []
+    c = []
+
+    #x = np.random.randint(low=offset_x, high=img.shape[1]-offset_x, size=n)
+    #y = np.random.randint(low=offset_y, high=img.shape[0]-offset_y, size=n)
+    #c = np.random.randint(low=0, high=k, size=n)
+
+    for i in range(n):
+        xi = np.random.randint(low=offset_x, high=img.shape[1]-offset_x, size=1)[0]
+        yi = np.random.randint(low=offset_y, high=img.shape[0]-offset_y, size=1)[0]
+        ci = np.random.randint(low=0, high=k, size=1)[0]
+        if img[yi, xi] == 0:
+            x.append(xi)
+            y.append(yi)
+            c.append(ci)
 
     ret = {}
 
