@@ -35,6 +35,9 @@ import sys
 
 ### INITIALIZATIONS ###
 
+# Initialize main node.
+rospy.init_node('main')
+
 # /// publishers ///
 # Define publisher for ellipse search rotations.
 rotation_pub = rospy.Publisher('/cmd_vel_mux/input/navi', Twist, queue_size=10)
@@ -60,8 +63,6 @@ rot.angular.z = ROTATION_SPEED_Z
 rot_loop_rate = rate = rospy.Rate(10)
 ### /ROTATION PARAMETERS ###
 
-# Initialize main node.
-rospy.init_node('main')
 
 # Initialize TargetMarker instance.
 tm = TargetMarker()
