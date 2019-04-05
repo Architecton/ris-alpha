@@ -14,7 +14,7 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 
 import tf2_ros
 import tf2_geometry_msgs
-from geometry_msgs.msg import Point, Vector3, PoseStamped
+from geometry_msgs.msg import Point, Vector3, PoseStamped, Twist
 
 from targetmarker import TargetMarker
 from task1.srv import EllipseLocator
@@ -27,9 +27,14 @@ from sound_play.libsoundplay import SoundClient
 
 import time
 
+import pdb
+
 
 import sys
 ### /IMPORTS ###
+
+
+rotation_pub = rospy.Publisher('/cmd_vel_mux/input/navi', Twist, queue_size=10)
 
 
 
@@ -64,7 +69,7 @@ checkpoints = np.empty((0, 3), dtype=float)
 
 NUM_ROTATIONS = 8  # Number of different angles to check
 rotation_agl = 2*np.pi/NUM_ROTATIONS  # Get angle for a single rotation
-agl_increments = np.array(np.arange(NUM_ROTATIONS))  # Get angle increments
+agl_increments = np.array(np.arange(NUM_ROTATIONS))*rotation_agl  # Get angle increments
 
 for point in checkpoints_res.points.points:
     # Get next checkpoints batch.
@@ -212,6 +217,19 @@ while checkpoints.shape[0] > 0:
             rospy.loginfo("Checkpoint resolution goal aborted")
             break
 
+    print "initializing rotation..."
+    rospy.sleep(2)
+    rot = Twist()
+    rot.angular.x = 0.3
+    rot.angular.y = 0.3
+    rot.angular.z = 0.3
+    rotation_pub.publish(rot)
+    rospy.sleep(2)
+    rot.angular.x = 0.0
+    rot.angular.y = 0.0
+    rot.angular.z = 0.0
+    rotation_pub.publish(rot)
+    print "sleep ended"
     # Remove checkpoint from checkpoints array
     checkpoints = np.delete(checkpoints, (idx_nxt), axis=0)
 
