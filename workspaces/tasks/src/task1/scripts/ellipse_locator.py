@@ -16,6 +16,8 @@ from targetmarker import TargetMarker
 
 # Import message type received as data retrieved from callback.
 from task1.msg import EllipseData
+from task1.msg import ScanFlag
+
 # Import service that is implemented by this file.
 from task1.srv import EllipseLocator
 
@@ -27,8 +29,23 @@ import pdb
 tf2_buffer = None
 tf2_listener = None
 DIFF_THRESH = 0.5
+scan_flag = 0
 
 ### /IMPORTS ###
+
+def changePermission(data):
+    """
+    callback executed when scanning permission changes.
+    
+    Args:
+        data -- contains flag that is set to 1 if robot is in a state required to get good images
+                and 0 if not.
+
+    Returns:
+        None
+    """
+    global scan_flag
+    scan_flag = data.flag
 
 def callback(data):
 
@@ -55,28 +72,25 @@ def callback(data):
     global tf2_buffer
     global tf2_listener
 
+    # Declare global flag that signals if robot is in a state to get good images.
+    global scan_flag
+
+    
+    # Initialize target marker.
     tm = TargetMarker()
     
-    # TODO: stopped if velocity is zero
-
-    # Threshold to consider robot stationary.
-    ROBOT_STILL_THRESH = 1e-4
-
     # Get current robot's position.
     trans_now = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
     pos1 = np.array([trans_now.transform.translation.x, trans_now.transform.translation.y, trans_now.transform.translation.z])
 
-    # If robot has not moved since photo was taken.
-    # if ROBOT IS NOT MOVING
-    # If data.found flag set to 1...
-    if data.found:
+    # If data.found flag set to 1 and robot in state to get good images...
+    if data.found and scan_flag == 1:
         for ell_idx in np.arange(len(data.dpt)):  # Go over all found ellipses.
 
             # Check for buffer overflow.
             if buff_ptr >= BUFF_SIZE:
                 raise BufferError("Attempting to add object to full buffer")
             
-            # NOTE: This may raise an exception if data not available!
             # Get transformation of point using robot position and map position when the image was taken.
 
             trans = tf2_buffer.lookup_transform(target_frame='map',\
@@ -99,8 +113,6 @@ def callback(data):
                 pass
 
 
-            # NOTE: If angle is positive, reduce x, if angle is negative, increase x.
-
             # Solve quadratic equation to get point a specified distance perpendicular to the
             # face of the ellipse.
             
@@ -119,7 +131,7 @@ def callback(data):
             # Necessary change in x to achieve position 1.0 units before the ellipse face.
             # NOTE: two solutions to quadratic equation.
             dx1 = -(c**2/np.sqrt(k**2 + 1))
-            dx2 = c**2/np.sqrt(k**2 + 1)
+            # dx2 = c**2/np.sqrt(k**2 + 1)
 
             # Get goal point in front of the face of the ellipse.
             pos_nxt_approach_pt = PoseStamped()
@@ -138,12 +150,12 @@ def callback(data):
             res = np.empty(6, dtype=float)
             res[:3] = np.array([pos_nxt_transformed.pose.position.x, pos_nxt_transformed.pose.position.y, pos_nxt_transformed.pose.position.z])
             res[3:] = np.array([pos_nxt_approach_transformed.pose.position.x, pos_nxt_approach_transformed.pose.position.y, pos_nxt_approach_transformed.pose.position.z])
+        
 
-            pdb.set_trace()
-
+            ### DEBUGGING VISUALIZATION ###
             tm.push_position(res[:3])
             tm.push_position(res[3:])
-
+            ### /DEBUGGING VISUALIZATION ###
 
             # Add data to buffer and increment buffer pointer.
             buff[buff_ptr, :] = res
@@ -172,7 +184,7 @@ def req_handler(req):
         return buff[buff_ptr-1, :]
         buff_ptr -= 1  # Decrement buffer pointer.
     else:
-        return []  # If buffer empty, return none.
+        return []  # If buffer empty, return an empty array.
 
 
 def ellipse_locator_server():
@@ -183,34 +195,33 @@ def ellipse_locator_server():
     the data in the buffer.
     """
 
-    # Set threshold for declaring a distinct ellise.
-    # TODO: empirically set threshold.
-
-
-    # Define buffer and allocate array for storing arrays containing data about
-    # found ellipses.
-
-
-    
-
     # Subscribe to /rings topic broadcasted by the robot's computer.
     rospy.Subscriber('rings', EllipseData, callback)
+
+    # Subscribe to /scan_perm topic that is broadcasted by the robot controlling node
+    # and contains messages that signal whether robot is in correct state for taking good
+    # images.
+    rospy.Subscriber('/scan_perm', ScanFlag, changePermission)
+
     # Initialize service.
     rospy.Service('ellipse_locator', EllipseLocator, req_handler)
+
     # Wait for requests.
     rospy.spin()
 
 if __name__ == '__main__':
-    # Initialize buffer.
 
+    # Initialize buffer.
     BUFF_SIZE = 50
     buff = np.ones((BUFF_SIZE, 6), dtype=float) * 1000
     buff_ptr = 0  # Initialize buffer pointer.
+
     # Initialize coordinate transform buffer and listener.
     rospy.init_node('ellipse_locator')
     tf2_buffer = tf2_ros.Buffer()
     tf2_listener = tf2_ros.TransformListener(tf2_buffer)
-    rospy.sleep(5)
+    rospy.sleep(5)  # Wait for cache to fill.
 
+    # Initialize service.
     ellipse_locator_server()
     
