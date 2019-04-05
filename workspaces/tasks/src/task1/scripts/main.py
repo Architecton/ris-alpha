@@ -26,10 +26,7 @@ from sound_play.msg import SoundRequest
 from sound_play.libsoundplay import SoundClient
 
 import time
-
 import pdb
-
-
 import sys
 ### /IMPORTS ###
 
@@ -67,14 +64,9 @@ checkpoints_res = serv(8)
 # Allocate array for storing checkpoints.
 checkpoints = np.empty((0, 3), dtype=float)
 
-NUM_ROTATIONS = 8  # Number of different angles to check
-rotation_agl = 2*np.pi/NUM_ROTATIONS  # Get angle for a single rotation
-agl_increments = np.array(np.arange(NUM_ROTATIONS))*rotation_agl  # Get angle increments
-
 for point in checkpoints_res.points.points:
     # Get next checkpoints batch.
-    checkpoints_nxt = np.repeat(np.array([[point.x, point.y, point.z]]), NUM_ROTATIONS, axis=0)
-    checkpoints_nxt[:, -1] = checkpoints_nxt[:, -1] + agl_increments
+    checkpoints_nxt = np.array([[point.x, point.y, point.z]])
     checkpoints = np.vstack((checkpoints, checkpoints_nxt))
 
 
