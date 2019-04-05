@@ -55,6 +55,7 @@ rot = Twist()
 rot.angular.x = ROTATION_SPEED_X
 rot.angular.y = ROTATION_SPEED_Y
 rot.angular.z = ROTATION_SPEED_Z
+rot_loop_rate = rate = rospy.Rate(10)
 ### /ROTATION PARAMETERS ###
 
 # Initialize main node.
@@ -68,8 +69,6 @@ ac_chkpnts = actionlib.SimpleActionClient("move_base", MoveBaseAction)
 ac_ellipses = actionlib.SimpleActionClient("move_base", MoveBaseAction)
 
 # Initialize checkpoints array.
-# TODO: integrate with Miha's part.
-
 rospy.wait_for_service('get_checkpoints')
 
 try:
@@ -99,10 +98,14 @@ resolved_ell = np.empty((0, 3), dtype=float)
 resolved_ell_ctr = 0  # Initialize resolved ellipses counter.
 NUM_ELLIPSES_TO_FIND = 8
 
+# Number of checkpoints to generate.
+NUM_CHECKPOINTS = 8
+
+# While all ellipses not found.
 while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
 
     # Call checkpoints generating service.
-    checkpoints_res = serv(8)
+    checkpoints_res = serv(NUM_CHECKPOINTS)
 
     # Allocate array for storing checkpoints.
     checkpoints = np.empty((0, 3), dtype=float)
@@ -186,7 +189,8 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
             # ROTATE
             start_rot_time = time.time()
             while(time.time() - start_rot_time < rotation_dur):
-                rotation_pub.publish(rot)
+                rotation_pub.publish(rot)  # Publish angular velocity.
+                rot_loop_rate.sleep()  # TODO: EMPIRICALLY SET
 
         ## /ELLIPSE LOCATING ROTATION ##
 

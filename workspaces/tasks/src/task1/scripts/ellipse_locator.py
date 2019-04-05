@@ -77,12 +77,8 @@ def callback(data):
 
     
     # Initialize target marker.
-    tm = TargetMarker()
+    # tm = TargetMarker()
     
-    # Get current robot's position.
-    trans_now = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
-    pos1 = np.array([trans_now.transform.translation.x, trans_now.transform.translation.y, trans_now.transform.translation.z])
-
     # If data.found flag set to 1 and robot in state to get good images...
     if data.found and scan_flag == 1:
         for ell_idx in np.arange(len(data.dpt)):  # Go over all found ellipses.
@@ -153,8 +149,8 @@ def callback(data):
         
 
             ### DEBUGGING VISUALIZATION ###
-            tm.push_position(res[:3])
-            tm.push_position(res[3:])
+            # tm.push_position(res[:3])
+            # tm.push_position(res[3:])
             ### /DEBUGGING VISUALIZATION ###
 
             # Add data to buffer and increment buffer pointer.
@@ -201,7 +197,7 @@ def ellipse_locator_server():
     # Subscribe to /scan_perm topic that is broadcasted by the robot controlling node
     # and contains messages that signal whether robot is in correct state for taking good
     # images.
-    rospy.Subscriber('/scan_perm', ScanFlag, changePermission)
+    rospy.Subscriber('scan_perm', ScanFlag, changePermission)
 
     # Initialize service.
     rospy.Service('ellipse_locator', EllipseLocator, req_handler)
