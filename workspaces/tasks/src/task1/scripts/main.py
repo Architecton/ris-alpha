@@ -49,7 +49,9 @@ rotation_agl = 2*np.pi/float(NUM_ROTATIONS)
 ROTATION_SPEED_X = 0.5
 ROTATION_SPEED_Y = 0.5
 ROTATION_SPEED_Z = 0.5
-rotation_dur = rotation_agl/ROTATION_SPEED_X  # Duration for which to publish specified rotation velocity to get rotation_agl angle.
+rotation_dur_callib = 1.0
+# Duration for which to publish specified rotation velocity to get rotation_agl angle.
+rotation_dur = (rotation_agl/ROTATION_SPEED_X)*rotation_dur_callib 
 ROTATION_SLEEP_DURATION = 2
 rot = Twist()
 rot.angular.x = ROTATION_SPEED_X
@@ -72,7 +74,7 @@ ac_ellipses = actionlib.SimpleActionClient("move_base", MoveBaseAction)
 rospy.wait_for_service('get_checkpoints')
 
 try:
-    serv = rospy.ServiceProxy('get_checkpoints', Checkpoint_res)
+    checkpoint_gen = rospy.ServiceProxy('get_checkpoints', Checkpoint_res)
 except rospy.ServiceException, e:
     print "Service error: {0}".format(e.message)
 
@@ -105,7 +107,7 @@ NUM_CHECKPOINTS = 8
 while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
 
     # Call checkpoints generating service.
-    checkpoints_res = serv(NUM_CHECKPOINTS)
+    checkpoints_res = checkpoint_gen(NUM_CHECKPOINTS)
 
     # Allocate array for storing checkpoints.
     checkpoints = np.empty((0, 3), dtype=float)
@@ -126,8 +128,8 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
     robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z]) 
 
     # Wait for ellipse data buffer query service to come online and make a proxy function.
-    #rospy.wait_for_service('ellipse_locator')
-    #ellipse_locator = rospy.ServiceProxy('ellipse_locator', EllipseLocator)
+    rospy.wait_for_service('ellipse_locator')
+    ellipse_locator = rospy.ServiceProxy('ellipse_locator', EllipseLocator)
 
     ### /INITIALIZATIONS ###
 
@@ -193,7 +195,7 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
                 rot_loop_rate.sleep()  # TODO: EMPIRICALLY SET
 
         ## /ELLIPSE LOCATING ROTATION ##
-
+        """
 
         ## HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
         try:
@@ -233,6 +235,9 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
                     ellipse_data = ellipse_locator().target
         except rospy.ServiceException, e:
             rospy.loginfo("Ellipse locator service call failed: {0}".format(e))
+        """
+
+        ## /HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
 
         # Remove checkpoint from checkpoints array
         checkpoints = np.delete(checkpoints, (idx_nxt), axis=0)
