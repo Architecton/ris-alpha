@@ -31,12 +31,12 @@ import sys
 ### /IMPORTS ###
 
 
-rotation_pub = rospy.Publisher('/cmd_vel_mux/input/navi', Twist, queue_size=10)
-
-
-
 
 ### INITIALIZATIONS ###
+
+# Define publisher for ellipse search rotations.
+rotation_pub = rospy.Publisher('/cmd_vel_mux/input/navi', Twist, queue_size=10)
+
 
 # Initialize main node.
 rospy.init_node('main')
