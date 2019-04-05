@@ -68,7 +68,6 @@ def callback(data):
 
     # If robot has not moved since photo was taken.
     # if ROBOT IS NOT MOVING
-    print "Robot is standing still"
     # If data.found flag set to 1...
     if data.found:
         for ell_idx in np.arange(len(data.dpt)):  # Go over all found ellipses.
@@ -111,7 +110,7 @@ def callback(data):
             # k -- tan of the angle of the line perpendicular to the face of the ellipse 
             # m -- y intercept of the line perpendicular to the face of the ellipse 
             
-            c = 0.8
+            c = 0.6
             # alternative: b = a*k + m
             k = np.tan(data.perp_agl[ell_idx])
             m = pos_nxt.pose.position.y - k*pos_nxt.pose.position.y 
@@ -126,9 +125,9 @@ def callback(data):
             pos_nxt_approach_pt = PoseStamped()
 
             # Increment/Decrement x and y to get position in front of the ellipse perpendicular to its face.
-            pos_nxt_approach_pt.pose.position.x = pos_nxt.pose.position.x + dx1 if data.agl[ell_idx] < 0 else pos_nxt.pose.position.x + dx2
-            pos_nxt_approach_pt.pose.position.y = pos_nxt.pose.position.y + dx1*k + m if data.agl[ell_idx] < 0 else pos_nxt.pose.position.y + dx2*k + m
-            pos_nxt_approach_pt.pose.position.z = np.arctan(k)
+            pos_nxt_approach_pt.pose.position.x = pos_nxt.pose.position.x + dx1 #if data.agl[ell_idx] < 0 else pos_nxt.pose.position.x + dx2
+            pos_nxt_approach_pt.pose.position.y = pos_nxt.pose.position.y + dx1*k + m #if data.agl[ell_idx] < 0 else pos_nxt.pose.position.y + dx2*k + m
+            pos_nxt_approach_pt.pose.position.z = data.perp_agl[ell_idx]
 
             # Transform approach goal position to map coordinate system.
             pos_nxt_approach_transformed = tf2_geometry_msgs.do_transform_pose(pos_nxt_approach_pt, trans)
@@ -139,6 +138,8 @@ def callback(data):
             res = np.empty(6, dtype=float)
             res[:3] = np.array([pos_nxt_transformed.pose.position.x, pos_nxt_transformed.pose.position.y, pos_nxt_transformed.pose.position.z])
             res[3:] = np.array([pos_nxt_approach_transformed.pose.position.x, pos_nxt_approach_transformed.pose.position.y, pos_nxt_approach_transformed.pose.position.z])
+
+            pdb.set_trace()
 
             tm.push_position(res[:3])
             tm.push_position(res[3:])
