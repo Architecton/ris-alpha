@@ -29,6 +29,7 @@ from sound_play.libsoundplay import SoundClient
 import time
 import pdb
 import sys
+
 ### /IMPORTS ###
 
 
@@ -38,6 +39,14 @@ import sys
 # Initialize main node.
 rospy.init_node('main')
 
+# Initialize sound node.
+soundhandle = SoundClient()
+rospy.sleep(1)
+voice = 'voice_kal_diphone'
+volume = 1.0
+
+
+soundhandle.say("Starting initialization.", voice, volume)
 # /// publishers ///
 # Define publisher for ellipse search rotations.
 rotation_pub = rospy.Publisher('/cmd_vel_mux/input/navi', Twist, queue_size=10)
@@ -52,7 +61,7 @@ rotation_agl = 2*np.pi/float(NUM_ROTATIONS)
 ROTATION_SPEED_X = 0.5
 ROTATION_SPEED_Y = 0.5
 ROTATION_SPEED_Z = 0.5
-rotation_dur_callib = 1.0
+rotation_dur_callib = 1.0 # Constant used to calibrate rotation duration.
 # Duration for which to publish specified rotation velocity to get rotation_agl angle.
 rotation_dur = (rotation_agl/ROTATION_SPEED_X)*rotation_dur_callib 
 ROTATION_SLEEP_DURATION = 2
@@ -60,7 +69,7 @@ rot = Twist()
 rot.angular.x = ROTATION_SPEED_X
 rot.angular.y = ROTATION_SPEED_Y
 rot.angular.z = ROTATION_SPEED_Z
-rot_loop_rate = rate = rospy.Rate(10)
+rot_loop_rate = rospy.Rate(10)
 ### /ROTATION PARAMETERS ###
 
 
@@ -83,13 +92,6 @@ except rospy.ServiceException, e:
 tf2_buffer = tf2_ros.Buffer()
 tf2_listener = tf2_ros.TransformListener(tf2_buffer)
 
-# Initialize sound node.
-
-#rospy.init_node('say', anonymous = True)
-soundhandle = SoundClient()
-rospy.sleep(1)
-voice = 'voice_kal_diphone'
-volume = 1.0
 
 # Set distance threshold to consider ellipse as unresolved.
 # TODO: empirically determine best threshold.
@@ -103,6 +105,8 @@ NUM_ELLIPSES_TO_FIND = 8
 
 # Number of checkpoints to generate.
 NUM_CHECKPOINTS = 8
+
+soundhandle.say("Starting search.", voice, volume)
 
 # While all ellipses not found.
 while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
@@ -152,7 +156,8 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
 
         goal_chkpnt_status = GoalStatus.LOST  # Set status for next checkpoint goal.
         ac_chkpnts.send_goal(goal_chkpt) # Send checkpoint goal.
-        rospy.loginfo("Resolving checkpoint {0}".format(checkpoint_ctr))
+
+        soundhandle.say("Resolving checkpoint {0}".format(checkpoint_ctr), voice, volume)
 
         # Loop for next checkpoint goal.
         while not goal_chkpnt_status == GoalStatus.SUCCEEDED:
@@ -173,6 +178,7 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
 
         ## ELLIPSE LOCATING ROTATION ##
 
+        soundhandle.say("Starting rotation sequence.", voice, volume)
         for rot_idx in np.arange(NUM_ROTATIONS):
 
 
@@ -239,8 +245,8 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
         """
 
         ## /HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
-
         # Remove checkpoint from checkpoints array
+        soundhandle.say("Checkpoint number {0} resolved.".format(resolved_ell_ctr), voice, volume)
         checkpoints = np.delete(checkpoints, (idx_nxt), axis=0)
 
         # Get robot position in map coordinates.
