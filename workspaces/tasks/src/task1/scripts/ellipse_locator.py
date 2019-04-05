@@ -57,96 +57,109 @@ def callback(data):
 
     tm = TargetMarker()
     
-    # If data.found flag set to 1...
-    if data.found:
-        print "ellipse in view"
-        for ell_idx in np.arange(len(data.dpt)):  # Go over all found ellipses.
+    # TODO: stopped if velocity is zero
 
-            # Check for buffer overflow.
-            if buff_ptr >= BUFF_SIZE:
-                raise BufferError("Attempting to add object to full buffer")
-            
-            # NOTE: This may raise an exception if data not available!
-            # Get transformation of point using robot position and map position when the image was taken.
+    # Threshold to consider robot stationary.
+    ROBOT_STILL_THRESH = 1e-4
 
-            trans = tf2_buffer.lookup_transform(target_frame='map',\
-                                    source_frame='base_link',\
-                                    #time=rospy.Time.from_seconds(data.timestamp[ell_idx]),\
-                                    time=rospy.Time.now() - rospy.Duration(1.),\
-                                    timeout=rospy.Duration(1.0))
+    # Get current robot's position.
+    trans_now = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
+    pos1 = np.array([trans_now.transform.translation.x, trans_now.transform.translation.y, trans_now.transform.translation.z])
 
-            # pdb.set_trace()
+    # Get robot's position when photo was taken.
+    trans_m = tf2_buffer.lookup_transform(target_frame='map',\
+                        source_frame='base_link',\
+                        time=rospy.Time.from_seconds(data.timestamp[ell_idx]),\
+                        #time=rospy.Time.now() - rospy.Duration(1.),\
+                        timeout=rospy.Duration(1.0))
+    pos2 = np.array([trans_im.transform.translation.x, trans_im.transform.translation.y, trans_im.transform.translation.z])
 
-            # Get point in map coordiates corresponding to the ellipse.
-            pos_nxt = PoseStamped()
-            pos_nxt.pose.position.x = data.dpt[ell_idx]*np.cos(data.agl[ell_idx])
-            pos_nxt.pose.position.y = -data.dpt[ell_idx]*np.sin(data.agl[ell_idx])
-            pos_nxt_transformed = tf2_geometry_msgs.do_transform_pose(pos_nxt, trans)
+    # If robot has not moved since photo was taken.
+    # if ROBOT IS NOT MOVING
+    if np.sqrt(np.sum(np.abs(pos1 - pos2))) < ROBOT_STILL_THRESH
+        print "Robot is standing still"
+        # If data.found flag set to 1...
+        if data.found:
+            for ell_idx in np.arange(len(data.dpt)):  # Go over all found ellipses.
 
-            # Check if ellipse already in buffer.
-            if buff_ptr > 0:
-                if np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([pos_nxt_transformed.pose.position.x, pos_nxt_transformed.pose.position.y]), buff[:, :2]) < DIFF_THRESH):
-                    print "Ellipse already in buffer! breaking..."
-                    break
-            else:  # No need to check if buffer empty.
-                pass
+                # Check for buffer overflow.
+                if buff_ptr >= BUFF_SIZE:
+                    raise BufferError("Attempting to add object to full buffer")
+                
+                # NOTE: This may raise an exception if data not available!
+                # Get transformation of point using robot position and map position when the image was taken.
 
+                trans = tf2_buffer.lookup_transform(target_frame='map',\
+                                        source_frame='base_link',\
+                                        time=rospy.Time.from_seconds(data.timestamp[ell_idx]),\
+                                        #time=rospy.Time.now() - rospy.Duration(1.),\
+                                        timeout=rospy.Duration(1.0))
 
-            # NOTE: If angle is positive, reduce x, if angle is negative, increase x.
+                # Get point in map coordiates corresponding to the ellipse.
+                pos_nxt = PoseStamped()
+                pos_nxt.pose.position.x = data.dpt[ell_idx]*np.cos(data.agl[ell_idx])
+                pos_nxt.pose.position.y = -data.dpt[ell_idx]*np.sin(data.agl[ell_idx])
+                pos_nxt_transformed = tf2_geometry_msgs.do_transform_pose(pos_nxt, trans)
 
-            # Solve quadratic equation to get point a specified distance perpendicular to the
-            # face of the ellipse.
-            
-            # c -- perpendicular distance to face of ellipse
-            # a -- x coordinate of the ellipse center
-            # b -- y coordinate of the ellipse center
-            # k -- tan of the angle of the line perpendicular to the face of the ellipse 
-            # m -- y intercept of the line perpendicular to the face of the ellipse 
-            
-            c = 0.8
-            # alternative: b = a*k + m
-            k = np.tan(data.perp_agl[ell_idx])
-            m = pos_nxt.pose.position.y - k*pos_nxt.pose.position.y 
-            # m = data.perp_y_itrcpt[ell_idx]
-
-            # Necessary change in x to achieve position 1.0 units before the ellipse face.
-            # NOTE: two solutions to quadratic equation.
-            dx1 = -(c**2/np.sqrt(k**2 + 1))
-            dx2 = c**2/np.sqrt(k**2 + 1)
-
-            # Get goal point in front of the face of the ellipse.
-            pos_nxt_approach_pt = PoseStamped()
-
-            # pdb.set_trace()
-
-            # Increment/Decrement x and y to get position in front of the ellipse perpendicular to its face.
-            pos_nxt_approach_pt.pose.position.x = pos_nxt.pose.position.x + dx1 if data.agl[ell_idx] < 0 else pos_nxt.pose.position.x + dx2
-            pos_nxt_approach_pt.pose.position.y = pos_nxt.pose.position.y + dx1*k + m if data.agl[ell_idx] < 0 else pos_nxt.pose.position.y + dx2*k + m
-            pos_nxt_approach_pt.pose.position.z = np.arctan(k)
-
-            # Transform approach goal position to map coordinate system.
-            pos_nxt_approach_transformed = tf2_geometry_msgs.do_transform_pose(pos_nxt_approach_pt, trans)
-
-            # Save resuls in buffer.
-            # First three elements correspond to the coordinates of the face of the ellipse and the last three correspond to the target spot in front
-            # of the ellipse face, perpendicular to it.
-            res = np.empty(6, dtype=float)
-            res[:3] = np.array([pos_nxt_transformed.pose.position.x, pos_nxt_transformed.pose.position.y, pos_nxt_transformed.pose.position.z])
-            res[3:] = np.array([pos_nxt_approach_transformed.pose.position.x, pos_nxt_approach_transformed.pose.position.y, pos_nxt_approach_transformed.pose.position.z])
-
-            #tm.push_position(res[:3])
-            #tm.push_position(res[3:])
+                # Check if ellipse already in buffer.
+                if buff_ptr > 0:
+                    if np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([pos_nxt_transformed.pose.position.x, pos_nxt_transformed.pose.position.y]), buff[:, :2]) < DIFF_THRESH):
+                        break
+                else:  # No need to check if buffer empty.
+                    pass
 
 
-            print "Adding following to buffer:"
-            print res
+                # NOTE: If angle is positive, reduce x, if angle is negative, increase x.
 
-            # Add data to buffer and increment buffer pointer.
-            buff[buff_ptr, :] = res
-            buff_ptr += 1
+                # Solve quadratic equation to get point a specified distance perpendicular to the
+                # face of the ellipse.
+                
+                # c -- perpendicular distance to face of ellipse
+                # a -- x coordinate of the ellipse center
+                # b -- y coordinate of the ellipse center
+                # k -- tan of the angle of the line perpendicular to the face of the ellipse 
+                # m -- y intercept of the line perpendicular to the face of the ellipse 
+                
+                c = 0.8
+                # alternative: b = a*k + m
+                k = np.tan(data.perp_agl[ell_idx])
+                m = pos_nxt.pose.position.y - k*pos_nxt.pose.position.y 
+                # m = data.perp_y_itrcpt[ell_idx]
+
+                # Necessary change in x to achieve position 1.0 units before the ellipse face.
+                # NOTE: two solutions to quadratic equation.
+                dx1 = -(c**2/np.sqrt(k**2 + 1))
+                dx2 = c**2/np.sqrt(k**2 + 1)
+
+                # Get goal point in front of the face of the ellipse.
+                pos_nxt_approach_pt = PoseStamped()
+
+                # Increment/Decrement x and y to get position in front of the ellipse perpendicular to its face.
+                pos_nxt_approach_pt.pose.position.x = pos_nxt.pose.position.x + dx1 if data.agl[ell_idx] < 0 else pos_nxt.pose.position.x + dx2
+                pos_nxt_approach_pt.pose.position.y = pos_nxt.pose.position.y + dx1*k + m if data.agl[ell_idx] < 0 else pos_nxt.pose.position.y + dx2*k + m
+                pos_nxt_approach_pt.pose.position.z = np.arctan(k)
+
+                # Transform approach goal position to map coordinate system.
+                pos_nxt_approach_transformed = tf2_geometry_msgs.do_transform_pose(pos_nxt_approach_pt, trans)
+
+                # Save resuls in buffer.
+                # First three elements correspond to the coordinates of the face of the ellipse and the last three correspond to the target spot in front
+                # of the ellipse face, perpendicular to it.
+                res = np.empty(6, dtype=float)
+                res[:3] = np.array([pos_nxt_transformed.pose.position.x, pos_nxt_transformed.pose.position.y, pos_nxt_transformed.pose.position.z])
+                res[3:] = np.array([pos_nxt_approach_transformed.pose.position.x, pos_nxt_approach_transformed.pose.position.y, pos_nxt_approach_transformed.pose.position.z])
+
+                #tm.push_position(res[:3])
+                #tm.push_position(res[3:])
+
+
+                # Add data to buffer and increment buffer pointer.
+                buff[buff_ptr, :] = res
+                buff_ptr += 1
+        else:
+            pass
     else:
-        print('not found')
-        pass
+        print "Robot is moving"
 
 
 def req_handler(req):

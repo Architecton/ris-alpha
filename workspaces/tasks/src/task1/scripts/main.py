@@ -56,15 +56,21 @@ try:
 except rospy.ServiceException, e:
     print "Service error: {0}".format(e.message)
 
+# Call checkpoints generating service.
 checkpoints_res = serv(8)
 
-checkpoints = [] 
+# Allocate array for storing checkpoints.
+checkpoints = np.empty((0, 3), dtype=float)
 
+NUM_ROTATIONS = 8  # Number of different angles to check
+rotation_agl = 2*np.pi/NUM_ROTATIONS  # Get angle for a single rotation
+agl_increments = np.array(np.arange(NUM_ROTATIONS))  # Get angle increments
 
 for point in checkpoints_res.points.points:
-    checkpoints.append([point.x, point.y, point.z])
-
-checkpoints = np.array(checkpoints)
+    # Get next checkpoints batch.
+    checkpoints_nxt = np.repeat(np.array([[point.x, point.y, point.z]]), NUM_ROTATIONS, axis=0)
+    checkpoints_nxt[:, -1] = checkpoints_nxt[:, -1] + agl_increments
+    checkpoints = np.vstack((checkpoints, checkpoints_nxt))
 
 
 #checkpoints = np.array([[-1.276, 2.121, 0.850], [0.421, 0.166, 0.597], [2.195, 0.723, 0.999], [1.832, 2.986, 0.882], [0.036, 2.124, 0.855]])
@@ -91,8 +97,8 @@ trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
 robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z]) 
 
 # Wait for ellipse data buffer query service to come online and make a proxy function.
-rospy.wait_for_service('ellipse_locator')
-ellipse_locator = rospy.ServiceProxy('ellipse_locator', EllipseLocator)
+#rospy.wait_for_service('ellipse_locator')
+#ellipse_locator = rospy.ServiceProxy('ellipse_locator', EllipseLocator)
 
 # Initialize sound node.
 
@@ -126,6 +132,7 @@ while checkpoints.shape[0] > 0:
 
     # Loop for next checkpoint goal.
     while not goal_chkpnt_status == GoalStatus.SUCCEEDED:
+        """
         # Check if any ellipses if buffer.
         try:  # Initialize resolved ellipses counter.
             # Query into ellipse data buffer.
@@ -151,7 +158,6 @@ while checkpoints.shape[0] > 0:
                     ### /DEBUG PLOT ###
 
 
-                    """
                     # Create goal to approach found ellipse.
                     goal_ell = MoveBaseGoal()
                     goal_ell.target_pose.header.frame_id = "map"
@@ -187,13 +193,13 @@ while checkpoints.shape[0] > 0:
                     resolved_ell_ctr += 1
                     # Resend preempted checkpoint goal.
                     ac_chkpnts.send_goal(goal_chkpt)
-                    """
                 else:
                     pass
             else:
                 pass
         except rospy.ServiceException, e:
             print "Ellipse locator service call failed: {0}".format(e)
+        """
         
 
         ac_chkpnts.wait_for_result(rospy.Duration(0.1))
