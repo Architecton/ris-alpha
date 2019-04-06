@@ -17,9 +17,11 @@ from targetmarker import TargetMarker
 # Import message type received as data retrieved from callback.
 from task1.msg import EllipseData
 from task1.msg import ScanFlag
+from task1.msg import CheckpointProcessorResponse
 
 # Import service that is implemented by this file.
 from task1.srv import EllipseLocator
+from task1.srv import CheckpointProcessor
 
 import time
 import numpy as np
@@ -128,6 +130,15 @@ def callback(data):
             if (lambda x: np.sqrt(np.sum(x**2)))(np.array([pos_nxt.pose.position.x, pos_nxt.pose.position.y])) > 1.8:
                 break
 
+
+            
+            fixed_pos_nxt_transformed = checkpoint_approach_validator(pos_nxt_transformed.pose.position.x, pos_nxt_transformed.pose.position.y)
+            if fixed_pos_nxt_transformed.valid:
+                pos_nxt_transformed.pose.position.x = fixed_pos_nxt_transformed.output_x
+                pos_nxt_transformed.pose.position.y = fixed_pos_nxt_transformed.output_y
+            else:
+                break
+
             # Check if ellipse already in buffer.
             """
             if buff2_ptr > 0:
@@ -142,18 +153,6 @@ def callback(data):
 
             # Get line equation
             k = pos_nxt.pose.position.y/pos_nxt.pose.position.x
-
-
-
-
-
-
-
-
-
-
-
-
 
 
             # Solve quadratic equation to get point a specified distance perpendicular to the
@@ -265,6 +264,13 @@ if __name__ == '__main__':
 
     # Initialize coordinate transform buffer and listener.
     rospy.init_node('ellipse_locator')
+
+    try:
+        checkpoint_approach_validator = rospy.ServiceProxy('checkpoint_processor', CheckpointProcessor)
+    except rospy.ServiceException, e:
+        print "Service error: {0}".format(e.message)
+
+
     tf2_buffer = tf2_ros.Buffer()
     tf2_listener = tf2_ros.TransformListener(tf2_buffer)
     rospy.sleep(5)  # Wait for cache to fill.

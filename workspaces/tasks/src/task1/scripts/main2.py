@@ -206,7 +206,6 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
         ## /ELLIPSE LOCATING ROTATION ##
 
         ## HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
-        """
         try:
             # Query into ellipse buffer
             ellipse_data = ellipse_locator().target
@@ -224,7 +223,7 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
                     goal_ell.target_pose.header.stamp = rospy.Time.now()
                     goal_ell.target_pose.pose.position.x = ellipse_data[0]
                     goal_ell.target_pose.pose.position.y = ellipse_data[1]
-                    goal_ell.target_pose.pose.position.z = ellipse_data[2]
+                    goal_ell.target_pose.pose.orientation.w = ellipse_data[5]
                     goal_nxt_ell_status = GoalStatus.LOST
                     # Send ellipse resolution goal.
                     ac_ellipses.send_goal(goal_ell)
@@ -253,7 +252,6 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
                     ellipse_data = ellipse_locator().target
         except rospy.ServiceException, e:
             rospy.loginfo("Ellipse locator service call failed: {0}".format(e))
-        """
         ## /HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
         # Remove checkpoint from checkpoints array
         soundhandle.say("Checkpoint number {0} resolved.".format(resolved_ell_ctr), voice, volume)

@@ -16,7 +16,7 @@ while(not ac.wait_for_server(rospy.Duration.from_sec(2.0))):  # Wait for server.
               rospy.loginfo("Waiting for the move_base action server to come up")
 
 # Define goal coordinates and orientations.
-xyw = np.array([[-1.276, 2.121, 0.850], [0.421, 0.166, 0.597], [2.195, 0.723, 0.999], [1.832, 2.986, 0.882], [0.036, 2.124, 0.855]];
+xyw = np.array([[-1.276, 2.121, 0.850], [0.421, 0.166, 0.597], [2.195, 0.723, 0.999], [1.832, 2.986, 0.882], [0.036, 2.124, 0.855]])
 # Allocate list for goals.
 goal_list = np.empty(xyw.shape[0], dtype=object)
 for k in np.arrange(xyw.shape[0]):  # Initialize goals and add to list.
