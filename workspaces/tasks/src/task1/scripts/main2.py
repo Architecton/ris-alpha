@@ -235,7 +235,7 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
                         ac_ellipses.wait_for_result(rospy.Duration(0.5))
                         goal_nxt_ell_status = ac_ellipses.get_state()
 
-                        elif goal_nxt_ell_status == GoalStatus.ABORTED or goal_nxt_ell_status == GoalStatus.REJECTED:
+                        if goal_nxt_ell_status == GoalStatus.ABORTED or goal_nxt_ell_status == GoalStatus.REJECTED:
                             rospy.loginfo("Ellipse resolution goal aborted")
                             break
                         elif goal_nxt_ell_status == GoalStatus.SUCCEEDED:
