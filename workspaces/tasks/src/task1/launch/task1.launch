@@ -1,6 +1,7 @@
 <launch>
 	<!--<node pkg="task1" type="ring_detector.py" name="image_converter" output="screen" />-->
-	<node pkg="task1" type="ellipse_locator2.py" name="ellipse_locator" output="screen" />
+	<node pkg="task1" type="ellipse_locator3.py" name="ellipse_locator" output="screen" />
+	<node pkg="task1" type="checkpoint_processor.py" name="checkpoint_processor_server" output="screen" />
 	<node pkg="task1" type="get_checkpoints.py" name="get_checkpoints_server" output="screen" />
-	<node pkg="task1" type="main.py" name="main" output="screen" />
+	<node pkg="task1" type="main2.py" name="main" output="screen" />
 </launch>
