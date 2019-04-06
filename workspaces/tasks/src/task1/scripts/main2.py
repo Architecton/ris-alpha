@@ -221,7 +221,7 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
                     goal_ell.target_pose.header.stamp = rospy.Time.now()
                     goal_ell.target_pose.pose.position.x = ellipse_data[0]
                     goal_ell.target_pose.pose.position.y = ellipse_data[1]
-                    goal_ell.target_pose.pose.position.w = ellipse_data[2]
+                    goal_ell.target_pose.pose.position.z = ellipse_data[2]
                     goal_nxt_ell_status = GoalStatus.LOST
                     # Send ellipse resolution goal.
                     ac_ellipses.send_goal(goal_ell)
