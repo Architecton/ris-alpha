@@ -122,8 +122,8 @@ def callback(data):
 
             # Get point in map coordiates corresponding to the ellipse.
             pos_nxt = PoseStamped()
-            pos_nxt.pose.position.x = data.dpt[ell_idx]*np.cos(data.agl[ell_idx])
-            pos_nxt.pose.position.y = data.dpt[ell_idx]*np.sin(data.agl[ell_idx])
+            pos_nxt.pose.position.x = -data.dpt[ell_idx]*np.cos(data.agl[ell_idx])
+            pos_nxt.pose.position.y = -data.dpt[ell_idx]*np.sin(data.agl[ell_idx])
             pos_nxt_transformed = tf2_geometry_msgs.do_transform_pose(pos_nxt, trans)
 
             # Check if ellipse already in buffer.
