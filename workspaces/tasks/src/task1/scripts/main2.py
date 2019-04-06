@@ -221,8 +221,8 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
                     goal_ell = MoveBaseGoal()
                     goal_ell.target_pose.header.frame_id = "map"
                     goal_ell.target_pose.header.stamp = rospy.Time.now()
-                    goal_ell.target_pose.pose.position.x = ellipse_data[0]
-                    goal_ell.target_pose.pose.position.y = ellipse_data[1]
+                    goal_ell.target_pose.pose.position.x = ellipse_data[3]
+                    goal_ell.target_pose.pose.position.y = ellipse_data[4]
                     goal_ell.target_pose.pose.orientation.w = ellipse_data[5]
                     goal_nxt_ell_status = GoalStatus.LOST
                     # Send ellipse resolution goal.
