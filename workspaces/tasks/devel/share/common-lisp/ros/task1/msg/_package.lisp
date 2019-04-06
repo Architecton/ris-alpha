@@ -1,6 +1,8 @@
 (cl:defpackage task1-msg
   (:use )
   (:export
+   "<CHECKPOINTPROCESSORRESPONSE>"
+   "CHECKPOINTPROCESSORRESPONSE"
    "<CHECKPOINTS>"
    "CHECKPOINTS"
    "<ELLIPSEDATA>"

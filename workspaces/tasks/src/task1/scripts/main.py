@@ -64,7 +64,7 @@ ROTATION_SPEED_Z = 1.0
 rotation_dur_callib = 0.3 # Constant used to calibrate rotation duration.
 # Duration for which to publish specified rotation velocity to get rotation_agl angle.
 rotation_dur = (rotation_agl/ROTATION_SPEED_X)*rotation_dur_callib 
-ROTATION_SLEEP_DURATION = 2
+ROTATION_SLEEP_DURATION = 2.0
 rot = Twist()
 rot.angular.x = ROTATION_SPEED_X
 rot.angular.y = ROTATION_SPEED_Y
@@ -106,7 +106,7 @@ NUM_ELLIPSES_TO_FIND = 8
 # Number of checkpoints to generate.
 NUM_CHECKPOINTS = 8
 
-soundhandle.say("Starting search.", voice, volume)
+soundhandle.say("Exterminate all humans.", voice, volume)
 
 # While all ellipses not found.
 while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
@@ -193,7 +193,7 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
             ## IMAGE PROCESSING STREAM SCAN END ###
 
             # Safety sleep.
-            rospy.sleep(0.1)
+            rospy.sleep(0.8)
 
             # ROTATE
             start_rot_time = time.time()
@@ -202,7 +202,7 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
                 rot_loop_rate.sleep()  # TODO: EMPIRICALLY SET
 
         ## /ELLIPSE LOCATING ROTATION ##
-        """
+        
 
         ## HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
         try:
@@ -210,10 +210,10 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
             ellipse_data = ellipse_locator().target
             while(len(ellipse_data) > 0):  # If data in buffer...
                 if not np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([ellipse_data[0], ellipse_data[1], ellipse_data[5]]), resolved_ell) < DISTINCT_ELL_THRESH):
-
+                    pdb.set_trace()
                     ### DEBUGGING VISUALIZATION ###
-                    tm.push_position(np.array(ellipse_data[:3]))
-                    tm.push_position(np.array(ellipse_data[3:]))
+                    #tm.push_position(np.array(ellipse_data[:3]))
+                    #tm.push_position(np.array(ellipse_data[3:]))
                     ### /DEBUGGING VISUALIZATION ###
 
                     # Initialize goal to aproach new ellipse
@@ -221,8 +221,8 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
                     goal_ell.target_pose.header.frame_id = "map"
                     goal_ell.target_pose.header.stamp = rospy.Time.now()
                     goal_ell.target_pose.pose.position.x = ellipse_data[3]
-                    goal_ell.target_pose.pose.position.y = ellipse.data[4]
-                    goal_ell.target_pose.pose.position.w = ellipse.data[5]
+                    goal_ell.target_pose.pose.position.y = ellipse_data[4]
+                    goal_ell.target_pose.pose.position.z = 0.8
                     goal_nxt_ell_status = GoalStatus.LOST
                     # Send ellipse resolution goal.
                     ac_ellipses.send_goal(goal_ell)
@@ -242,7 +242,7 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
                     ellipse_data = ellipse_locator().target
         except rospy.ServiceException, e:
             rospy.loginfo("Ellipse locator service call failed: {0}".format(e))
-        """
+        
 
         ## /HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
         # Remove checkpoint from checkpoints array
