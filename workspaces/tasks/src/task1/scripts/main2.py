@@ -246,6 +246,8 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
                             resolved_ell_ctr += 1
                     # Get next element in service's buffer.
                     ellipse_data = ellipse_locator().target
+                else:
+                    ellipse_data = ellipse_locator().target
         except rospy.ServiceException, e:
             rospy.loginfo("Ellipse locator service call failed: {0}".format(e))
         ## /HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
