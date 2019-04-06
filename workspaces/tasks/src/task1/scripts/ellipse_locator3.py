@@ -199,7 +199,7 @@ def callback(data):
             ### /DEBUGGING VISUALIZATION ###
 
             # Add data to buffer and increment buffer pointer.
-            buff2[buff_ptr2, :] = res
+            buff2[buff2_ptr, :] = res
             buff2_ptr += 1
     else:
         pass
