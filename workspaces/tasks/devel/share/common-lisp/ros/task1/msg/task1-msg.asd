@@ -9,4 +9,6 @@
     (:file "_package_Checkpoints" :depends-on ("_package"))
     (:file "EllipseData" :depends-on ("_package_EllipseData"))
     (:file "_package_EllipseData" :depends-on ("_package"))
+    (:file "ScanFlag" :depends-on ("_package_ScanFlag"))
+    (:file "_package_ScanFlag" :depends-on ("_package"))
   ))

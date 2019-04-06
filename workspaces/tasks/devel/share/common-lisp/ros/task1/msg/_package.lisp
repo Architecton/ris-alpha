@@ -5,5 +5,7 @@
    "CHECKPOINTS"
    "<ELLIPSEDATA>"
    "ELLIPSEDATA"
+   "<SCANFLAG>"
+   "SCANFLAG"
   ))
 
