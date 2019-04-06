@@ -105,7 +105,6 @@ def callback(data):
     # Initialize target marker.
     # If data.found flag set to 1 and robot in state to get good images...
     if data.found and scan_flag == 1:
-        print "ellipse found"
         for ell_idx in np.arange(len(data.dpt)):  # Go over all found ellipses.
 
             # Check for buffer overflow.
