@@ -209,12 +209,13 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
         try:
             # Query into ellipse buffer
             ellipse_data = ellipse_locator().target
+            print ellipse_data
             while(len(ellipse_data) > 0):  # If data in buffer...
                 if not np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([ellipse_data[0], ellipse_data[1], ellipse_data[5]]), resolved_ell) < DISTINCT_ELL_THRESH):
 
                     ### DEBUGGING VISUALIZATION ###
-                    tm.push_position(np.array(ellipse_data[:3]))
-                    tm.push_position(np.array(ellipse_data[3:]))
+                    #tm.push_position(np.array(ellipse_data[:3]))
+                    #tm.push_position(np.array(ellipse_data[3:]))
                     ### /DEBUGGING VISUALIZATION ###
 
                     # Initialize goal to aproach new ellipse
@@ -228,22 +229,17 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
                     # Send ellipse resolution goal.
                     ac_ellipses.send_goal(goal_ell)
 
+                    print goal_ell
+
                     while not goal_nxt_ell_status == GoalStatus.SUCCEEDED:
-                        ac_ellipses.wait_for_result(rospy.Duration(0.1))
+                        ac_ellipses.wait_for_result(rospy.Duration(0.5))
                         goal_nxt_ell_status = ac_ellipses.get_state()
 
-                        trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
-                        robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z])
-
-                        if (lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2)))(np.array([ellipse_data[0], ellipse_data[1], ellipse_data[2]]), robot_pos) < 0.8:
-                            soundhandle.say("Target number {0} resolved.".format(resolved_ell_ctr), voice, volume)
-                            rospy.loginfo("Target number {0} resolved".format(resolved_ell_ctr))
-                            resolved_ell = np.vstack((resolved_ell, np.array([ellipse_data[0], ellipse_data[1], ellipse_data[5]])))
-                            resolved_ell_ctr += 1
                         elif goal_nxt_ell_status == GoalStatus.ABORTED or goal_nxt_ell_status == GoalStatus.REJECTED:
                             rospy.loginfo("Ellipse resolution goal aborted")
                             break
                         elif goal_nxt_ell_status == GoalStatus.SUCCEEDED:
+                            print resolved_ell_ctr
                             soundhandle.say("Target number {0} resolved.".format(resolved_ell_ctr), voice, volume)
                             rospy.loginfo("Target number {0} resolved".format(resolved_ell_ctr))
                             resolved_ell = np.vstack((resolved_ell, np.array([ellipse_data[0], ellipse_data[1], ellipse_data[5]])))
