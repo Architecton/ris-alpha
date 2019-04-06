@@ -5,6 +5,8 @@
   :depends-on (:roslisp-msg-protocol :roslisp-utils :geometry_msgs-msg
 )
   :components ((:file "_package")
+    (:file "CheckpointProcessorResponse" :depends-on ("_package_CheckpointProcessorResponse"))
+    (:file "_package_CheckpointProcessorResponse" :depends-on ("_package"))
     (:file "Checkpoints" :depends-on ("_package_Checkpoints"))
     (:file "_package_Checkpoints" :depends-on ("_package"))
     (:file "EllipseData" :depends-on ("_package_EllipseData"))

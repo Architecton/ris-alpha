@@ -56,6 +56,7 @@ find_package( OpenCV REQUIRED )
    Checkpoints.msg
    EllipseData.msg
    ScanFlag.msg
+   CheckpointProcessorResponse.msg
  )
 
 ## Generate services in the 'srv' folder
@@ -68,6 +69,7 @@ find_package( OpenCV REQUIRED )
 add_service_files(
   FILES
   Checkpoint_res.srv
+  CheckpointProcessor.srv
   EllipseLocator.srv
 )
 

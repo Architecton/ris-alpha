@@ -58,8 +58,8 @@ def changePermission(data):
  
     tm = TargetMarker()
 
-    if scan_flag == 0 and buff2_ptr > 1:
-        res = np.median(buff[:buff2_ptr, :], 0)
+    if scan_flag == 0 and buff2_ptr > 5:
+        res = np.median(buff2[:buff2_ptr, :], 0)
         buff[buff_ptr] = res
         buff_ptr += 1
         buff2_ptr = 0
@@ -105,8 +105,9 @@ def callback(data):
     # Initialize target marker.
     # If data.found flag set to 1 and robot in state to get good images...
     if data.found and scan_flag == 1:
-        print "ellipse found"
         for ell_idx in np.arange(len(data.dpt)):  # Go over all found ellipses.
+            if data.dpt[ell_idx] > 3.0 or data.dpt[ell_idx] < 0.1 or np.abs(data.agl[ell_idx]) > np.pi/2.0:
+                break
 
             # Check for buffer overflow.
             if buff_ptr >= BUFF_SIZE:
