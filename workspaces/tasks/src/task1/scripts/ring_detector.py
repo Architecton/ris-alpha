@@ -26,7 +26,8 @@ class The_Ring:
         self.scan_ranges = None
         self.scan_angle_min = 0.0
         self.scan_angle_max = 0.0
-        self.scan_angle_increment = 0.0  
+        # self.scan_angle_increment = 0.0  
+        self.scan_angle_increment = 0.0017098772515631948
         self.in_process = 0
 
         # Initialize search boundaries for the ellipses and their centres
@@ -245,7 +246,7 @@ class The_Ring:
             self.scan_ranges = data.ranges
             self.scan_angle_min = data.angle_min
             self.scan_angle_max = data.angle_max
-            self.scan_angle_increment = data.angle_increment
+            # self.scan_angle_increment = data.angle_increment
 
     def get_ell_face_agl(self, dpts, agls):
         """
