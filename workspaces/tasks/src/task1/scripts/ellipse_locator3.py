@@ -63,7 +63,6 @@ def changePermission(data):
         buff[buff_ptr] = res
         buff_ptr += 1
         buff2_ptr = 0
-        pdb.set_trace()
         ### DEBUGGING VISUALIZATION ###
         tm.push_position(res[:3])
         tm.push_position(res[3:])
