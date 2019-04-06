@@ -149,8 +149,8 @@ def callback(data):
         
 
             ### DEBUGGING VISUALIZATION ###
-            # tm.push_position(res[:3])
-            # tm.push_position(res[3:])
+            tm.push_position(res[:3])
+            tm.push_position(res[3:])
             ### /DEBUGGING VISUALIZATION ###
 
             # Add data to buffer and increment buffer pointer.
