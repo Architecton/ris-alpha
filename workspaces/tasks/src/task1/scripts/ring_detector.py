@@ -26,7 +26,8 @@ class The_Ring:
         self.scan_ranges = None
         self.scan_angle_min = 0.0
         self.scan_angle_max = 0.0
-        self.scan_angle_increment = 0.0  
+        # self.scan_angle_increment = 0.0  
+        self.scan_angle_increment = 0.0017098772515631948
         self.in_process = 0
 
         # Initialize search boundaries for the ellipses and their centres
@@ -50,6 +51,7 @@ class The_Ring:
     def image_callback(self,data):
 
         self.in_process = 1  
+
         timestamp = data.header.stamp.to_time()
 
         try:
@@ -204,7 +206,7 @@ class The_Ring:
             if (self.scan_ranges != None and center[0] >= 0.0 and center[0] <= len(self.scan_ranges)):
                 x = int(round(center[0]))
                 agl = self.scan_angle_min + center[0] * self.scan_angle_increment
-                dpt = self.scan_ranges[x]
+                dpt = self.scan_ranges[x] if (x >= 0.0 and x < len(self.scan_ranges)) else np.nan
                 if not(np.isnan(dpt)):
                     # Calculate angle that is perpendicular to the detected ellipse face
                     min_bnd = max(x-10, 0)
@@ -244,7 +246,7 @@ class The_Ring:
             self.scan_ranges = data.ranges
             self.scan_angle_min = data.angle_min
             self.scan_angle_max = data.angle_max
-            self.scan_angle_increment = data.angle_increment
+            # self.scan_angle_increment = data.angle_increment
 
     def get_ell_face_agl(self, dpts, agls):
         """
