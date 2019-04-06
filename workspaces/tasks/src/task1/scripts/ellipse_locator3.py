@@ -126,7 +126,7 @@ def callback(data):
             pos_nxt.pose.position.y = -data.dpt[ell_idx]*np.sin(data.agl[ell_idx])
             pos_nxt_transformed = tf2_geometry_msgs.do_transform_pose(pos_nxt, trans)
 
-            if (lambda x: np.sqrt(x**2))(np.array([pos_nxt.pose.position.x, pos_nxt.pose.position.y])) > 1.8:
+            if (lambda x: np.sqrt(np.sum(x**2)))(np.array([pos_nxt.pose.position.x, pos_nxt.pose.position.y])) > 1.8:
                 break
 
             # Check if ellipse already in buffer.
