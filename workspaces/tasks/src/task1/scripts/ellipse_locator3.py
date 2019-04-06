@@ -58,7 +58,7 @@ def changePermission(data):
  
     tm = TargetMarker()
 
-    if scan_flag == 0 and buff2_ptr > 1:
+    if scan_flag == 0 and buff2_ptr > 10:
         res = np.median(buff2[:buff2_ptr, :], 0)
         buff[buff_ptr] = res
         buff_ptr += 1
@@ -180,8 +180,8 @@ def callback(data):
             pos_nxt_approach_pt = PoseStamped()
 
             # Increment/Decrement x and y to get position in front of the ellipse perpendicular to its face.
-            pos_nxt_approach_pt.pose.position.x = pos_nxt.pose.position.x + dx1 if data.agl[ell_idx] < 0 else pos_nxt.pose.position.x + dx2
-            pos_nxt_approach_pt.pose.position.y = pos_nxt.pose.position.y + dx1*k if data.agl[ell_idx] < 0 else pos_nxt.pose.position.y + dx2*k
+            pos_nxt_approach_pt.pose.position.x = pos_nxt.pose.position.x + dx1 #if data.agl[ell_idx] < 0 else pos_nxt.pose.position.x + dx2
+            pos_nxt_approach_pt.pose.position.y = pos_nxt.pose.position.y + dx1*k #if data.agl[ell_idx] < 0 else pos_nxt.pose.position.y + dx2*k
             pos_nxt_approach_pt.pose.position.z = data.perp_agl[ell_idx]
 
             # Transform approach goal position to map coordinate system.
