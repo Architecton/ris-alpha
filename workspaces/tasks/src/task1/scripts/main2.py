@@ -207,6 +207,7 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
 
         ## HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
         try:
+            pdb.set_trace()
             # Query into ellipse buffer
             ellipse_data = ellipse_locator().target
             print ellipse_data
