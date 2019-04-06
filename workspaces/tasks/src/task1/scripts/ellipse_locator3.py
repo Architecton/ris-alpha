@@ -225,6 +225,7 @@ def req_handler(req):
     if buff_ptr > 0:
         return buff[buff_ptr-1, :]
         buff_ptr -= 1  # Decrement buffer pointer.
+        print buff_ptr
     else:
         return []  # If buffer empty, return an empty array.
 
