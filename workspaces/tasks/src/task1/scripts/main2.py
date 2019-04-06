@@ -202,7 +202,6 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
                 rot_loop_rate.sleep()  # TODO: EMPIRICALLY SET
 
         ## /ELLIPSE LOCATING ROTATION ##
-        """
 
         ## HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
         try:
@@ -220,20 +219,29 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
                     goal_ell = MoveBaseGoal()
                     goal_ell.target_pose.header.frame_id = "map"
                     goal_ell.target_pose.header.stamp = rospy.Time.now()
-                    goal_ell.target_pose.pose.position.x = ellipse_data[3]
-                    goal_ell.target_pose.pose.position.y = ellipse.data[4]
-                    goal_ell.target_pose.pose.position.w = ellipse.data[5]
+                    goal_ell.target_pose.pose.position.x = ellipse_data[0]
+                    goal_ell.target_pose.pose.position.y = ellipse_data[1]
+                    goal_ell.target_pose.pose.position.w = ellipse_data[2]
                     goal_nxt_ell_status = GoalStatus.LOST
                     # Send ellipse resolution goal.
                     ac_ellipses.send_goal(goal_ell)
 
                     while not goal_nxt_ell_status == GoalStatus.SUCCEEDED:
-                        ac_ellipses.wait_for_result(rospy.Duration(1))
+                        ac_ellipses.wait_for_result(rospy.Duration(0.1))
                         goal_nxt_ell_status = ac_ellipses.get_state()
-                        if goal_nxt_ell_status == GoalStatus.ABORTED or goal_nxt_ell_status == GoalStatus.REJECTED:
+
+                        trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
+                        robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z])
+
+                        if (lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2)))(np.array([ellipse_data[0], ellipse_data[1], ellipse_data[2]]), robot_pos) < 0.8:
+                            soundhandle.say("Target number {0} resolved.".format(resolved_ell_ctr), voice, volume)
+                            rospy.loginfo("Target number {0} resolved".format(resolved_ell_ctr))
+                            resolved_ell = np.vstack((resolved_ell, np.array([ellipse_data[0], ellipse_data[1], ellipse_data[5]])))
+                            resolved_ell_ctr += 1
+                        elif goal_nxt_ell_status == GoalStatus.ABORTED or goal_nxt_ell_status == GoalStatus.REJECTED:
                             rospy.loginfo("Ellipse resolution goal aborted")
                             break
-                        if goal_nxt_ell_status == GoalStatus.SUCCEEDED:
+                        elif goal_nxt_ell_status == GoalStatus.SUCCEEDED:
                             soundhandle.say("Target number {0} resolved.".format(resolved_ell_ctr), voice, volume)
                             rospy.loginfo("Target number {0} resolved".format(resolved_ell_ctr))
                             resolved_ell = np.vstack((resolved_ell, np.array([ellipse_data[0], ellipse_data[1], ellipse_data[5]])))
@@ -242,7 +250,6 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
                     ellipse_data = ellipse_locator().target
         except rospy.ServiceException, e:
             rospy.loginfo("Ellipse locator service call failed: {0}".format(e))
-        """
 
         ## /HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
         # Remove checkpoint from checkpoints array
