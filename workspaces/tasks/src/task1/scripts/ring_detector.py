@@ -200,8 +200,8 @@ class The_Ring:
             # cv2.line(img_original, (int(center[0]), int(center[1])), (int(center[0]), int(center[1])), (0, 0, 255), 10)
 
             # Add a detected ring to the array
-            # x can be negative because of rotation during detection. Temporary fix
-            if (self.scan_ranges != None and center[0] >= 0.0):
+            # Check if detected center is out of bounds
+            if (self.scan_ranges != None and center[0] >= 0.0 and center[0] <= len(self.scan_ranges)):
                 x = int(round(center[0]))
                 agl = self.scan_angle_min + center[0] * self.scan_angle_increment
                 dpt = self.scan_ranges[x]
