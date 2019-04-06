@@ -32,6 +32,7 @@ tf2_buffer = None
 tf2_listener = None
 DIFF_THRESH = 0.5
 scan_flag = 0
+buff_ptr = 0
 
 ### /IMPORTS ###
 
@@ -110,7 +111,7 @@ def callback(data):
         for ell_idx in np.arange(len(data.dpt)):  # Go over all found ellipses.
 
             # Check for buffer overflow.
-            if buff_ptr >= BUFF_SIZE:
+            if buff2_ptr >= BUFF2_SIZE:
                 raise BufferError("Attempting to add object to full buffer")
             
             # Get transformation of point using robot position and map position when the image was taken.
@@ -132,7 +133,7 @@ def callback(data):
 
 
             
-            fixed_pos_nxt_transformed = checkpoint_approach_validator(pos_nxt_transformed.pose.position.x, pos_nxt_transformed.pose.position.y)
+            fixed_pos_nxt_transformed = approach_checkpoint_processor(pos_nxt_transformed.pose.position.x, pos_nxt_transformed.pose.position.y)
             if fixed_pos_nxt_transformed.valid:
                 pos_nxt_transformed.pose.position.x = fixed_pos_nxt_transformed.output_x
                 pos_nxt_transformed.pose.position.y = fixed_pos_nxt_transformed.output_y
@@ -164,7 +165,7 @@ def callback(data):
             # k -- tan of the angle of the line perpendicular to the face of the ellipse 
             # m -- y intercept of the line perpendicular to the face of the ellipse 
             
-            c = 0.8
+            c = 0.7
             # alternative: b = a*k + m
             #k = np.tan(data.perp_agl[ell_idx])
             #m = pos_nxt.pose.position.y - k*pos_nxt.pose.position.y 
@@ -173,7 +174,7 @@ def callback(data):
             # Necessary change in x to achieve position 1.0 units before the ellipse face.
             # NOTE: two solutions to quadratic equation.
             dx1 = -(c**2/np.sqrt(k**2 + 1))
-            dx2 = c**2/np.sqrt(k**2 + 1)
+            #dx2 = c**2/np.sqrt(k**2 + 1)
 
             # Get goal point in front of the face of the ellipse.
             pos_nxt_approach_pt = PoseStamped()
@@ -223,9 +224,8 @@ def req_handler(req):
 
     # Check if buffer not empty.
     if buff_ptr > 0:
-        return buff[buff_ptr-1, :]
         buff_ptr -= 1  # Decrement buffer pointer.
-        print buff_ptr
+        return buff[buff_ptr, :]
     else:
         return []  # If buffer empty, return an empty array.
 
@@ -255,7 +255,7 @@ def ellipse_locator_server():
 if __name__ == '__main__':
 
     # Initialize buffer.
-    BUFF_SIZE = 50
+    BUFF_SIZE = 500
     buff = np.ones((BUFF_SIZE, 6), dtype=float) * 1000
     buff_ptr = 0  # Initialize buffer pointer.
 
@@ -267,7 +267,7 @@ if __name__ == '__main__':
     rospy.init_node('ellipse_locator')
 
     try:
-        checkpoint_approach_validator = rospy.ServiceProxy('checkpoint_processor', CheckpointProcessor)
+        approach_checkpoint_processor = rospy.ServiceProxy('checkpoint_processor', CheckpointProcessor)
     except rospy.ServiceException, e:
         print "Service error: {0}".format(e.message)
 
