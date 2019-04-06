@@ -174,7 +174,7 @@ def callback(data):
             # Necessary change in x to achieve position 1.0 units before the ellipse face.
             # NOTE: two solutions to quadratic equation.
             dx1 = -(c**2/np.sqrt(k**2 + 1))
-            # dx2 = c**2/np.sqrt(k**2 + 1)
+            dx2 = c**2/np.sqrt(k**2 + 1)
 
             # Get goal point in front of the face of the ellipse.
             pos_nxt_approach_pt = PoseStamped()
