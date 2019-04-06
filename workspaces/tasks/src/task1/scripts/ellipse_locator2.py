@@ -59,7 +59,7 @@ def changePermission(data):
     tm = TargetMarker()
 
     if scan_flag == 0 and buff2_ptr > 1:
-        res = np.median(buff[:buff2_ptr], 0)
+        res = np.median(buff[:buff2_ptr, :], 0)
         buff[buff_ptr] = res
         buff_ptr += 1
         buff2_ptr = 0
