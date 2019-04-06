@@ -164,7 +164,7 @@ def callback(data):
             # k -- tan of the angle of the line perpendicular to the face of the ellipse 
             # m -- y intercept of the line perpendicular to the face of the ellipse 
             
-            c = 1.5
+            c = 0.8
             # alternative: b = a*k + m
             #k = np.tan(data.perp_agl[ell_idx])
             #m = pos_nxt.pose.position.y - k*pos_nxt.pose.position.y 
