@@ -210,7 +210,7 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
             # Query into ellipse buffer
             ellipse_data = ellipse_locator().target
             while(len(ellipse_data) > 0):  # If data in buffer...
-                if not np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([ellipse_data[0], ellipse_data[1], ellipse_data[5]]), resolved_ell) < DISTINCT_ELL_THRESH):
+                if not np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([ellipse_data[0], ellipse_data[1], ellipse_data[6]]), resolved_ell) < DISTINCT_ELL_THRESH):
 
                     ### DEBUGGING VISUALIZATION ###
                     #tm.push_position(np.array(ellipse_data[:3]))
@@ -223,12 +223,13 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
                     goal_ell.target_pose.header.stamp = rospy.Time.now()
                     goal_ell.target_pose.pose.position.x = ellipse_data[3]
                     goal_ell.target_pose.pose.position.y = ellipse_data[4]
-                    goal_ell.target_pose.pose.orientation.w = ellipse_data[5]
+                    goal_ell.target_pose.pose.orientation.x = ellipse_data[6]
+                    goal_ell.target_pose.pose.orientation.y = ellipse_data[7]
+                    goal_ell.target_pose.pose.orientation.z = ellipse_data[8]
+                    goal_ell.target_pose.pose.orientation.w = ellipse_data[9]
                     goal_nxt_ell_status = GoalStatus.LOST
                     # Send ellipse resolution goal.
                     ac_ellipses.send_goal(goal_ell)
-
-                    print goal_ell
 
                     while not goal_nxt_ell_status == GoalStatus.SUCCEEDED:
                         ac_ellipses.wait_for_result(rospy.Duration(0.5))
@@ -241,7 +242,7 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
                             print resolved_ell_ctr
                             soundhandle.say("Target number {0} resolved.".format(resolved_ell_ctr), voice, volume)
                             rospy.loginfo("Target number {0} resolved".format(resolved_ell_ctr))
-                            resolved_ell = np.vstack((resolved_ell, np.array([ellipse_data[0], ellipse_data[1], ellipse_data[5]])))
+                            resolved_ell = np.vstack((resolved_ell, np.array([ellipse_data[0], ellipse_data[1], ellipse_data[6]])))
                             resolved_ell_ctr += 1
                     # Get next element in service's buffer.
                     ellipse_data = ellipse_locator().target

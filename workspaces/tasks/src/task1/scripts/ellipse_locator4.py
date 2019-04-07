@@ -61,14 +61,14 @@ def changePermission(data):
  
     tm = TargetMarker()
 
-    if scan_flag == 0 and buff2_ptr > 7:
+    if scan_flag == 0 and buff2_ptr > 5:
         res = np.median(buff2[:buff2_ptr, :], 0)
         buff[buff_ptr] = res
         buff_ptr += 1
         buff2_ptr = 0
         ### DEBUGGING VISUALIZATION ###
         tm.push_position(res[:3])
-        tm.push_position(res[3:])
+        tm.push_position(res[3:6])
         ### /DEBUGGING VISUALIZATION ###
 
 
@@ -192,7 +192,8 @@ def callback(data):
             # of the ellipse face, perpendicular to it.
             res = np.empty(6, dtype=float)
             res[:3] = np.array([pos_nxt_transformed.pose.position.x, pos_nxt_transformed.pose.position.y, pos_nxt_transformed.pose.position.z])
-            res[3:] = np.array([pos_nxt_approach_transformed.pose.position.x, pos_nxt_approach_transformed.pose.position.y, pos_nxt_approach_transformed.pose.position.z])
+            res[3:6] = np.array([pos_nxt_approach_transformed.pose.position.x, pos_nxt_approach_transformed.pose.position.y, pos_nxt_approach_transformed.pose.position.z])
+            res[6:] = np.array([trans.transform.orientation.x, trans.transform.orientation.y, trans.transform.orientation.z, trans.transform.orientation.w])
         
 
             ### DEBUGGING VISUALIZATION ###
@@ -256,11 +257,11 @@ if __name__ == '__main__':
 
     # Initialize buffer.
     BUFF_SIZE = 500
-    buff = np.ones((BUFF_SIZE, 6), dtype=float) * 1000
+    buff = np.ones((BUFF_SIZE, 10), dtype=float) * 1000
     buff_ptr = 0  # Initialize buffer pointer.
 
     BUFF2_SIZE = 1000000
-    buff2 = np.ones((BUFF2_SIZE, 6), dtype=float) * 1000
+    buff2 = np.ones((BUFF2_SIZE, 10), dtype=float) * 1000
     buff2_ptr = 0
 
     # Initialize coordinate transform buffer and listener.
