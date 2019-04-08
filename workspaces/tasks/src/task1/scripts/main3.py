@@ -264,7 +264,7 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
 
         ## /HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
         # Remove checkpoint from checkpoints array
-        soundhandle.say("Checkpoint number {0} resolved.".format(resolved_ell_ctr), voice, volume)
+        soundhandle.say("Checkpoint number {0} resolved.".format(checkpoint_ctr), voice, volume)
         checkpoints = np.delete(checkpoints, (idx_nxt), axis=0)
 
         # Get robot position in map coordinates.
