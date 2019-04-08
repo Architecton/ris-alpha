@@ -208,44 +208,26 @@ class The_Ring:
                 agl = self.scan_angle_min + center[0] * self.scan_angle_increment
                 dpt = self.scan_ranges[x] if (x >= 0.0 and x < len(self.scan_ranges)) else np.nan
                 if not(np.isnan(dpt)):
-                    # TEST >>>
-                    # Check for any discontinuity in depth
-                    disc_ctr_l = 0
-                    for d in self.scan_ranges[max(x-5, 0):x]:
-                        abs_val = np.abs(d-dpt)
-                        if abs_val > 0.5 or np.isnan(abs_val):
-                            disc_ctr_l+=1
-                    
-                    disc_ctr_u = 0
-                    for d in self.scan_ranges[min(x+1, len(self.scan_ranges)):min(x+6, len(self.scan_ranges))]:
-                        abs_val = np.abs(d-dpt)
-                        if abs_val > 0.5 or np.isnan(abs_val):
-                            disc_ctr_u+=1
 
-                    if disc_ctr_l < 3 and disc_ctr_u < 3:
+                    # Calculate angle that is perpendicular to the detected ellipse face
+                    min_bnd = max(x-10, 0)
+                    max_bnd = min(x+10, len(self.scan_ranges))
+                    dpts_arg = np.array(self.scan_ranges[min_bnd:max_bnd])
+                    agls_arg = np.linspace(
+                        max(self.scan_angle_min + min_bnd * self.scan_angle_increment, self.scan_angle_min),
+                        min(self.scan_angle_min + max_bnd * self.scan_angle_increment, self.scan_angle_max),
+                        max_bnd-min_bnd,
+                        endpoint=False)
+                    filt = np.isnan(dpts_arg)
+                    perp_agl, perp_y_itrcpt = self.get_ell_face_agl(dpts_arg[~filt], agls_arg[~filt])
 
-                        # >>> Zamaknjeno za en tab v desno
-                        # Calculate angle that is perpendicular to the detected ellipse face
-                        min_bnd = max(x-10, 0)
-                        max_bnd = min(x+10, len(self.scan_ranges))
-                        dpts_arg = np.array(self.scan_ranges[min_bnd:max_bnd])
-                        agls_arg = np.linspace(
-                            max(self.scan_angle_min + min_bnd * self.scan_angle_increment, self.scan_angle_min),
-                            min(self.scan_angle_min + max_bnd * self.scan_angle_increment, self.scan_angle_max),
-                            max_bnd-min_bnd,
-                            endpoint=False)
-                        filt = np.isnan(dpts_arg)
-                        perp_agl, perp_y_itrcpt = self.get_ell_face_agl(dpts_arg[~filt], agls_arg[~filt])
-
-                        # Set values
-                        ed.dpt.append(dpt)
-                        ed.agl.append(agl)
-                        ed.timestamp.append(timestamp)
-                        ed.perp_agl.append(perp_agl)
-                        ed.perp_y_itrcpt.append(perp_y_itrcpt)
-                        ed.found = 1
-                        # <<< Zamaknjeno za en tab v desno
-                    # <<< TEST    
+                    # Set values
+                    ed.dpt.append(dpt)
+                    ed.agl.append(agl)
+                    ed.timestamp.append(timestamp)
+                    ed.perp_agl.append(perp_agl)
+                    ed.perp_y_itrcpt.append(perp_y_itrcpt)
+                    ed.found = 1
   
         if (ed.found == 1):
             self.rings_pub.publish(ed)
