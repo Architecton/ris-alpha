@@ -102,7 +102,8 @@ DISTINCT_AGL_THRESH = 0.5
 # First two fields store the coordinates of the ellipse center. The third field stores the perpendicular angle.
 resolved_ell = np.empty((0, 6), dtype=float)
 resolved_ell_ctr = 0  # Initialize resolved ellipses counter.
-NUM_ELLIPSES_TO_FIND = 8
+NUM_ELLIPSES_TO_FIND = 3
+end_search = False  # Flag to indicate end of search.
 
 # Number of checkpoints to generate.
 NUM_CHECKPOINTS = 8
@@ -246,12 +247,21 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
                             rospy.sleep(2.0)
                             resolved_ell = np.vstack((resolved_ell, np.array([ellipse_data[0], ellipse_data[1], ellipse_data[3], ellipse_data[4], ellipse_data[5], ellipse_data[6]])))
                             resolved_ell_ctr += 1
+                            # If all ellipses found, break loop.
+                            if resolved_ell_ctr >= NUM_ELLIPSES_TO_FIND:
+                                end_search = True
+                                break
                     # Get next element in service's buffer.
                     ellipse_data = ellipse_locator().target
                 else:
                     ellipse_data = ellipse_locator().target
         except rospy.ServiceException, e:
             rospy.loginfo("Ellipse locator service call failed: {0}".format(e))
+
+        # If all ellipses found, end.
+        if end_search:
+            break
+
         ## /HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
         # Remove checkpoint from checkpoints array
         soundhandle.say("Checkpoint number {0} resolved.".format(resolved_ell_ctr), voice, volume)
