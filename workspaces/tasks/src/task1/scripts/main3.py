@@ -102,11 +102,11 @@ DISTINCT_AGL_THRESH = 0.5
 # First two fields store the coordinates of the ellipse center. The third field stores the perpendicular angle.
 resolved_ell = np.empty((0, 6), dtype=float)
 resolved_ell_ctr = 0  # Initialize resolved ellipses counter.
-NUM_ELLIPSES_TO_FIND = 3
+NUM_ELLIPSES_TO_FIND = 10
 end_search = False  # Flag to indicate end of search.
 
 # Number of checkpoints to generate.
-NUM_CHECKPOINTS = 8
+NUM_CHECKPOINTS = 10
 
 soundhandle.say("Starting search.", voice, volume)
 
