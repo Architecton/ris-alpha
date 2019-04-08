@@ -211,8 +211,8 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
             # Query into ellipse buffer
             ellipse_data = ellipse_locator().target
             while(len(ellipse_data) > 0):  # If data in buffer...
-                if not np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([ellipse_data[0], ellipse_data[1]), resolved_ell[:, :2]) < DISTINCT_ELL_THRESH) and\
-                        not np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([ellipse_data[3], ellipse_data[4], ellipse_data[5], ellipse_data[6]), resolved_ell[:, 3:) <\ DISTINCT_AGL_THRESH):
+                if not np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([ellipse_data[0], ellipse_data[1]]), resolved_ell[:, :2]) < DISTINCT_ELL_THRESH) and\
+                        not np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([ellipse_data[3], ellipse_data[4], ellipse_data[5], ellipse_data[6]]), resolved_ell[:, 3:]) <\ DISTINCT_AGL_THRESH):
 
                     ### DEBUGGING VISUALIZATION ###
                     #tm.push_position(np.array(ellipse_data[:3]))
