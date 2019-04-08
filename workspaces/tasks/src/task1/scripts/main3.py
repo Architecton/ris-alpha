@@ -96,10 +96,11 @@ tf2_listener = tf2_ros.TransformListener(tf2_buffer)
 # Set distance threshold to consider ellipse as unresolved.
 # TODO: empirically determine best threshold.
 DISTINCT_ELL_THRESH = 0.7
+DISTINCT_AGL_THRESH = 0.5
 
 # Initialize found ellipses storage.
 # First two fields store the coordinates of the ellipse center. The third field stores the perpendicular angle.
-resolved_ell = np.empty((0, 3), dtype=float)
+resolved_ell = np.empty((0, 6), dtype=float)
 resolved_ell_ctr = 0  # Initialize resolved ellipses counter.
 NUM_ELLIPSES_TO_FIND = 8
 
@@ -210,7 +211,8 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
             # Query into ellipse buffer
             ellipse_data = ellipse_locator().target
             while(len(ellipse_data) > 0):  # If data in buffer...
-                if not np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([ellipse_data[0], ellipse_data[1], ellipse_data[6]]), resolved_ell) < DISTINCT_ELL_THRESH):
+                if not np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([ellipse_data[0], ellipse_data[1]), resolved_ell[:, :2]) < DISTINCT_ELL_THRESH) and\
+                        not np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([ellipse_data[3], ellipse_data[4], ellipse_data[5], ellipse_data[6]), resolved_ell[:, 3:) <\ DISTINCT_AGL_THRESH):
 
                     ### DEBUGGING VISUALIZATION ###
                     #tm.push_position(np.array(ellipse_data[:3]))
@@ -243,7 +245,7 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
                             soundhandle.say("Target number {0} resolved.".format(resolved_ell_ctr), voice, volume)
                             rospy.loginfo("Target number {0} resolved".format(resolved_ell_ctr))
                             rospy.sleep(2.0)
-                            resolved_ell = np.vstack((resolved_ell, np.array([ellipse_data[0], ellipse_data[1], ellipse_data[6]])))
+                            resolved_ell = np.vstack((resolved_ell, np.array([ellipse_data[0], ellipse_data[1], ellipse_data[3], ellipse_data[4], ellipse_data[5], ellipse_data[6]])))
                             resolved_ell_ctr += 1
                     # Get next element in service's buffer.
                     ellipse_data = ellipse_locator().target
