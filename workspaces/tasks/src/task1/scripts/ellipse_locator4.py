@@ -190,7 +190,7 @@ def callback(data):
             # Save resuls in buffer.
             # First three elements correspond to the coordinates of the face of the ellipse and the last three correspond to the target spot in front
             # of the ellipse face, perpendicular to it.
-            res = np.empty(6, dtype=float)
+            res = np.empty(10, dtype=float)
             res[:3] = np.array([pos_nxt_transformed.pose.position.x, pos_nxt_transformed.pose.position.y, pos_nxt_transformed.pose.position.z])
             res[3:6] = np.array([pos_nxt_approach_transformed.pose.position.x, pos_nxt_approach_transformed.pose.position.y, pos_nxt_approach_transformed.pose.position.z])
             res[6:] = np.array([trans.transform.rotation.x, trans.transform.rotation.y, trans.transform.rotation.z, trans.transform.rotation.w])
