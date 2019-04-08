@@ -178,11 +178,11 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
 
         ## ELLIPSE LOCATING ROTATION ##
 
-        soundhandle.say("Starting rotation sequence.", voice, volume)
+        soundhandle.say("Initiating rotation sequence.", voice, volume)
         for rot_idx in np.arange(NUM_ROTATIONS):
 
             # Safety sleep.
-            rospy.sleep(1.0)
+            rospy.sleep(0.5)
 
             ## IMAGE PROCESSING STREAM SCAN START ###
             sf.flag = 1
@@ -195,7 +195,7 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
             ## IMAGE PROCESSING STREAM SCAN END ###
 
             # Safety sleep.
-            rospy.sleep(1.0)
+            rospy.sleep(0.5)
 
             # ROTATE
             start_rot_time = time.time()
