@@ -95,7 +95,7 @@ tf2_listener = tf2_ros.TransformListener(tf2_buffer)
 
 # Set distance threshold to consider ellipse as unresolved.
 # TODO: empirically determine best threshold.
-DISTINCT_ELL_THRESH = 1.5
+DISTINCT_ELL_THRESH = 0.7
 
 # Initialize found ellipses storage.
 # First two fields store the coordinates of the ellipse center. The third field stores the perpendicular angle.
@@ -242,7 +242,7 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
                             print resolved_ell_ctr
                             soundhandle.say("Target number {0} resolved.".format(resolved_ell_ctr), voice, volume)
                             rospy.loginfo("Target number {0} resolved".format(resolved_ell_ctr))
-                            rospy.sleep(1.0)
+                            rospy.sleep(2.0)
                             resolved_ell = np.vstack((resolved_ell, np.array([ellipse_data[0], ellipse_data[1], ellipse_data[6]])))
                             resolved_ell_ctr += 1
                     # Get next element in service's buffer.
