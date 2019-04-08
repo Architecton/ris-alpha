@@ -34,6 +34,8 @@ DIFF_THRESH = 0.5
 scan_flag = 0
 buff_ptr = 0
 
+tm = TargetMarker()
+
 ### /IMPORTS ###
 
 def changePermission(data):
@@ -55,11 +57,10 @@ def changePermission(data):
     global buff2
     global BUFF2_SIZE
     global buff2_ptr
+    global tm
 
 
     scan_flag = data.flag
- 
-    tm = TargetMarker()
 
     if scan_flag == 0 and buff2_ptr > 5:
         res = np.median(buff2[:buff2_ptr, :], 0)
