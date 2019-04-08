@@ -242,6 +242,7 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
                             print resolved_ell_ctr
                             soundhandle.say("Target number {0} resolved.".format(resolved_ell_ctr), voice, volume)
                             rospy.loginfo("Target number {0} resolved".format(resolved_ell_ctr))
+                            rospy.sleep(1.0)
                             resolved_ell = np.vstack((resolved_ell, np.array([ellipse_data[0], ellipse_data[1], ellipse_data[6]])))
                             resolved_ell_ctr += 1
                     # Get next element in service's buffer.
