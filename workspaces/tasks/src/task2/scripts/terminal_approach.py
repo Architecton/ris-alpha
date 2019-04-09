@@ -33,9 +33,9 @@ class TerminalApproachHandler:
         x_offset = (data.target_center_x - data.center_x) - window_size if data.target_center_x > data.center_x else (data.target_center_x - data.center_x) + window_size
         
         # Set angular velocity as a function of the offset (larger offset, larger linear velocity).
-        self.mov.angular.z = x_offset*self.callib_coeff_agl**2
+        self.mov.angular.z = (x_offset*self.callib_coeff_agl)**2
         # Set linear velocity as a function of the offset (larger offset, smaller linear velocity).
-        self.mov.linear.x = (1/np.abs(x_offset))*self.callib_coeff_lin**2
+        self.mov.linear.x = ((1/np.abs(x_offset))*self.callib_coeff_lin)**2
 
         # publish velocity message.
         self.vel_pub.publish(mov)
@@ -60,8 +60,8 @@ class TerminalApproachHandler:
 if __name__ == '__main__':
 
     # Define velocity callibration coefficients.
-    CALLIB_COEFF_AGL = 0.001
-    CALLIB_COEFF_LIN = 0.001
+    CALLIB_COEFF_AGL = 0.03
+    CALLIB_COEFF_LIN = 1.5
 
     # Start service.
     ta = TerminalApproachHandler(CALLIB_COEFF_AGL, CALLIB_COEFF_LIN)

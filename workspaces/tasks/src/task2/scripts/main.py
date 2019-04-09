@@ -16,6 +16,4 @@ from task2.msg import ApproachImageFeedback
 
 # Request corrections
 
-
-
 ### /TERMINAL APPROACH ###
