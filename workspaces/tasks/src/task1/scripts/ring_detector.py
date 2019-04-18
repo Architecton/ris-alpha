@@ -16,6 +16,8 @@ NOTES:
 
 """
 
+# message_synchronizers.ApproximateTimeSychronizer za sinhronizacijo slike in senzorja 
+
 class The_Ring:
     def __init__(self):
         rospy.init_node('image_converter', anonymous=True)
