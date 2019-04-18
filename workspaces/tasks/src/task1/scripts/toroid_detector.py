@@ -18,11 +18,13 @@ class Toroid:
     def depth_callback(self, data):
 
     	try:
-            depth_img = self.bridge.imgmsg_to_cv2(data, "mono8")
+            depth_img = self.bridge.imgmsg_to_cv2(data)
         except CvBridgeError as e:
             print(e)
 
-
+        with open("depth_mat.txt", "w+") as f:
+            f.write(depth_img)
+        
         cv2.imshow('output', depth_img)
         cv2.waitKey(1)
         return
