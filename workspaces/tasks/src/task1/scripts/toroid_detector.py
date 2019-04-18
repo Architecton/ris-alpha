@@ -22,8 +22,7 @@ class Toroid:
         except CvBridgeError as e:
             print(e)
 
-        with open("depth_mat.txt", "w+") as f:
-            f.write(depth_img)
+        np.savetxt("ime_fajla.txt", depth_img, fmt="%d")
         
         cv2.imshow('output', depth_img)
         cv2.waitKey(1)
