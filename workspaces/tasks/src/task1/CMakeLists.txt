@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
 	nav_msgs
 	std_msgs
 	geometry_msgs
+	sensor_msgs
 	tf2
 	tf2_geometry_msgs
 	message_generation
@@ -85,6 +86,7 @@ generate_messages(
    DEPENDENCIES
    std_msgs  # Or other packages containing msgs
    geometry_msgs
+   sensor_msgs
 )
 
 catkin_package(
