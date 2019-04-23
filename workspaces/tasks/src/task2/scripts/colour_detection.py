@@ -105,10 +105,17 @@ class ColourFeatureGenerator:
         return colour_features_mat, target  # Return matrix of feature vectors and target values
 
     def clear(self):
+        """
+        Clear image index counter and image and target data dictionaries
+
+        Args:
+            -
+        Returns:
+            -
+        """
         self._img_counter = 0
         self._img_dict.clear()
         self._target_dict.clear()
-        pass
         
 
 class RingImageProcessor:
