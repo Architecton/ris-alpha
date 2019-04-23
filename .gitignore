@@ -105,3 +105,7 @@ venv.bak/
 
 # vim swap files
 *.swp
+
+# folders of training and test images
+train_img/
+test_img/
