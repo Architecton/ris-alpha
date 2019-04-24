@@ -1,10 +1,11 @@
+#!/usr/bin/env python
+
 import numpy as np
 import rospy
 from colour_detection import ColourFeatureGenerator, ColourClassifier
+from task2.msg import RingData
 
 from joblib import dump, load
-
-import pdb
 
 class ColourDetectionTrainer:
     def __init__(self, num_bins):
@@ -12,7 +13,7 @@ class ColourDetectionTrainer:
         self._target = -1  # Initialize target value.
         self._feature_gen = ColourFeatureGenerator(self._num_bins)  # Initialize feature generator instance.
         self.colour_dict = {0 : "red", 1 : "green", 2 : "blue", 3 : "black"}  # Initialize colour dictionary.
-        self._learner = ColourClassifier(colour_dict=self.colour_dict)  # Initialize learner.
+        self._learner = ColourClassifier(self.colour_dict)  # Initialize learner.
         self._features_mat = np.empty((0, self._num_bins*3), dtype=np.int)  # Initialize matrix of features.
         self._target_vec = np.empty(0, dtype=np.int)  # Initialize target vector.
 
@@ -68,18 +69,18 @@ if __name__ == '__main__':
 
     # Initialize trainer
     trainer = ColourDetectionTrainer(num_bins=256)    
+    
     # Go over ring colours.
     for colour in trainer.colour_dict.keys():
     
         # Countdown to start of training data recording.
         countdown_val = 15
         print("Starting recording of {0} ring training data in:".format(trainer.colour_dict[colour]))
-        while countdown_val >= 1:
+        while(countdown_val >= 1):
             print("{0}".format(countdown_val))
             countdown_val -= 1
             rospy.sleep(1)
 
-        pdb.set_trace() 
         # Set target value, subscribe to topic and initialize recording timeout.
         print("Recording of {0} ring training data started for 60 seconds.".format(trainer.colour_dict[colour]))
         trainer.set_target(colour)
@@ -87,7 +88,7 @@ if __name__ == '__main__':
         recording_timeout = 60
 
         # Record training data for specified duration.
-        while recording_timeout >= 1:
+        while(recording_timeout >= 1):
             print("{0}".format(recording_timeout))
             recording_timeout -= 1
             rospy.sleep(1)

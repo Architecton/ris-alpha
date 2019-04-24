@@ -55,6 +55,7 @@ find_package( OpenCV REQUIRED )
    FILES
    ApproachImageFeedback.msg
    TerminalApproachFeedback.msg
+   RingData.msg
  )
 
 ## Generate services in the 'srv' folder

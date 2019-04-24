@@ -96,7 +96,7 @@ namespace message_traits
 
 
 // BOOLTRAITS {'IsFixedSize': False, 'IsMessage': True, 'HasHeader': False}
-// {'sensor_msgs': ['/opt/ros/kinetic/share/sensor_msgs/cmake/../msg'], 'task1': ['/home/miha/Desktop/ris-alpha/workspaces/tasks/src/task1/msg'], 'std_msgs': ['/opt/ros/kinetic/share/std_msgs/cmake/../msg'], 'geometry_msgs': ['/opt/ros/kinetic/share/geometry_msgs/cmake/../msg']}
+// {'sensor_msgs': ['/opt/ros/melodic/share/sensor_msgs/cmake/../msg'], 'task1': ['/home/jernej/Desktop/Repositories/classes/third-year/intelligent-systems-development/ris-alpha/workspaces/tasks/src/task1/msg'], 'std_msgs': ['/opt/ros/melodic/share/std_msgs/cmake/../msg'], 'geometry_msgs': ['/opt/ros/melodic/share/geometry_msgs/cmake/../msg']}
 
 // !!!!!!!!!!! ['__class__', '__delattr__', '__dict__', '__doc__', '__eq__', '__format__', '__getattribute__', '__hash__', '__init__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_parsed_fields', 'constants', 'fields', 'full_name', 'has_header', 'header_present', 'names', 'package', 'parsed_fields', 'short_name', 'text', 'types']
 
@@ -163,25 +163,25 @@ struct Definition< ::task1::EllipseData_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "#Found flag that takes on values 1 or 0 (ellipse detected or not)\n\
-uint8 found\n\
-\n\
-#Depth value at pixel representing the centre of the found ellipse\n\
-#Contains garbage if found flag value equal to 0\n\
-float64[] dpt\n\
-\n\
-#angle_min + index_center*angle_increment\n\
-float64[] agl\n\
-\n\
-#result of rospy.Time.now().to_time() when image taken\n\
-float64[] timestamp\n\
-\n\
-#angle of line perpendicular to the face of the ellipse\n\
-float64[] perp_agl\n\
-\n\
-#y intercept of the line perpendicular to the face of the ellips\n\
-float64[] perp_y_itrcpt\n\
-";
+    return "#Found flag that takes on values 1 or 0 (ellipse detected or not)\n"
+"uint8 found\n"
+"\n"
+"#Depth value at pixel representing the centre of the found ellipse\n"
+"#Contains garbage if found flag value equal to 0\n"
+"float64[] dpt\n"
+"\n"
+"#angle_min + index_center*angle_increment\n"
+"float64[] agl\n"
+"\n"
+"#result of rospy.Time.now().to_time() when image taken\n"
+"float64[] timestamp\n"
+"\n"
+"#angle of line perpendicular to the face of the ellipse\n"
+"float64[] perp_agl\n"
+"\n"
+"#y intercept of the line perpendicular to the face of the ellips\n"
+"float64[] perp_y_itrcpt\n"
+;
   }
 
   static const char* value(const ::task1::EllipseData_<ContainerAllocator>&) { return value(); }

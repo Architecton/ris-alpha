@@ -1,10 +1,12 @@
 
 "use strict";
 
-let ApproachImageFeedback = require('./ApproachImageFeedback.js');
 let TerminalApproachFeedback = require('./TerminalApproachFeedback.js');
+let ApproachImageFeedback = require('./ApproachImageFeedback.js');
+let RingData = require('./RingData.js');
 
 module.exports = {
-  ApproachImageFeedback: ApproachImageFeedback,
   TerminalApproachFeedback: TerminalApproachFeedback,
+  ApproachImageFeedback: ApproachImageFeedback,
+  RingData: RingData,
 };
