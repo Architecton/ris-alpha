@@ -8,6 +8,10 @@ from task2.srv import TerminalApproach
 
 class TerminalApproachHandler:
 
+    """
+    Class representing a service that guides the robot on the terminal approach to the ring.
+    """
+
     # Constructor.
     def __init__(self, callib_coeff_agl, callib_coeff_lin):
         self.callib_coeff_ang = callib_coeff_agl  # Set velocity callibration coefficients.
