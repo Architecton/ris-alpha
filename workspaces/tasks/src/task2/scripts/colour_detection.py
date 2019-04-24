@@ -120,6 +120,11 @@ class ColourFeatureGenerator:
 
 class RingImageProcessor:
 
+    """
+    Class used to detect colors of rings from stream of data containing the bgr image of the
+    ring, the indices of the center of the ring and its radius.
+    """
+
     # Constructor
     def __init__(self, clf, num_bins):
         self._clf = clf  # learned classifier
@@ -189,6 +194,7 @@ class RingImageProcessor:
         (vals, ct) = np.unique(predictions, return_counts=True)
         return vals[np.argmax(ct)]
 
+"""
 if __name__ == '__main__':
 
     gen = ColourFeatureGenerator(num_bins=256)
@@ -222,3 +228,4 @@ if __name__ == '__main__':
 
     # Get prediction.
     pred = clf.predict(example)
+"""
