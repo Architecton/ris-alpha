@@ -1,10 +1,10 @@
 
 "use strict";
 
-let ValidRegionsMap = require('./ValidRegionsMap.js')
 let TerminalApproach = require('./TerminalApproach.js')
+let ValidRegionsMap = require('./ValidRegionsMap.js')
 
 module.exports = {
-  ValidRegionsMap: ValidRegionsMap,
   TerminalApproach: TerminalApproach,
+  ValidRegionsMap: ValidRegionsMap,
 };

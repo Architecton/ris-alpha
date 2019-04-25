@@ -7,6 +7,8 @@
    "CHECKPOINTS"
    "<ELLIPSEDATA>"
    "ELLIPSEDATA"
+   "<RINGDATA>"
+   "RINGDATA"
    "<SCANFLAG>"
    "SCANFLAG"
   ))

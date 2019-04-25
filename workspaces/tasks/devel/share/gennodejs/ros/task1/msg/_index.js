@@ -1,14 +1,16 @@
 
 "use strict";
 
-let ScanFlag = require('./ScanFlag.js');
+let CheckpointProcessorResponse = require('./CheckpointProcessorResponse.js');
+let RingData = require('./RingData.js');
 let Checkpoints = require('./Checkpoints.js');
 let EllipseData = require('./EllipseData.js');
-let CheckpointProcessorResponse = require('./CheckpointProcessorResponse.js');
+let ScanFlag = require('./ScanFlag.js');
 
 module.exports = {
-  ScanFlag: ScanFlag,
+  CheckpointProcessorResponse: CheckpointProcessorResponse,
+  RingData: RingData,
   Checkpoints: Checkpoints,
   EllipseData: EllipseData,
-  CheckpointProcessorResponse: CheckpointProcessorResponse,
+  ScanFlag: ScanFlag,
 };
