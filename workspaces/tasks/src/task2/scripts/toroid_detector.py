@@ -3,6 +3,11 @@
 import rospy
 import cv2
 import numpy as np
+
+import pdb
+
+from cv2 import convertScaleAbs
+
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 #from task2.msg import RingData
@@ -18,13 +23,12 @@ class Toroid:
         self.depth_sub = rospy.Subscriber("camera/depth/image_raw", Image, self.depth_callback)
 
         # Subscribe to the RGB image topic
-        self.image_sub = rospy.Subscriber("/camera/rgb/image_raw", Image, self.image_callback)
+        #self.image_sub = rospy.Subscriber("/camera/rgb/image_raw", Image, self.image_callback)
 
         # Add toroid publisher
-        self.toroid_pub = rospy.Publisher('toroids', RingData, queue_size=1000)
-
+        #self.toroid_pub = rospy.Publisher('toroids', RingData, queue_size=1000)
+        self.toroid_pub = rospy.Publisher('toroids', ApproachImageFeedback, queue_size=1000) 
         # Max depth of scanning the depth in meters
-        self.MAX_DPT = 2000.0
 
         # TODO: Initialize search boundaries for the ellipses and their centres
         self.upp_bnd_elps = 0 # ELLIPSE BOUNDARY: Offset from the top of the image
@@ -32,54 +36,81 @@ class Toroid:
         self.upp_bnd_ctr = 0 # CENTRE BOUNDARY: Offset from the the upp_bnd_elps
         self.low_bnd_ctr = 480 # CENTRE BOUNDARY: Offset from the the upp_bnd_elps
 
+        self.SCALING_VALUE = 10000.0
+        self.MAX_DPT = 2000.0 * 255.0/self.SCALING_VALUE
+        self.MIN_DPT = 1000.0 * 255.0/self.SCALING_VALUE
         # self.bgr_img
 
 
     # def image_callback(self, data):
 #
- #   	try:
+ #      try:
   #          self.bgr_img = self.bridge.imgmsg_to_cv2(data)
    #     except CvBridgeError as e:
     #        print(e)
 
     def depth_callback(self, data):
 
-    	try:
-            depth_img = self.bridge.imgmsg_to_cv2(data)
+        try:
+            depth_img_original = self.bridge.imgmsg_to_cv2(data)
         except CvBridgeError as e:
             print(e)
 
+        depth_img = depth_img_original
+
         # Set all depths greater than MAX_DPT to 0
-		depth_img[depth_img > self.MAX_DPT] = 0.0
+        # depth_img[np.logical_or(depth_img > self.MAX_DPT, depth_img < self.MIN_DPT)] = 0.0
+
+        import matplotlib.pyplot as plt
+
+        """
+        plt.figure()
+        plt.imshow(depth_img, cmap="gray")
+        #imshow('title', depth_img)
+        plt.show()
+        """
+
 
         # Apply the bilateral filter to remove noise and preserve edges
-        depth_img = cv2.bilateralFilter(
+        """depth_img = cv2.bilateralFilter(
             depth_img,
             sigmaColor=30,
             d=5,
             sigmaSpace=30
-        )
+        )"""
 
         # Setting thresholds using the global otsu
         upper, _ = cv2.threshold(depth_img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         lower = 0.5 * upper
+
+        kernel = np.ones((4,4),np.float32)/25
+        depth_img = cv2.filter2D(depth_img, -1, kernel)
 
         # Find edges with canny
         edges = cv2.Canny(
             depth_img, 
             threshold1=lower, 
             threshold2=upper,
-            L2gradient=True
+            L2gradient=True,
         )
 
+
+
         # Extract contours
-        depth_img2, contours, hierarchy = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        depth_img2, contours, _ = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+        
+        #plt.figure()
+        #plt.imshow(edges, cmap="gray")
+        #plt.imshow(depth_img2, cmap="gray")
+        #plt.show()
+        
 
         # Fit elipses to all extracted contours
         elps = []
         for cnt in contours:
             # Threshold for size of ellipses (number of pixels in contour)
-            if cnt.shape[0] >= 50:
+            if cnt.shape[0] >= 100:
                 # Checking whether the ellipse centre is within the search boundaries
                 x,y,w,h = cv2.boundingRect(cnt)
 
@@ -142,7 +173,7 @@ class Toroid:
             found = 1
   
         if (found == 1):
-            self.toroid_pub.publish(ed)
+            self.toroid_pub.publish(rd)
 
         # DEVONLY: Visualize camera output
         cv2.imshow('Live feed', depth_img)

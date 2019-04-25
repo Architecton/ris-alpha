@@ -10,4 +10,6 @@
     (:file "_package_RingData" :depends-on ("_package"))
     (:file "TerminalApproachFeedback" :depends-on ("_package_TerminalApproachFeedback"))
     (:file "_package_TerminalApproachFeedback" :depends-on ("_package"))
+    (:file "ValidRegionsMapResponse" :depends-on ("_package_ValidRegionsMapResponse"))
+    (:file "_package_ValidRegionsMapResponse" :depends-on ("_package"))
   ))
