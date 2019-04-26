@@ -3,9 +3,13 @@
 import numpy as np
 import rospy
 from colour_detection import ColourFeatureGenerator, ColourClassifier
-from task2.msg import RingData
+from task2.msg import ApproachImageFeedback
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge, CvBridgeError
 
 import os
+
+import pdb
 
 from joblib import dump, load
 
@@ -26,6 +30,9 @@ class ColourDetectionTrainer:
         self._IMAGE_HEIGHT = 480
         self._IMAGE_WIDTH = 640
 
+        self._ring_image = None
+        self._cv_bridge = CvBridge()
+
         # initialize node
         rospy.init_node('colour_detection_trainer', anonymous=True)
 
@@ -41,7 +48,8 @@ class ColourDetectionTrainer:
         """
         self._target = target
 
-    def _callback(self, data):
+
+    def _depth_callback(self, data):
 
         """
         Callback called when broadcast on topic received.
@@ -55,16 +63,40 @@ class ColourDetectionTrainer:
 
         center_y = data.center_y  # Get y coordinate of center of ring.
         center_x = data.center_x  # Get x coordinate of center of ring.
-        rad = data.rad  # Get radius of ring.
-        im = np.reshape(data.img, [self._IMAGE_HEIGHT, self._IMAGE_WIDTH, 3])  # Get bgr image.
+        min_axis = data.minor_axis  # Get minor axis of ellipse.
+        maj_axis = data.major_axis  # Get major axis of ellipse.
 
         # Compute coordiantes of the top left corner and bottom right corners of the
         # cropped square.
-        l_u = np.array([center_y - rad, center_x - rad])
-        r_d = np.array([center_y + rad, center_x + rad])
+        l_u = np.array([center_y - maj_axis, center_x - maj_axis])
+        r_d = np.array([center_y + maj_axis, center_x + maj_axis])
+
+        if self._ring_image:
+            # Add image and class to feature generator instance
+            self._feature_gen.add_image(self._ring_image, self._target, l_u, r_d)
+
+
+    def _img_callback(self, data):
+
+        """
+        Callback called when broadcast on topic received.
+
+        Args:
+            data -- data from rgb camera
+
+        Returns:
+            None
+        """
+
+        # Convert to bgr image
+        try:
+            received_image = self._cv_bridge.imgmsg_to_cv2(data)
+        except CvBridgeError as e:
+            print(e)
 
         # Add image and class to feature generator instance
-        self._feature_gen.add_image(im, self._target, l_u, r_d)
+        self._ring_image = received_image
+
 
     def get_data(self):
         """
@@ -97,11 +129,13 @@ class ColourDetectionTrainer:
 
     def subscribe(self):
         # subscribe to topic
-        self._subscriber = rospy.Subscriber('ring_data', RingData, self._callback)
+        self._subscriber = rospy.Subscriber('toroids', ApproachImageFeedback, self._depth_callback)
+        self._img_subscriber = rospy.Subscriber('/camera/rgb/image_raw', Image, self._img_callback)
 
     def unsubscribe(self):
         # unscubscribe from topic
-        self._subscriber.unregister()
+    self._depth_subscriber.unregister()
+    self._img_subscriber.unregister()
 
 
 if __name__ == '__main__':
