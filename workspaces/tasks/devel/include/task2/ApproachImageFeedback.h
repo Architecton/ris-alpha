@@ -24,22 +24,37 @@ struct ApproachImageFeedback_
   typedef ApproachImageFeedback_<ContainerAllocator> Type;
 
   ApproachImageFeedback_()
-    : center_x(0)
-    , center_y(0)  {
+    : timestamp()
+    , center_x(0)
+    , center_y(0)
+    , minor_axis(0)
+    , major_axis(0)  {
     }
   ApproachImageFeedback_(const ContainerAllocator& _alloc)
-    : center_x(0)
-    , center_y(0)  {
+    : timestamp()
+    , center_x(0)
+    , center_y(0)
+    , minor_axis(0)
+    , major_axis(0)  {
   (void)_alloc;
     }
 
 
+
+   typedef ros::Time _timestamp_type;
+  _timestamp_type timestamp;
 
    typedef int32_t _center_x_type;
   _center_x_type center_x;
 
    typedef int32_t _center_y_type;
   _center_y_type center_y;
+
+   typedef int32_t _minor_axis_type;
+  _minor_axis_type minor_axis;
+
+   typedef int32_t _major_axis_type;
+  _major_axis_type major_axis;
 
 
 
@@ -76,7 +91,7 @@ namespace message_traits
 
 
 // BOOLTRAITS {'IsFixedSize': True, 'IsMessage': True, 'HasHeader': False}
-// {'geometry_msgs': ['/opt/ros/kinetic/share/geometry_msgs/cmake/../msg'], 'task2': ['/home/dkalsan/ris-alpha/workspaces/tasks/src/task2/msg'], 'std_msgs': ['/opt/ros/kinetic/share/std_msgs/cmake/../msg']}
+// {'geometry_msgs': ['/opt/ros/kinetic/share/geometry_msgs/cmake/../msg'], 'task2': ['/home/jernej/ris-alpha/workspaces/tasks/src/task2/msg'], 'std_msgs': ['/opt/ros/kinetic/share/std_msgs/cmake/../msg']}
 
 // !!!!!!!!!!! ['__class__', '__delattr__', '__dict__', '__doc__', '__eq__', '__format__', '__getattribute__', '__hash__', '__init__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_parsed_fields', 'constants', 'fields', 'full_name', 'has_header', 'header_present', 'names', 'package', 'parsed_fields', 'short_name', 'text', 'types']
 
@@ -119,12 +134,12 @@ struct MD5Sum< ::task2::ApproachImageFeedback_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "a3d3daadf2714704bb8322e86f0fde87";
+    return "9f0d914c11b2e37db5f51064189d6c63";
   }
 
   static const char* value(const ::task2::ApproachImageFeedback_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0xa3d3daadf2714704ULL;
-  static const uint64_t static_value2 = 0xbb8322e86f0fde87ULL;
+  static const uint64_t static_value1 = 0x9f0d914c11b2e37dULL;
+  static const uint64_t static_value2 = 0xb5f51064189d6c63ULL;
 };
 
 template<class ContainerAllocator>
@@ -144,8 +159,11 @@ struct Definition< ::task2::ApproachImageFeedback_<ContainerAllocator> >
   static const char* value()
   {
     return "#coordinates of the center of the ring\n\
+time timestamp\n\
 int32 center_x\n\
 int32 center_y\n\
+int32 minor_axis\n\
+int32 major_axis\n\
 ";
   }
 
@@ -164,8 +182,11 @@ namespace serialization
   {
     template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)
     {
+      stream.next(m.timestamp);
       stream.next(m.center_x);
       stream.next(m.center_y);
+      stream.next(m.minor_axis);
+      stream.next(m.major_axis);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -184,10 +205,16 @@ struct Printer< ::task2::ApproachImageFeedback_<ContainerAllocator> >
 {
   template<typename Stream> static void stream(Stream& s, const std::string& indent, const ::task2::ApproachImageFeedback_<ContainerAllocator>& v)
   {
+    s << indent << "timestamp: ";
+    Printer<ros::Time>::stream(s, indent + "  ", v.timestamp);
     s << indent << "center_x: ";
     Printer<int32_t>::stream(s, indent + "  ", v.center_x);
     s << indent << "center_y: ";
     Printer<int32_t>::stream(s, indent + "  ", v.center_y);
+    s << indent << "minor_axis: ";
+    Printer<int32_t>::stream(s, indent + "  ", v.minor_axis);
+    s << indent << "major_axis: ";
+    Printer<int32_t>::stream(s, indent + "  ", v.major_axis);
   }
 };
 

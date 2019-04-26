@@ -55,7 +55,6 @@ find_package( OpenCV REQUIRED )
    FILES
    ApproachImageFeedback.msg
    TerminalApproachFeedback.msg
-   RingData.msg
    ValidRegionsMapResponse.msg
  )
 

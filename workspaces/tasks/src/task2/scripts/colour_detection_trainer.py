@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
+import pdb
+
 import numpy as np
 import rospy
 from colour_detection import ColourFeatureGenerator, ColourClassifier
 from task2.msg import ApproachImageFeedback
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
+import cv2
 
 import os
 
@@ -90,10 +93,12 @@ class ColourDetectionTrainer:
 
         # Convert to bgr image
         try:
-            received_image = self._cv_bridge.imgmsg_to_cv2(data)
+            received_image = self._cv_bridge.imgmsg_to_cv2(data, 'bgr8')
         except CvBridgeError as e:
             print(e)
 
+	cv2.imshow("feed", received_image)
+	cv2.waitKey(1)
         # Add image and class to feature generator instance
         self._ring_image = received_image
 
@@ -110,6 +115,7 @@ class ColourDetectionTrainer:
 
         # get feature and target matrix from generator instance and store in _features_mat and _target_vec
         features_mat_nxt, target_nxt = self._feature_gen.compute_colour_features()  # Compute next block of the features matrix and target vector.
+	pdb.set_trace()
         self._features_mat = np.hstack((self._features_mat, features_mat_nxt))  # Add block to features matrix.
         self._target_vec = np.hstack((self._target_vec, target_nxt))  # Add block to target vector.
 
@@ -129,13 +135,13 @@ class ColourDetectionTrainer:
 
     def subscribe(self):
         # subscribe to topic
-        self._subscriber = rospy.Subscriber('toroids', ApproachImageFeedback, self._depth_callback)
+        self._depth_subscriber = rospy.Subscriber('toroids', ApproachImageFeedback, self._depth_callback)
         self._img_subscriber = rospy.Subscriber('/camera/rgb/image_raw', Image, self._img_callback)
 
     def unsubscribe(self):
         # unscubscribe from topic
-    self._depth_subscriber.unregister()
-    self._img_subscriber.unregister()
+	self._depth_subscriber.unregister()
+	self._img_subscriber.unregister()
 
 
 if __name__ == '__main__':
@@ -154,7 +160,7 @@ if __name__ == '__main__':
     for colour in trainer.colour_dict.keys():
     
         # Countdown to start of training data recording.
-        countdown_val = 15
+        countdown_val = 3
         while(countdown_val >= 1):
             print("Starting recording of {0} ring training data in:".format(trainer.colour_dict[colour]))
             print("{0}".format(countdown_val))
@@ -165,7 +171,7 @@ if __name__ == '__main__':
         # Set target value, subscribe to topic and initialize recording timeout.
         trainer.set_target(colour)
         trainer.subscribe()
-        recording_timeout = 60
+        recording_timeout = 10
 
         # Record training data for specified duration.
         while(recording_timeout >= 1):
