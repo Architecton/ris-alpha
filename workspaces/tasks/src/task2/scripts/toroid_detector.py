@@ -141,14 +141,14 @@ class Toroid:
             rd.center_x = int(np.round(outer_elp[0][0]))
             rd.center_y = int(np.round(outer_elp[0][1]))
             rd.timestamp = data.header.stamp
-            # rd.minor_axis = np.min(outer_elp[1])
-            # rd.major_axis = np.max(outer_elp[1])
+            rd.minor_axis = np.min(outer_elp[1])
+            rd.major_axis = np.max(outer_elp[1])
             # rd.im = np.ravel(self.bgr_img)
 
             found = 1
   
         if (found == 1):
-            rospy.sleep(2)
+            #rospy.sleep(2)
             #print "publishing"
             #print rd.timestamp
             #print "x: {0}".format(rd.center_x)
