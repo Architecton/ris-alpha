@@ -44,6 +44,8 @@ class Toroid:
 
     def depth_callback(self, data):
 
+    	timestamp = data.header.stamp.to_time()
+
     	try:
             depth_img = self.bridge.imgmsg_to_cv2(data)
         except CvBridgeError as e:
@@ -135,6 +137,7 @@ class Toroid:
             # Set toroid data
             rd.center_x = e1[0][0]
             rd.center_y = e1[0][1]
+            rd.timestamp = timestamp
             # rd.minor_axis = np.min(e1[1])
             # rd.major_axis = np.max(e1[1])
             # rd.im = np.ravel(self.bgr_img)

@@ -18,6 +18,9 @@ class Visualizer:
         # Subscribe to the RGB image topic
         self.image_sub = rospy.Subscriber("/camera/rgb/image_raw", Image, self.image_callback)
 
+        self.dctr = 0;
+        self.ictr = 0;
+
     def depth_callback(self, data):
 
     	try:
@@ -25,8 +28,12 @@ class Visualizer:
         except CvBridgeError as e:
             print(e)
 
-        cv2.imshow('Depth image', depth_img)
-        cv2.waitKey(1)
+        self.dctr += 1
+        print "depth counter: %d".format(self.dctr)
+
+        #cv2.namedWindow('Depth image')
+        #cv2.imshow('Depth image', depth_img)
+
 
     def image_callback(self, data):
 
@@ -35,8 +42,13 @@ class Visualizer:
         except CvBridgeError as e:
             print(e)
 
-        cv2.imshow('BGR image', bgr_img)
-        cv2.waitKey(1)        
+        self.ictr += 1    
+        print "image counter: %d".format(self.ictr)
+
+        # cv2.namedWindow('BGR image')
+        # cv2.imshow('BGR image', bgr_img)     
+        # cv2.waitKey(1)
+
 
 def main():
 
