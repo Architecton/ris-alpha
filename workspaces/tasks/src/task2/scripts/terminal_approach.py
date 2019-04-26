@@ -14,7 +14,7 @@ class TerminalApproachHandler:
 
     # Constructor.
     def __init__(self, callib_coeff_agl):
-        self.callib_coeff_ang = callib_coeff_agl  # Set velocity callibration coefficients.
+        self.callib_coeff_agl = callib_coeff_agl  # Set velocity callibration coefficients.
 
         # Define velocity publisher.
         self.vel_pub = rospy.Publisher('/cmd_vel_mux/input/navi', Twist, queue_size=100)
