@@ -16,6 +16,8 @@ import sys
 ros_map = []
 info = MapMetaData()
 
+WINDOW_SIZE = 100
+
 def mapCallback(data):
     global ros_map
     global info
