@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import pdb
-
 import numpy as np
 import rospy
 from colour_detection import ColourFeatureGenerator, ColourClassifier
@@ -30,10 +28,12 @@ class ColourDetectionTrainer:
         self._features_mat = np.empty((0, self._num_bins*3), dtype=np.int)  # Initialize matrix of features.
         self._target_vec = np.empty(0, dtype=np.int)  # Initialize target vector.
 
+	self.training_imgs = np.empty((0, 480*640*3), dtype=np.uint8)
+
         self._IMAGE_HEIGHT = 480
         self._IMAGE_WIDTH = 640
 
-        self._ring_image = None
+        self._ring_image = np.empty(0, dtype=np.uint8)
         self._cv_bridge = CvBridge()
 
         # initialize node
@@ -50,6 +50,7 @@ class ColourDetectionTrainer:
             None
         """
         self._target = target
+	self._feature_gen.clear()
 
 
     def _depth_callback(self, data):
@@ -71,13 +72,22 @@ class ColourDetectionTrainer:
 
         # Compute coordiantes of the top left corner and bottom right corners of the
         # cropped square.
-        l_u = np.array([center_y - maj_axis, center_x - maj_axis])
-        r_d = np.array([center_y + maj_axis, center_x + maj_axis])
+        l_u = np.array([center_y - min_axis, center_x - min_axis])
+	l_u[0] = np.clip(l_u[0], 0, 480)
+	l_u[1] = np.clip(l_u[1], 0, 640)
+        r_d = np.array([center_y + min_axis, center_x + min_axis])
+	r_d[0] = np.clip(r_d[0], 0, 480)
+	r_d[1] = np.clip(r_d[1], 0, 640)
 
-        if self._ring_image:
+	# cv2.imshow("feed", self._ring_image[l_u[0]:r_d[0], l_u[1]:r_d[1]])
+	# cv2.waitKey(1)
+
+        if self._ring_image.shape[0] > 0:
             # Add image and class to feature generator instance
             self._feature_gen.add_image(self._ring_image, self._target, l_u, r_d)
 
+	# Add cropped image to array of training samples.
+	self.training_imgs = np.vstack((self.training_imgs, np.ravel(self._ring_image[l_u[0]:r_d[0], l_u[1]:r_d[1]])))
 
     def _img_callback(self, data):
 
@@ -97,8 +107,6 @@ class ColourDetectionTrainer:
         except CvBridgeError as e:
             print(e)
 
-	cv2.imshow("feed", received_image)
-	cv2.waitKey(1)
         # Add image and class to feature generator instance
         self._ring_image = received_image
 
@@ -115,8 +123,7 @@ class ColourDetectionTrainer:
 
         # get feature and target matrix from generator instance and store in _features_mat and _target_vec
         features_mat_nxt, target_nxt = self._feature_gen.compute_colour_features()  # Compute next block of the features matrix and target vector.
-	pdb.set_trace()
-        self._features_mat = np.hstack((self._features_mat, features_mat_nxt))  # Add block to features matrix.
+        self._features_mat = np.vstack((self._features_mat, features_mat_nxt))  # Add block to features matrix.
         self._target_vec = np.hstack((self._target_vec, target_nxt))  # Add block to target vector.
 
     def get_classifier(self):
@@ -160,7 +167,7 @@ if __name__ == '__main__':
     for colour in trainer.colour_dict.keys():
     
         # Countdown to start of training data recording.
-        countdown_val = 3
+        countdown_val = 30
         while(countdown_val >= 1):
             print("Starting recording of {0} ring training data in:".format(trainer.colour_dict[colour]))
             print("{0}".format(countdown_val))
@@ -185,10 +192,15 @@ if __name__ == '__main__':
         # features vectors and target vector.
         trainer.unsubscribe()
         trainer.get_data()
-        countdown_val = 15
-       
+        countdown_val = 1
+    
     # Get classifier.
     clf = trainer.get_classifier()
     
     # Save classifier.
     dump(clf, 'ring_colour_classifier.joblib') 
+    trainer._features_mat.dtype='uint8'
+    sio.savemat('training_data.mat', {'data' : trainer._features_mat})
+    sio.savemat('training_data_target.mat', { 'data' : trainer._target_vec})
+    trainer.training_imgs.dtype='uint8'
+    sio.savemat('training_images.mat', {'data' : trainer.training_imgs})
