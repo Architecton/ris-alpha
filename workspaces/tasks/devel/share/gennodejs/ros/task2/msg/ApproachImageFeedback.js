@@ -18,10 +18,19 @@ class ApproachImageFeedback {
   constructor(initObj={}) {
     if (initObj === null) {
       // initObj === null is a special case for deserialization where we don't initialize fields
+      this.timestamp = null;
       this.center_x = null;
       this.center_y = null;
+      this.minor_axis = null;
+      this.major_axis = null;
     }
     else {
+      if (initObj.hasOwnProperty('timestamp')) {
+        this.timestamp = initObj.timestamp
+      }
+      else {
+        this.timestamp = {secs: 0, nsecs: 0};
+      }
       if (initObj.hasOwnProperty('center_x')) {
         this.center_x = initObj.center_x
       }
@@ -34,15 +43,33 @@ class ApproachImageFeedback {
       else {
         this.center_y = 0;
       }
+      if (initObj.hasOwnProperty('minor_axis')) {
+        this.minor_axis = initObj.minor_axis
+      }
+      else {
+        this.minor_axis = 0;
+      }
+      if (initObj.hasOwnProperty('major_axis')) {
+        this.major_axis = initObj.major_axis
+      }
+      else {
+        this.major_axis = 0;
+      }
     }
   }
 
   static serialize(obj, buffer, bufferOffset) {
     // Serializes a message object of type ApproachImageFeedback
+    // Serialize message field [timestamp]
+    bufferOffset = _serializer.time(obj.timestamp, buffer, bufferOffset);
     // Serialize message field [center_x]
     bufferOffset = _serializer.int32(obj.center_x, buffer, bufferOffset);
     // Serialize message field [center_y]
     bufferOffset = _serializer.int32(obj.center_y, buffer, bufferOffset);
+    // Serialize message field [minor_axis]
+    bufferOffset = _serializer.int32(obj.minor_axis, buffer, bufferOffset);
+    // Serialize message field [major_axis]
+    bufferOffset = _serializer.int32(obj.major_axis, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -50,15 +77,21 @@ class ApproachImageFeedback {
     //deserializes a message object of type ApproachImageFeedback
     let len;
     let data = new ApproachImageFeedback(null);
+    // Deserialize message field [timestamp]
+    data.timestamp = _deserializer.time(buffer, bufferOffset);
     // Deserialize message field [center_x]
     data.center_x = _deserializer.int32(buffer, bufferOffset);
     // Deserialize message field [center_y]
     data.center_y = _deserializer.int32(buffer, bufferOffset);
+    // Deserialize message field [minor_axis]
+    data.minor_axis = _deserializer.int32(buffer, bufferOffset);
+    // Deserialize message field [major_axis]
+    data.major_axis = _deserializer.int32(buffer, bufferOffset);
     return data;
   }
 
   static getMessageSize(object) {
-    return 8;
+    return 24;
   }
 
   static datatype() {
@@ -68,15 +101,18 @@ class ApproachImageFeedback {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return 'a3d3daadf2714704bb8322e86f0fde87';
+    return '9f0d914c11b2e37db5f51064189d6c63';
   }
 
   static messageDefinition() {
     // Returns full string definition for message
     return `
     #coordinates of the center of the ring
+    time timestamp
     int32 center_x
     int32 center_y
+    int32 minor_axis
+    int32 major_axis
     
     `;
   }
@@ -87,6 +123,13 @@ class ApproachImageFeedback {
       msg = {};
     }
     const resolved = new ApproachImageFeedback(null);
+    if (msg.timestamp !== undefined) {
+      resolved.timestamp = msg.timestamp;
+    }
+    else {
+      resolved.timestamp = {secs: 0, nsecs: 0}
+    }
+
     if (msg.center_x !== undefined) {
       resolved.center_x = msg.center_x;
     }
@@ -99,6 +142,20 @@ class ApproachImageFeedback {
     }
     else {
       resolved.center_y = 0
+    }
+
+    if (msg.minor_axis !== undefined) {
+      resolved.minor_axis = msg.minor_axis;
+    }
+    else {
+      resolved.minor_axis = 0
+    }
+
+    if (msg.major_axis !== undefined) {
+      resolved.major_axis = msg.major_axis;
+    }
+    else {
+      resolved.major_axis = 0
     }
 
     return resolved;
