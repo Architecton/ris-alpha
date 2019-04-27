@@ -138,7 +138,6 @@ class Toroid:
             depth_img_filtered[(y-h/2):(y+h/2), (x-w/2):(x+w/2)] = depth_img_original[(y-h/2):(y+h/2), (x-w/2):(x+w/2)]
             depth_img_filtered = np.ravel(depth_img_filtered)
             depth_img_filtered = depth_img_filtered[depth_img_filtered != 0]
-            print np.median(depth_img_filtered)
 
             #cv2.imshow('Live feed', depth_img_filtered*255)
             #cv2.waitKey(1)
@@ -161,12 +160,12 @@ class Toroid:
             #rd.major_axis = np.max(outer_elp[1])
             rd.major_axis = h
             # rd.im = np.ravel(self.bgr_img)
+            # rd.dpt = np.median(depth_img_filtered)
 
             found = 1
   
         if (found == 1):
             #rospy.sleep(2)
-            print "publishing"
             #print rd.timestamp
             #print "x: {0}".format(rd.center_x)
             #print "y: {0}".format(rd.center_y)
@@ -175,7 +174,6 @@ class Toroid:
         # DEVONLY: Visualize camera output
         cv2.imshow('Live feed', depth_img_edge*255)
         cv2.waitKey(1)
-
 
 def main():
 
