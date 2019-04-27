@@ -32,8 +32,8 @@ class ColourDetectionTrainer:
         self._features_mat = np.empty((0, self._num_bins*3), dtype=np.int)  # Initialize matrix of features.
         self._target_vec = np.empty(0, dtype=np.int)  # Initialize target vector.
 
-	self.training_imgs = dict()
-	self._training_img_counter = 0
+		self.training_imgs = dict()
+		self._training_img_counter = 0
 
         self._IMAGE_HEIGHT = 480
         self._IMAGE_WIDTH = 640
@@ -78,14 +78,14 @@ class ColourDetectionTrainer:
         # Compute coordiantes of the top left corner and bottom right corners of the
         # cropped square.
         l_u = np.array([center_y - min_axis/2, center_x - min_axis/2])
-	l_u[0] = np.clip(l_u[0], 0, 480)
-	l_u[1] = np.clip(l_u[1], 0, 640)
-        r_d = np.array([center_y + min_axis/2, center_x + min_axis/2])
-	r_d[0] = np.clip(r_d[0], 0, 480)
-	r_d[1] = np.clip(r_d[1], 0, 640)
+		l_u[0] = np.clip(l_u[0], 0, 480)
+		l_u[1] = np.clip(l_u[1], 0, 640)
+	    r_d = np.array([center_y + min_axis/2, center_x + min_axis/2])
+		r_d[0] = np.clip(r_d[0], 0, 480)
+		r_d[1] = np.clip(r_d[1], 0, 640)
 
-	# cv2.imshow("feed", self._ring_image[l_u[0]:r_d[0], l_u[1]:r_d[1]])
-	# cv2.waitKey(1)
+		# cv2.imshow("feed", self._ring_image[l_u[0]:r_d[0], l_u[1]:r_d[1]])
+		# cv2.waitKey(1)
 
         if self._ring_image.shape[0] > 0:
             # Add image and class to feature generator instance
