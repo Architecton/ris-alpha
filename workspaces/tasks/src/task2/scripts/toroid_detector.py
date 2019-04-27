@@ -135,12 +135,14 @@ class Toroid:
             h = np.uint16(round(outer_elp[1][1]))
 
             depth_img_filtered = np.zeros((depth_img.shape[0], depth_img.shape[1]))
-            depth_img_filtered[(y-h/2):(y+h/2), (x-w/2):(x+w/2)] = depth_img[(y-h/2):(y+h/2), (x-w/2):(x+w/2)]
+            depth_img_filtered[(y-h/2):(y+h/2), (x-w/2):(x+w/2)] = depth_img_original[(y-h/2):(y+h/2), (x-w/2):(x+w/2)]
+            depth_img_filtered = np.ravel(depth_img_filtered)
+            depth_img_filtered = depth_img_filtered[depth_img_filtered != 0]
+            print np.median(depth_img_filtered)
 
-            print "test"
-            cv2.imshow('Live feed', depth_img_filtered*255)
-            cv2.waitKey(1)
-            return    
+            #cv2.imshow('Live feed', depth_img_filtered*255)
+            #cv2.waitKey(1)
+            #return    
 
             # DEVONLY: Draw the detections
             depth_img_edge.fill(1)
@@ -164,7 +166,7 @@ class Toroid:
   
         if (found == 1):
             #rospy.sleep(2)
-            #print "publishing"
+            print "publishing"
             #print rd.timestamp
             #print "x: {0}".format(rd.center_x)
             #print "y: {0}".format(rd.center_y)
