@@ -131,7 +131,7 @@ class RingImageProcessor:
     def __init__(self, clf, num_bins):
         self._clf = clf  # learned classifier
         self._num_bins = num_bins  # number of bins to use when computing histograms
-        self._colour_fetures_mat = np.empty((0, num_bins*3), dtype=np.int)  # Matrix for storing features
+        self._colour_features_mat = np.empty((0, num_bins*3), dtype=np.int)  # Matrix for storing features
 
     def _crop_to_ring(self, img, l_u, r_d):
         """
@@ -179,7 +179,7 @@ class RingImageProcessor:
         """
         cropped_img = self._crop_to_ring(img, l_u, r_d)
         colour_feature_nxt = self._get_color_feature(cropped_img)
-        self._colour_fetures_mat = np.vstack((self._colour_features_mat, colour_feature_nxt))
+        self._colour_features_mat = np.vstack((self._colour_features_mat, colour_feature_nxt))
 
     
     def get_ring_color(self):

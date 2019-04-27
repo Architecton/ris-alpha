@@ -1,8 +1,20 @@
+#!/usr/bin/env python
+import numpy as np
+
+import rospy
 from colour_detection import RingImageProcessor
+from joblib import load
+
+from task2.msg import ApproachImageFeedback
+
+from sensor_msgs.msg import Image
+
+from cv_bridge import CvBridge, CvBridgeError
+import cv2
 
 class ColourDetectionTester:
-    def __init__(self, clf):
-        self._ring_image_processor = RingImageProcessor(clf, 256)
+    def __init__(self, clf, num_bins):
+        self._ring_image_processor = RingImageProcessor(clf, 100)
         self._num_bins = num_bins  # Number of bins to use in histograms.
 
         self._ring_image = np.empty(0, dtype=np.uint8)
@@ -70,6 +82,7 @@ class ColourDetectionTester:
      
     
 if __name__ == '__main__':
-    cdt = ColourDetectionTester()
+    clf = load('ring_colour_classifier.joblib')
+    cdt = ColourDetectionTester(clf, 100)
     cdt.subscribe()
     rospy.spin()
