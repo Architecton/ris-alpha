@@ -33,7 +33,7 @@ class TerminalApproachHandler:
         Returns:
             None
         """
-
+	print "Here I am also"
         # Compute offset from window 
         x_offset = (data.feedback.target_center_x - data.feedback.center_x) -\
  		data.feedback.window_size if data.feedback.target_center_x > data.feedback.center_x else\
