@@ -6,6 +6,8 @@ from geometry_msgs.msg import Twist
 from task2.msg import TerminalApproachFeedback
 from task2.srv import TerminalApproach
 
+import pdb
+
 class TerminalApproachHandler:
 
     """
@@ -33,13 +35,17 @@ class TerminalApproachHandler:
         """
 
         # Compute offset from window 
-        x_offset = (data.target_center_x - data.center_x) - data.window_size if data.target_center_x > data.center_x else (data.target_center_x - data.center_x) + data.window_size
+        x_offset = (data.feedback.target_center_x - data.feedback.center_x) -\
+ 		data.feedback.window_size if data.feedback.target_center_x > data.feedback.center_x else\
+		(data.feedback.target_center_x - data.feedback.center_x) + data.feedback.window_size
         
         # Set angular velocity as a function of the offset (larger offset, larger linear velocity).
         self.mov.angular.z = (x_offset*self.callib_coeff_agl)**2
 
         # publish velocity message.
-        self.vel_pub.publish(mov)
+        self.vel_pub.publish(self.mov)
+
+	return []
 
     def start_server(self):
         """

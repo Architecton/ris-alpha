@@ -8,6 +8,10 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 
+import pickle
+
+import scipy.io as sio
+
 import os
 
 import pdb
@@ -28,7 +32,8 @@ class ColourDetectionTrainer:
         self._features_mat = np.empty((0, self._num_bins*3), dtype=np.int)  # Initialize matrix of features.
         self._target_vec = np.empty(0, dtype=np.int)  # Initialize target vector.
 
-	self.training_imgs = np.empty((0, 480*640*3), dtype=np.uint8)
+	self.training_imgs = dict()
+	self._training_img_counter = 0
 
         self._IMAGE_HEIGHT = 480
         self._IMAGE_WIDTH = 640
@@ -72,10 +77,10 @@ class ColourDetectionTrainer:
 
         # Compute coordiantes of the top left corner and bottom right corners of the
         # cropped square.
-        l_u = np.array([center_y - min_axis, center_x - min_axis])
+        l_u = np.array([center_y - min_axis/2, center_x - min_axis/2])
 	l_u[0] = np.clip(l_u[0], 0, 480)
 	l_u[1] = np.clip(l_u[1], 0, 640)
-        r_d = np.array([center_y + min_axis, center_x + min_axis])
+        r_d = np.array([center_y + min_axis/2, center_x + min_axis/2])
 	r_d[0] = np.clip(r_d[0], 0, 480)
 	r_d[1] = np.clip(r_d[1], 0, 640)
 
@@ -86,8 +91,9 @@ class ColourDetectionTrainer:
             # Add image and class to feature generator instance
             self._feature_gen.add_image(self._ring_image, self._target, l_u, r_d)
 
-	# Add cropped image to array of training samples.
-	self.training_imgs = np.vstack((self.training_imgs, np.ravel(self._ring_image[l_u[0]:r_d[0], l_u[1]:r_d[1]])))
+	    # Add cropped image to array of training samples.
+   	    self.training_imgs[self._training_img_counter] = self._ring_image[l_u[0]:r_d[0], l_u[1]:r_d[1]]
+	    self._training_img_counter += 1
 
     def _img_callback(self, data):
 
@@ -150,6 +156,10 @@ class ColourDetectionTrainer:
 	self._depth_subscriber.unregister()
 	self._img_subscriber.unregister()
 
+    def save_obj(self, obj, name):
+        with open(name + '.pkl', 'wb') as f:
+       	    pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
+
 
 if __name__ == '__main__':
 
@@ -167,7 +177,7 @@ if __name__ == '__main__':
     for colour in trainer.colour_dict.keys():
     
         # Countdown to start of training data recording.
-        countdown_val = 30
+        countdown_val = 2
         while(countdown_val >= 1):
             print("Starting recording of {0} ring training data in:".format(trainer.colour_dict[colour]))
             print("{0}".format(countdown_val))
@@ -178,7 +188,7 @@ if __name__ == '__main__':
         # Set target value, subscribe to topic and initialize recording timeout.
         trainer.set_target(colour)
         trainer.subscribe()
-        recording_timeout = 10
+        recording_timeout = 3
 
         # Record training data for specified duration.
         while(recording_timeout >= 1):
@@ -199,8 +209,8 @@ if __name__ == '__main__':
     
     # Save classifier.
     dump(clf, 'ring_colour_classifier.joblib') 
-    trainer._features_mat.dtype='uint8'
     sio.savemat('training_data.mat', {'data' : trainer._features_mat})
     sio.savemat('training_data_target.mat', { 'data' : trainer._target_vec})
-    trainer.training_imgs.dtype='uint8'
-    sio.savemat('training_images.mat', {'data' : trainer.training_imgs})
+    trainer.save_obj(trainer.training_imgs, 'training_images')
+    # trainer.training_imgs.dtype='uint8'
+    # sio.savemat('training_images.mat', {'data' : trainer.training_imgs})

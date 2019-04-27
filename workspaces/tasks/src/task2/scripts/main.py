@@ -17,6 +17,8 @@ from geometry_msgs.msg import Point, Vector3, PoseStamped, Twist
 from task2.srv import TerminalApproach
 from task2.msg import TerminalApproachFeedback
 from task2.msg import ApproachImageFeedback
+
+import pdb
 ### /IMPORTS ###
 
 
@@ -77,7 +79,6 @@ if __name__ == "__main__":
 
     # Initialize Terminal Approach handler.
     tah = TerminalApproachHandler(WINDOW_SIZE, CENTER_WINDOW)
-    tah.subscribe_to_feedback()
 
     # Define goals that are perpendicular to rings.
     checkpoints = np.array([[-1.276, 2.121, 0.850], [0.421, 0.166, 0.597], [2.195, 0.723, 0.999], [1.832, 2.986, 0.882], [0.036, 2.124, 0.855]])
@@ -93,7 +94,7 @@ if __name__ == "__main__":
 
 
         # Go to closest goal.
-        idx_nxt_checkpoint = np.argmin((lambda x1, x2 : np.sum(np.abs(x1 - x2)**2)**(1.0/2.0))(robot_pos, perp_checkpoints))
+        idx_nxt_checkpoint = np.argmin((lambda x1, x2 : np.sum(np.abs(x1 - x2)**2)**(1.0/2.0))(robot_pos, checkpoints))
 
         # Create goal for next checkpoint.
         goal_chkpt = MoveBaseGoal()
@@ -103,7 +104,12 @@ if __name__ == "__main__":
         goal_chkpt.target_pose.pose.position.y = checkpoints[idx_nxt_checkpoint, 1]
         goal_chkpt.target_pose.pose.orientation.w = checkpoints[idx_nxt_checkpoint, 2] 
         goal_chkpnt_status = GoalStatus.LOST  # Set status for next checkpoint goal.
+	
+
+	pdb.set_trace()	
         ac_chkpnts.send_goal(goal_chkpt) # Send checkpoint goal.
+
+
 
         # Loop for next checkpoint goal.
         while not goal_chkpnt_status == GoalStatus.SUCCEEDED:
