@@ -5,12 +5,10 @@ import cv2
 import numpy as np
 
 import pdb
-
 from cv2 import convertScaleAbs
 
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
-#from task2.msg import RingData
 from task2.msg import ApproachImageFeedback
 
 class Toroid:
@@ -55,13 +53,6 @@ class Toroid:
             print(e)
 
         depth_img = depth_img_original
-
-        #cv2.line(depth_img, (int(0), int(self.low_bnd_elps)), (int(640), int(self.low_bnd_elps)), (255, 255, 255), 1)
-
-        # DEVONLY: Visualize camera output
-        #cv2.imshow('Live feed', depth_img*255)
-        #cv2.waitKey(1)
-        #return;
 
         # Set all depths greater than MAX_DPT and smaller than MIN_DPT to 0
         depth_img = np.uint8(np.logical_and(depth_img < self.MAX_DPT, depth_img > self.MIN_DPT))
@@ -108,11 +99,11 @@ class Toroid:
                         if(dist2 < 10):
                             is_unique = False
                 
-                    if ((is_unique or len(candidates) == 0) and (1.15 < max(e1[1][0]/e2[1][0], e2[1][0]/e1[1][0]) < 2.3)):
+                    if ((is_unique or len(candidates) == 0) and (1.1 < max(e1[1][0]/e2[1][0], e2[1][0]/e1[1][0]) < 2.3)):
                         candidates.append((e1,e2))                              
 
         # Build an array of detected Rings
-        rd = ApproachImageFeedback()
+        aif = ApproachImageFeedback()
         found = 0
 
         for c in candidates:
@@ -134,14 +125,34 @@ class Toroid:
             w = np.uint16(round(outer_elp[1][0]))
             h = np.uint16(round(outer_elp[1][1]))
 
-            depth_img_filtered = np.zeros((depth_img.shape[0], depth_img.shape[1]))
-            depth_img_filtered[(y-h/2):(y+h/2), (x-w/2):(x+w/2)] = depth_img_original[(y-h/2):(y+h/2), (x-w/2):(x+w/2)]
-            depth_img_filtered = np.ravel(depth_img_filtered)
-            depth_img_filtered = depth_img_filtered[depth_img_filtered != 0]
-
-            #cv2.imshow('Live feed', depth_img_filtered*255)
+            # TMP
+            #depth_img_edge = depth_img_edge * 255
+            #cv2.line(depth_img_edge, (x, y), (x, y), (255, 255, 255), 5)
+            #cv2.line(depth_img_edge, (x-w/2, y), (x+w/2, y), (255,255,255), 2)
+            #cv2.line(depth_img_edge, (x, y-h/2), (x, y+h/2), (255,255,255), 2)
+            #cv2.imshow('Live feed', depth_img_edge)
             #cv2.waitKey(1)
-            #return    
+            #return
+
+            # cv2.imshow('Live feed', depth_img[(y-h/2):(y+h/2), (x-w/2):(x+w/2)]*255)
+            # cv2.waitKey(1)
+            # return
+
+            # NEW >>
+            depth_img_mask = np.zeros((depth_img_original.shape[0], depth_img_original.shape[1]))
+            depth_img_mask[(max(y-h/2, 0)):(min(y+h/2, 480)), (max(x-w/2, 0)):(min(x+w/2, 640))] = depth_img[(max(y-h/2, 0)):(min(y+h/2, 480)), (max(x-w/2, 0)):(min(x+w/2, 640))]
+            depth_val_vector = depth_img_original[depth_img_mask == 1]
+            depth_val_vector = depth_val_vector[np.logical_not(np.isnan(depth_val_vector))]
+            # <<
+
+            # OLD >>
+            # depth_img_filtered = np.zeros((depth_img.shape[0], depth_img.shape[1]))
+            # depth_img_filtered[(y-h/2):(y+h/2), (x-w/2):(x+w/2)] = depth_img[(y-h/2):(y+h/2), (x-w/2):(x+w/2)]
+            # depth_img_filtered = np.ravel(depth_img_filtered)
+            # depth_img_filtered = depth_img_filtered[depth_img_filtered != 0]
+            # filter nan values
+            # depth_img_filtered = depth_img_filtered[np.logical_not(np.isnan(depth_img_filtered))]    
+            # <<
 
             # DEVONLY: Draw the detections
             depth_img_edge.fill(1)
@@ -152,28 +163,25 @@ class Toroid:
             # cv2.line(depth_img_edge, (int(e1[0][0]), int(e1[0][1])), (int(e1[0][0]), int(e1[0][1])), (0, 0, 255), 10)
 
             # Set toroid data
-            rd.center_x = int(np.round(outer_elp[0][0]))
-            rd.center_y = int(np.round(outer_elp[0][1]))
-            rd.timestamp = data.header.stamp
-            #rd.minor_axis = np.min(outer_elp[1])
-            rd.minor_axis = w
-            #rd.major_axis = np.max(outer_elp[1])
-            rd.major_axis = h
-            # rd.im = np.ravel(self.bgr_img)
-            # rd.dpt = np.median(depth_img_filtered)
+            aif.center_x = int(np.round(outer_elp[0][0]))
+            aif.center_y = int(np.round(outer_elp[0][1]))
+            aif.timestamp = data.header.stamp
+            #aif.minor_axis = np.min(outer_elp[1])
+            aif.minor_axis = w
+            #aif.major_axis = np.max(outer_elp[1])
+            aif.major_axis = h
+            # aif.im = np.ravel(self.bgr_img)
+            # aif.dpt = np.median(depth_val_vector)
+            print np.median(depth_val_vector)
 
             found = 1
   
         if (found == 1):
-            #rospy.sleep(2)
-            #print rd.timestamp
-            #print "x: {0}".format(rd.center_x)
-            #print "y: {0}".format(rd.center_y)
-            self.toroid_pub.publish(rd)
+            self.toroid_pub.publish(aif)
 
         # DEVONLY: Visualize camera output
-        cv2.imshow('Live feed', depth_img_edge*255)
-        cv2.waitKey(1)
+        # cv2.imshow('Live feed', depth_img_edge*255)
+        # cv2.waitKey(1)
 
 def main():
 
