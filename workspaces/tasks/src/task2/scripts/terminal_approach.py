@@ -33,11 +33,11 @@ class TerminalApproachHandler:
         Returns:
             None
         """
-	print "Here I am also"
+        print "Here I am also"
         # Compute offset from window 
         x_offset = (data.feedback.target_center_x - data.feedback.center_x) -\
- 		data.feedback.window_size if data.feedback.target_center_x > data.feedback.center_x else\
-		(data.feedback.target_center_x - data.feedback.center_x) + data.feedback.window_size
+        data.feedback.window_size if data.feedback.target_center_x > data.feedback.center_x else\
+        (data.feedback.target_center_x - data.feedback.center_x) + data.feedback.window_size
         
         # Set angular velocity as a function of the offset (larger offset, larger linear velocity).
         self.mov.angular.z = 2.0 #(x_offset*self.callib_coeff_agl)**2
@@ -45,7 +45,7 @@ class TerminalApproachHandler:
         # publish velocity message.
         self.vel_pub.publish(self.mov)
 
-	return []
+        return []
 
     def start_server(self):
         """
