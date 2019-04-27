@@ -19,7 +19,7 @@ class TerminalApproachHandler:
         self.callib_coeff_agl = callib_coeff_agl  # Set velocity callibration coefficients.
 
         # Define velocity publisher.
-        self.vel_pub = rospy.Publisher('/cmd_vel_mux/input/navi', Twist, queue_size=100)
+        self.vel_pub = rospy.Publisher('/cmd_vel_mux/input/navi', Twist, queue_size=1)
         self.mov = Twist()  # Define velocity message instance.
 
 
@@ -33,14 +33,14 @@ class TerminalApproachHandler:
         Returns:
             None
         """
-	pdb.set_trace()
         # Compute offset from window 
         x_offset = (data.feedback.target_center_x - data.feedback.center_x) -\
         data.feedback.window_size if data.feedback.target_center_x > data.feedback.center_x else\
         (data.feedback.target_center_x - data.feedback.center_x) + data.feedback.window_size
         
         # Set angular velocity as a function of the offset (larger offset, larger linear velocity).
-        self.mov.angular.z = (x_offset*self.callib_coeff_agl)**2
+        self.mov.angular.z = np.sign(x_offset)*self.callib_coeff_agl
+        self.mov.linear.x = 0.1
 
         # publish velocity message.
         self.vel_pub.publish(self.mov)
@@ -67,7 +67,7 @@ class TerminalApproachHandler:
 if __name__ == '__main__':
 
     # Define velocity callibration coefficients.
-    CALLIB_COEFF_AGL = 0.03
+    CALLIB_COEFF_AGL = 0.1
 
     # Start service.
     ta = TerminalApproachHandler(CALLIB_COEFF_AGL)

@@ -162,7 +162,7 @@ class Toroid:
             # rd.im = np.ravel(self.bgr_img)
             # rd.dpt = np.median(depth_img_filtered)
 
-            print np.median(depth_img_filtered)
+            #print np.median(depth_img_filtered)
 
             found = 1
   

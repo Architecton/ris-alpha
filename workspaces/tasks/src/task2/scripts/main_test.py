@@ -18,6 +18,8 @@ from task2.srv import TerminalApproach
 from task2.msg import TerminalApproachFeedback
 from task2.msg import ApproachImageFeedback
 
+import time
+
 import pdb
 ### /IMPORTS ###
 
@@ -31,7 +33,7 @@ class TerminalApproachHandler:
 	# set window size in which to keep center of ring.
         self._WINDOW_SIZE = window_size
 	self._target_center_x = target_center_x
-        self._sprint_pub = rospy.Publisher('/cmd_vel_mux/input/navi', Twist, queue_size=10)
+        self._sprint_pub = rospy.Publisher('/cmd_vel_mux/input/navi', Twist, queue_size=1)
         self._corr = TerminalApproachFeedback()
         rospy.wait_for_service('terminal_approach')  # Wait for service to come online.
         try:
@@ -48,11 +50,13 @@ class TerminalApproachHandler:
 
     def sprint(self, sprint_duration):
         msg = Twist()  # TODO: "wiggle" while moving forward.
-        sprint_loop_rate = Rospy.rate(10)  # TODO: empirically set
-        msg.linear.x = 2.0
+        sprint_loop_rate = rospy.Rate(2)  # TODO: empirically set
+        msg.linear.x = 0.1
+        msg.angular.z = 0.3
         start_time = time.time()
         while(time.time() - start_time < sprint_duration):
             self._sprint_pub.publish(msg)  # Publish angular velocity.
+            msg.angular.z = -msg.angular.z
             sprint_loop_rate.sleep()
 
     def subscribe_to_feedback(self):
@@ -67,16 +71,15 @@ if __name__ == "__main__":
     # Initialize main node.
     rospy.init_node('main')
 
-    tah = TerminalApproachHandler(10, 300)
+    tah = TerminalApproachHandler(1, 450)
 
     # Align for 7 seconds.
     tah.subscribe_to_feedback()
-    rospy.sleep(60)
-    tah.unsubscribe_from_feedback()
+    rospy.sleep(10)
     
     # TODO: say colour of ring.
     
     # Go straight to pick up ring.
-    # tah.sprint(4)
+    tah.sprint(10)
 
  
