@@ -40,7 +40,7 @@ class TerminalApproachHandler:
         (data.feedback.target_center_x - data.feedback.center_x) + data.feedback.window_size
         
         # Set angular velocity as a function of the offset (larger offset, larger linear velocity).
-        self.mov.angular.z = 2.0 #(x_offset*self.callib_coeff_agl)**2
+        self.mov.angular.z = (x_offset*self.callib_coeff_agl)**2
 
         # publish velocity message.
         self.vel_pub.publish(self.mov)
