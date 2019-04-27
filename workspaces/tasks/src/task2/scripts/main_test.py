@@ -40,6 +40,7 @@ class TerminalApproachHandler:
             print "Service error: {0}".format(e.message)
 
     def _image_feedback_callback(self, data):
+	print "here I am"
 	self._corr.target_center_x = self._target_center_x
         self._corr.center_x = data.center_x
         self._corr.window_size = self._WINDOW_SIZE
