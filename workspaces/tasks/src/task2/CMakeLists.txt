@@ -56,6 +56,7 @@ find_package( OpenCV REQUIRED )
    ApproachImageFeedback.msg
    TerminalApproachFeedback.msg
    ValidRegionsMapResponse.msg
+   RingApproachPointResponse.msg
  )
 
 ## Generate services in the 'srv' folder
@@ -69,6 +70,7 @@ add_service_files(
   FILES
   TerminalApproach.srv
   ValidRegionsMap.srv
+  RingApproachPoint.srv
 )
 
 ## Generate actions in the 'action' folder
