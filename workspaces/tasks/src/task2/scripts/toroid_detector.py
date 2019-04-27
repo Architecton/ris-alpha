@@ -67,22 +67,22 @@ class Toroid:
         depth_img = np.uint8(np.logical_and(depth_img < self.MAX_DPT, depth_img > self.MIN_DPT))
 
         # Perform closing operation
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9))
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (13, 13))
         depth_img = cv2.morphologyEx(depth_img, cv2.MORPH_CLOSE, kernel)
 
         # Extract the edge
         kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
         eroded_img = cv2.erode(depth_img, kernel, iterations=1)
-        depth_img = depth_img - eroded_img
+        depth_img_edge = depth_img - eroded_img
 
         # Extract contours
-        _, contours, _ = cv2.findContours(depth_img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        _, contours, _ = cv2.findContours(depth_img_edge, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
         # Fit elipses to all extracted contours
         elps = []
         for cnt in contours:
             # Threshold for size of ellipses (number of pixels in contour)
-            if cnt.shape[0] >= 15:
+            if cnt.shape[0] >= 35:
                 # Checking whether the ellipse centre is within the search boundaries
                 x,y,w,h = cv2.boundingRect(cnt)
 
@@ -108,11 +108,10 @@ class Toroid:
                         if(dist2 < 10):
                             is_unique = False
                 
-                    if ((is_unique or len(candidates) == 0) and (1.0 < max(e1[1][0]/e2[1][0], e2[1][0]/e1[1][0]) < 1.5)):
+                    if ((is_unique or len(candidates) == 0) and (1.15 < max(e1[1][0]/e2[1][0], e2[1][0]/e1[1][0]) < 2.3)):
                         candidates.append((e1,e2))                              
 
         # Build an array of detected Rings
-        #rd = RingData()
         rd = ApproachImageFeedback()
         found = 0
 
@@ -129,20 +128,32 @@ class Toroid:
             else:
                 outer_elp = e2     
 
+            # DEVONLY: Visualize camera output
+            x = outer_elp[0][0]
+            y = outer_elp[0][1]
+            w = outer_elp[1][0]
+            h = outer_elp[1][1]
+
+            #cv2.imshow('Live feed', depth_img[(y-h/2):(y+h/2), (x-w/2):(x+w/2)]*255)
+            #cv2.waitKey(1)
+            #return    
+
             # DEVONLY: Draw the detections
-            depth_img.fill(1)
-            cv2.ellipse(depth_img[self.upp_bnd_elps:self.low_bnd_elps, 0:len(depth_img)], e1, (0, 255, 0), 2)
-            cv2.ellipse(depth_img[self.upp_bnd_elps:self.low_bnd_elps, 0:len(depth_img)], e2, (0, 255, 0), 2)
+            depth_img_edge.fill(1)
+            cv2.ellipse(depth_img_edge[self.upp_bnd_elps:self.low_bnd_elps, 0:len(depth_img_edge)], e1, (0, 255, 0), 2)
+            cv2.ellipse(depth_img_edge[self.upp_bnd_elps:self.low_bnd_elps, 0:len(depth_img_edge)], e2, (0, 255, 0), 2)
 
             # DEVONLY: Drawing center
-            # cv2.line(depth_img, (int(e1[0][0]), int(e1[0][1])), (int(e1[0][0]), int(e1[0][1])), (0, 0, 255), 10)
+            # cv2.line(depth_img_edge, (int(e1[0][0]), int(e1[0][1])), (int(e1[0][0]), int(e1[0][1])), (0, 0, 255), 10)
 
             # Set toroid data
             rd.center_x = int(np.round(outer_elp[0][0]))
             rd.center_y = int(np.round(outer_elp[0][1]))
             rd.timestamp = data.header.stamp
-            rd.minor_axis = np.min(outer_elp[1])
-            rd.major_axis = np.max(outer_elp[1])
+            #rd.minor_axis = np.min(outer_elp[1])
+            rd.minor_axis = w
+            #rd.major_axis = np.max(outer_elp[1])
+            rd.major_axis = h
             # rd.im = np.ravel(self.bgr_img)
 
             found = 1
@@ -156,7 +167,7 @@ class Toroid:
             self.toroid_pub.publish(rd)
 
         # DEVONLY: Visualize camera output
-        cv2.imshow('Live feed', depth_img*255)
+        cv2.imshow('Live feed', depth_img_edge*255)
         cv2.waitKey(1)
 
 

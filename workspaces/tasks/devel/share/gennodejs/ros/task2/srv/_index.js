@@ -1,12 +1,12 @@
 
 "use strict";
 
-let ValidRegionsMap = require('./ValidRegionsMap.js')
-let RingApproachPoint = require('./RingApproachPoint.js')
 let TerminalApproach = require('./TerminalApproach.js')
+let RingApproachPoint = require('./RingApproachPoint.js')
+let ValidRegionsMap = require('./ValidRegionsMap.js')
 
 module.exports = {
-  ValidRegionsMap: ValidRegionsMap,
-  RingApproachPoint: RingApproachPoint,
   TerminalApproach: TerminalApproach,
+  RingApproachPoint: RingApproachPoint,
+  ValidRegionsMap: ValidRegionsMap,
 };
