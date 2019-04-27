@@ -82,7 +82,7 @@ class Toroid:
         elps = []
         for cnt in contours:
             # Threshold for size of ellipses (number of pixels in contour)
-            if cnt.shape[0] >= 35:
+            if cnt.shape[0] >= 15:
                 # Checking whether the ellipse centre is within the search boundaries
                 x,y,w,h = cv2.boundingRect(cnt)
 
@@ -129,14 +129,18 @@ class Toroid:
                 outer_elp = e2     
 
             # DEVONLY: Visualize camera output
-            x = outer_elp[0][0]
-            y = outer_elp[0][1]
-            w = outer_elp[1][0]
-            h = outer_elp[1][1]
+            x = np.uint16(round(outer_elp[0][0]))
+            y = np.uint16(round(outer_elp[0][1]))
+            w = np.uint16(round(outer_elp[1][0]))
+            h = np.uint16(round(outer_elp[1][1]))
 
-            #cv2.imshow('Live feed', depth_img[(y-h/2):(y+h/2), (x-w/2):(x+w/2)]*255)
-            #cv2.waitKey(1)
-            #return    
+            depth_img_filtered = np.zeros((depth_img.shape[0], depth_img.shape[1]))
+            depth_img_filtered[(y-h/2):(y+h/2), (x-w/2):(x+w/2)] = depth_img[(y-h/2):(y+h/2), (x-w/2):(x+w/2)]
+
+            print "test"
+            cv2.imshow('Live feed', depth_img_filtered*255)
+            cv2.waitKey(1)
+            return    
 
             # DEVONLY: Draw the detections
             depth_img_edge.fill(1)
