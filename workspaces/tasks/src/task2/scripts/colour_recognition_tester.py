@@ -1,15 +1,24 @@
-from colour_detection import RingImageProcessor
+#!/usr/bin/env python
+import numpy as np
 
-class ColourDetectionTester:
-    def __init__(self, clf):
-        self._ring_image_processor = RingImageProcessor(clf, 256)
+import rospy
+from colour_detection import RingImageProcessor
+from joblib import load
+
+from task2.msg import ApproachImageFeedback
+
+from sensor_msgs.msg import Image
+
+from cv_bridge import CvBridge, CvBridgeError
+import cv2
+
+class ColourDetector:
+    def __init__(self, clf, num_bins):
+        self._ring_image_processor = RingImageProcessor(clf, 100)
         self._num_bins = num_bins  # Number of bins to use in histograms.
 
         self._ring_image = np.empty(0, dtype=np.uint8)
         self._cv_bridge = CvBridge()
-
-        # initialize node
-        rospy.init_node('colour_detection_trainer', anonymous=True)
 
 
     def _depth_callback(self, data):
@@ -41,7 +50,7 @@ class ColourDetectionTester:
         if self._ring_image.shape[0] > 0:
             # Add image and class to feature generator instance
             self._ring_image_processor.img_to_feature(self._ring_image, l_u, r_d)
-            print self._ring_image_processor.get_ring_color()
+
 
     def _img_callback(self, data):
 
@@ -64,12 +73,26 @@ class ColourDetectionTester:
         # Add image and class to feature generator instance
         self._ring_image = received_image
 
+
     def subscribe(self):
         self._depth_subscriber = rospy.Subscriber('toroids', ApproachImageFeedback, self._depth_callback)
         self._img_subscriber = rospy.Subscriber('/camera/rgb/image_raw', Image, self._img_callback)
+
+
+    def _unsubscribe(self)
+        self._depth_subscriber._unsubscribe()
+        self._img_subscriber._unsubscribe()
+
+
+    def get_ring_color(self):
+        self._unsubscribe()
+        res = self._ring_image_processor.get_ring_color()
+        self._ring_image_processor.clear()
+        return res
      
     
 if __name__ == '__main__':
-    cdt = ColourDetectionTester()
+    clf = load('ring_colour_classifier.joblib')
+    cdt = ColourDetector(clf, 100)
     cdt.subscribe()
     rospy.spin()

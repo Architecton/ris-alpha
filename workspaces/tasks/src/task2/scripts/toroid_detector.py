@@ -174,6 +174,8 @@ class Toroid:
             # aif.dpt = np.median(depth_val_vector)
             print np.median(depth_val_vector)
 
+            #print np.median(depth_img_filtered)
+
             found = 1
   
         if (found == 1):
