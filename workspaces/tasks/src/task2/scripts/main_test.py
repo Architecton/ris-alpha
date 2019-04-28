@@ -165,9 +165,9 @@ class Utils:
         # print self._cdt.get_ring_color()
         
         # Go straight to pick up ring.
-        self._tah.sprint(10, forward=True)  # Final run to pick up the ring.
+        self._tah.sprint(13, forward=True)  # Final run to pick up the ring.
         self._tah.unsubscribe_from_feedback()
-        self._tah.sprint(3.4, forward=False)  # Reverse (to check if ring picked up).
+        self._tah.sprint(3.6, forward=False)  # Reverse (to check if ring picked up).
 
     def _callback(self, data):
         """
