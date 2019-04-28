@@ -196,6 +196,11 @@ class RingImageProcessor:
         (vals, ct) = np.unique(predictions, return_counts=True)
         return vals[np.argmax(ct)]
 
+    def clear(self):
+        self._colour_features_mat = np.empty((0, num_bins*3), dtype=np.int)  # Matrix for storing features
+        
+
+
 """
 if __name__ == '__main__':
 

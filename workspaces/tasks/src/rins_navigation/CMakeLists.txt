@@ -1,21 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(task2)
+project(rins_navigation)
 
-find_package(catkin REQUIRED COMPONENTS
-  	roscpp
-	rospy
-	cv_bridge
-	sensor_msgs
-	visualization_msgs
-	nav_msgs
-	std_msgs
-	geometry_msgs
-	tf2
-	tf2_geometry_msgs
-	message_generation
-)
+## Compile as C++11, supported in ROS Kinetic and newer
+# add_compile_options(-std=c++11)
 
-find_package( OpenCV REQUIRED )
+## Find catkin macros and libraries
+## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
+## is used, also find other catkin packages
+find_package(catkin REQUIRED COMPONENTS roscpp tf sensor_msgs move_base map_server amcl gmapping turtlebot_bringup dwa_local_planner)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -51,13 +43,11 @@ find_package( OpenCV REQUIRED )
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
- add_message_files(
-   FILES
-   ApproachImageFeedback.msg
-   TerminalApproachFeedback.msg
-   ValidRegionsMapResponse.msg
-   RingApproachPointResponse.msg
- )
+# add_message_files(
+#   FILES
+#   Message1.msg
+#   Message2.msg
+# )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -66,14 +56,6 @@ find_package( OpenCV REQUIRED )
 #   Service2.srv
 # )
 
-add_service_files(
-  FILES
-  TerminalApproach.srv
-  ValidRegionsMap.srv
-  RingApproachPoint.srv
-  GetRingColor.srv
-)
-
 ## Generate actions in the 'action' folder
 # add_action_files(
 #   FILES
@@ -81,16 +63,11 @@ add_service_files(
 #   Action2.action
 # )
 
-
-generate_messages(
-   DEPENDENCIES
-   std_msgs  # Or other packages containing msgs
-   geometry_msgs
-)
-
-catkin_package(
-	CATKIN_DEPENDS message_runtime
-)
+## Generate added messages and services with any dependencies listed here
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs  # Or other packages containing msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -106,8 +83,26 @@ catkin_package(
 ##   * uncomment the "generate_dynamic_reconfigure_options" section below
 ##     and list every .cfg file to be processed
 
+## Generate dynamic reconfigure parameters in the 'cfg' folder
+# generate_dynamic_reconfigure_options(
+#   cfg/DynReconf1.cfg
+#   cfg/DynReconf2.cfg
+# )
+
+###################################
+## catkin specific configuration ##
+###################################
+## The catkin_package macro generates cmake config files for your package
+## Declare things to be passed to dependent projects
+## INCLUDE_DIRS: uncomment this if your package contains header files
+## LIBRARIES: libraries you create in this project that dependent projects also need
+## CATKIN_DEPENDS: catkin_packages dependent projects also need
+## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-	CATKIN_DEPENDS message_runtime
+#  INCLUDE_DIRS include
+#  LIBRARIES rins_navigation
+#  CATKIN_DEPENDS other_catkin_pkg
+#  DEPENDS system_lib
 )
 
 ###########
@@ -116,13 +111,14 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-
-
-include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(
+# include
+# ${catkin_INCLUDE_DIRS}
+)
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/task1.cpp
+#   src/${PROJECT_NAME}/rins_navigation.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -133,7 +129,7 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/task1_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/rins_navigation_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -190,7 +186,7 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_task1.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_rins_navigation.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

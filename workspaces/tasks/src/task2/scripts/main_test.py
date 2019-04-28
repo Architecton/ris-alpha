@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 
 ### Imports ###
+
 import rospy
 import numpy as np
 
 import actionlib
 from actionlib_msgs.msg import GoalStatus
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
+
+from sound_play.msg import SoundRequest
+from sound_play.libsoundplay import SoundClient
 
 import tf2_ros
 import tf2_geometry_msgs
@@ -17,11 +21,12 @@ from task2.srv import TerminalApproach
 from task2.msg import TerminalApproachFeedback
 from task2.msg import ApproachImageFeedback
 
-from colour_detector import ColourDetector
+# from colour_detector import ColourDetector
 
 import time
 
 import pdb
+
 ### /IMPORTS ###
 
 
@@ -96,7 +101,7 @@ class Utils:
     """
 
     def __init__(self, window_size, target_center_x, terminal_approach_duration):
-        self._terminal_approach_duration  # Set duration of the terminal approach homing phase.
+        self._terminal_approach_duration = terminal_approach_duration  # Set duration of the terminal approach homing phase.
         self._tah = TerminalApproachHandler(window_size, target_center_x)  # Terminal approach handler instance.
         self._detection_counter = 0  # Counter of detected rings.
 
@@ -104,9 +109,9 @@ class Utils:
         self._rot_pub = rospy.Publisher('/cmd_vel_mux/input/navi', Twist, queue_size=1)
 
         # Load classifier.
-        self._clf = load('ring_colour_classifier.joblib')
+        #self._clf = load('ring_colour_classifier.joblib')
         # Instantiate ColourDetector instance
-        self._cdt = ColourDetector(self._clf, 100)
+        #self._cdt = ColourDetector(self._clf, 100)
 
 
     def detect_ring(self):
@@ -115,7 +120,7 @@ class Utils:
         """
 
         self._subscribe()  # Subscribe to toroids topic and wait.
-        rospy.sleep(1)
+        rospy.sleep(3)
         self._subs.unregister()
         if self._detection_counter > 10:  # If detected more than 10 rings, declare ring found.
             self._detection_counter = 0
@@ -124,7 +129,7 @@ class Utils:
             self._detection_counter = 0
             return False
 
-    def ring_scan(ring_scan_duration):
+    def ring_scan(self, ring_scan_duration):
         """
             perform a slow rotational search for rings
         """
@@ -138,11 +143,13 @@ class Utils:
         # Rotate left and check for detected rings.
         while(time.time() - start_time < ring_scan_duration):
             self._rot_pub.publish(msg)  # Publish angular velocity.
-            if self._detection_counter >= 3:  # If found ring 3 or more times, declare ring found.
+            if self._detection_counter >= 1:  # If found ring 3 or more times, declare ring found.
                 self._detection_counter = 0
+                self._subs.unregister()
                 return True
             scan_loop_rate.sleep()
         self._detection_counter = 0
+        self._subs.unregister()
         return False
 
 
@@ -151,18 +158,18 @@ class Utils:
         perform terminal approach to the ring.
         """
         self._tah.subscribe_to_feedback()
-        self._cdt.subscribe()
+        # self._cdt.subscribe()
         rospy.sleep(self._terminal_approach_duration)
         
         # TODO: say colour of ring.
-        print self._cdt.get_ring_color()
+        # print self._cdt.get_ring_color()
         
         # Go straight to pick up ring.
-        self._tah.sprint(10, forward=True)  # Final run to pick up the ring.
+        self._tah.sprint(13, forward=True)  # Final run to pick up the ring.
         self._tah.unsubscribe_from_feedback()
-        self._tah.sprint(20, forward=False)  # Reverse (to check if ring picked up).
+        self._tah.sprint(3.6, forward=False)  # Reverse (to check if ring picked up).
 
-    def _callback(data):
+    def _callback(self, data):
         """
         callback called when topic published on /toroids. Used to count ring detections.
         """
@@ -195,15 +202,37 @@ if __name__ == "__main__":
     # Initialize action client
     ac_chkpnts = actionlib.SimpleActionClient("move_base", MoveBaseAction)
 
-    # Set array of checkpoints.
-    checkpoints = np.array([[-1.276, 2.121, 0.850], [0.421, 0.166, 0.597], 
-                            [2.195, 0.723, 0.999], [1.832, 2.986, 0.882], [0.036, 2.124, 0.855]])
+    # Define array of checkpoints.
+    checkpoints = np.array(
+        [[0.105893270894, 0.136317363463],
+        [-0.0343030632612, 2.70417335956],
+        [1.31084515827, 1.51287972294],
+        [2.81970682896, 1.79192063586],
+        [1.91655018277, 0.858679839984], 
+        [0.863168808613, 2.11869023203],
+        [2.09860654436, 3.02047163568],
+        [1.97930727727, 2.97823109257]])
+
+    # Define array of orientations for
+    checkpoint_orientations = np.array(
+        [[0.858581771733, 0.512676643946],
+        [-0.468302282172, 0.883568317966],
+        [-0.996140868632, 0.0877688432288],
+        [-0.99516226678, 0.098244912165],
+        [0.787886357936, 0.615820661377],
+        [0.0828900295388, 0.996558700229],
+        [-0.588117419044, 0.808775556887],
+        [-0.982367777334, 0.186958685423]])
     
     # Create instance of Utils class.
     ut = Utils(window_size=WINDOW_SIZE, target_center_x=TARGET_CENTER_X, terminal_approach_duration=TERMINAL_APPROACH_DURATION)
 
     # Initialize counter of collected rings.
     collected_rings_counter = 0
+
+    # Initialize coordinate transforms buffer.
+    tf2_buffer = tf2_ros.Buffer()
+    tf2_listener = tf2_ros.TransformListener(tf2_buffer)
     
     # Wait for map cache to fill.
     rospy.sleep(5)
@@ -212,11 +241,13 @@ if __name__ == "__main__":
     while checkpoints.shape[0] > 0:
         
         # Get robot's current position.
+
         trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
-        robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z])
+        robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y])
         
         # Get index of closest checkpoint.
         idx_nxt = np.argmin((lambda x1, x2 : np.sum(np.abs(x1 - x2)**2.0, 1)**(1.0/2.0))(robot_pos, checkpoints))
+	print "resolving next checkpoint"
     
         # Initialize next goal from closest checkpoint and visit it.
         goal_chkpt = MoveBaseGoal()
@@ -224,7 +255,8 @@ if __name__ == "__main__":
         goal_chkpt.target_pose.header.stamp = rospy.Time.now()
         goal_chkpt.target_pose.pose.position.x = checkpoints[idx_nxt, 0]
         goal_chkpt.target_pose.pose.position.y = checkpoints[idx_nxt, 1]
-        goal_chkpt.target_pose.pose.orientation.z = checkpoints[idx_nxt, 2]
+        goal_chkpt.target_pose.pose.orientation.z = checkpoint_orientations[idx_nxt, 0]
+        goal_chkpt.target_pose.pose.orientation.w = checkpoint_orientations[idx_nxt, 1]
 
         goal_chkpnt_status = GoalStatus.LOST  # Set status for next checkpoint goal.
         ac_chkpnts.send_goal(goal_chkpt)  # Send checkpoint goal.
@@ -241,25 +273,28 @@ if __name__ == "__main__":
             # Handle abortions.
             if goal_chkpnt_status == GoalStatus.ABORTED or goal_chkpnt_status == GoalStatus.REJECTED:
                 rospy.loginfo("Checkpoint resolution goal aborted")
+                checkpoints = np.delete(checkpoints, (idx_nxt), axis=0)
+                checkpoint_orientations = np.delete(checkpoint_orientations, (idx_nxt), axis=0)
                 break
 
             if goal_chkpnt_status == GoalStatus.SUCCEEDED:
 
                 ## RING DETECTION AND COLLECTION PROCEDURE ##
-                
                 terminal_approach_performed_flg = False
                 position_resolved_flg = False
             
                 while not position_resolved_flg:
                     # See if ring detected in initial position.
-                    detected_flg = detect_ring()
+                    print "detecting ring"
+                    detected_flg = ut.detect_ring()
                     if detected_flg:
-                        perform_terminal_approach()
+                        ut.perform_terminal_approach()
                         terminal_approach_performed_flg = True
                     else:
-                        scan_res = ut.ring_scan()
+                        print "performing scan"
+                        scan_res = ut.ring_scan(2)
                         if scan_res:
-                            perform_terminal_approach()
+                            ut.perform_terminal_approach()
                             terminal_approach_performed_flg = True
                         else:
                             position_resolved_flg = True
@@ -268,5 +303,6 @@ if __name__ == "__main__":
                                 collected_rings_counter += 1
 
                 checkpoints = np.delete(checkpoints, (idx_nxt), axis=0)
+                checkpoint_orientations = np.delete(checkpoint_orientations, (idx_nxt), axis=0)
                 ##############################
 

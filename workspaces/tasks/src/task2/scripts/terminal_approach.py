@@ -21,6 +21,7 @@ class TerminalApproachHandler:
         # Define velocity publisher.
         self.vel_pub = rospy.Publisher('/cmd_vel_mux/input/navi', Twist, queue_size=1)
         self.mov = Twist()  # Define velocity message instance.
+	self._corrections_counter = 0
 
 
 
@@ -39,8 +40,11 @@ class TerminalApproachHandler:
         (data.feedback.target_center_x - data.feedback.center_x) + data.feedback.window_size
         
         # Set angular velocity as a function of the offset (larger offset, larger linear velocity).
-        self.mov.angular.z = np.sign(x_offset)*self.callib_coeff_agl
-        self.mov.linear.x = 0.1
+	if self._corrections_counter % 4 == 0:
+	    self.mov.angular.z = np.sign(x_offset)*self.callib_coeff_agl
+        else:
+	    self.mov.angular.z = 0
+        self.mov.linear.x = 0.03
 
         # publish velocity message.
         self.vel_pub.publish(self.mov)
