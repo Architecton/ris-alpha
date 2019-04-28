@@ -1,12 +1,14 @@
 
 "use strict";
 
-let TerminalApproach = require('./TerminalApproach.js')
-let RingApproachPoint = require('./RingApproachPoint.js')
+let GetRingColor = require('./GetRingColor.js')
 let ValidRegionsMap = require('./ValidRegionsMap.js')
+let RingApproachPoint = require('./RingApproachPoint.js')
+let TerminalApproach = require('./TerminalApproach.js')
 
 module.exports = {
-  TerminalApproach: TerminalApproach,
-  RingApproachPoint: RingApproachPoint,
+  GetRingColor: GetRingColor,
   ValidRegionsMap: ValidRegionsMap,
+  RingApproachPoint: RingApproachPoint,
+  TerminalApproach: TerminalApproach,
 };
