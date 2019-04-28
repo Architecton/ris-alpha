@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 ### Imports ###
+
 import rospy
 import numpy as np
 
@@ -22,6 +23,7 @@ from colour_detector import ColourDetector
 import time
 
 import pdb
+
 ### /IMPORTS ###
 
 
@@ -140,9 +142,11 @@ class Utils:
             self._rot_pub.publish(msg)  # Publish angular velocity.
             if self._detection_counter >= 3:  # If found ring 3 or more times, declare ring found.
                 self._detection_counter = 0
+                self._subs.unregister()
                 return True
             scan_loop_rate.sleep()
         self._detection_counter = 0
+        self._subs.unregister()
         return False
 
 
