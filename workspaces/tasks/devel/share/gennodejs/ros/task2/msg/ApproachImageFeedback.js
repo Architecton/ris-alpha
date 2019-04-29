@@ -23,6 +23,7 @@ class ApproachImageFeedback {
       this.center_y = null;
       this.minor_axis = null;
       this.major_axis = null;
+      this.dpt = null;
     }
     else {
       if (initObj.hasOwnProperty('timestamp')) {
@@ -55,6 +56,12 @@ class ApproachImageFeedback {
       else {
         this.major_axis = 0;
       }
+      if (initObj.hasOwnProperty('dpt')) {
+        this.dpt = initObj.dpt
+      }
+      else {
+        this.dpt = 0.0;
+      }
     }
   }
 
@@ -70,6 +77,8 @@ class ApproachImageFeedback {
     bufferOffset = _serializer.int32(obj.minor_axis, buffer, bufferOffset);
     // Serialize message field [major_axis]
     bufferOffset = _serializer.int32(obj.major_axis, buffer, bufferOffset);
+    // Serialize message field [dpt]
+    bufferOffset = _serializer.float32(obj.dpt, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -87,11 +96,13 @@ class ApproachImageFeedback {
     data.minor_axis = _deserializer.int32(buffer, bufferOffset);
     // Deserialize message field [major_axis]
     data.major_axis = _deserializer.int32(buffer, bufferOffset);
+    // Deserialize message field [dpt]
+    data.dpt = _deserializer.float32(buffer, bufferOffset);
     return data;
   }
 
   static getMessageSize(object) {
-    return 24;
+    return 28;
   }
 
   static datatype() {
@@ -101,7 +112,7 @@ class ApproachImageFeedback {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return '9f0d914c11b2e37db5f51064189d6c63';
+    return '48f6d07ab2de708512ad475e0ac59310';
   }
 
   static messageDefinition() {
@@ -113,7 +124,7 @@ class ApproachImageFeedback {
     int32 center_y
     int32 minor_axis
     int32 major_axis
-    
+    float32 dpt
     `;
   }
 
@@ -156,6 +167,13 @@ class ApproachImageFeedback {
     }
     else {
       resolved.major_axis = 0
+    }
+
+    if (msg.dpt !== undefined) {
+      resolved.dpt = msg.dpt;
+    }
+    else {
+      resolved.dpt = 0.0
     }
 
     return resolved;

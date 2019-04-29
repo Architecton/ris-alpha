@@ -55,8 +55,6 @@ class Toroid:
 
         depth_img = depth_img_original
 
-        start = time.time()
-
         depth_img_edge = np.zeros((depth_img.shape[0], depth_img.shape[1]), dtype="uint8")
 
         for x in range(0,6):
@@ -76,6 +74,9 @@ class Toroid:
             eroded_img = cv2.erode(depth_img_tmp, kernel, iterations=1)
             depth_img_edgetmp = depth_img_tmp - eroded_img
             depth_img_edge = np.uint8(np.logical_or(depth_img_edge, depth_img_edgetmp))
+
+        # Set for future extraction of detected ring depth
+        depth_img = np.uint8(np.logical_and(depth_img < self.MAX_DPT, depth_img > self.MIN_DPT))
 
         # Extract contours
         _, contours, _ = cv2.findContours(depth_img_edge, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
@@ -113,9 +114,6 @@ class Toroid:
                     if ((is_unique or len(candidates) == 0) and (1.1 < max(e1[1][0]/e2[1][0], e2[1][0]/e1[1][0]) < 2.3)):
                         candidates.append((e1,e2))                              
 
-        end = time.time()
-        print end - start
-
         # Build an array of detected Rings
         aif = ApproachImageFeedback()
         found = 0
@@ -134,7 +132,7 @@ class Toroid:
             if (e1[1][0] > e2[1][0] and e1[1][1] > e2[1][1]):
                 outer_elp = e1
             else:
-                outer_elp = e2     
+                outer_elp = e2  
 
             # DEVONLY: Visualize camera output
             x = np.uint16(round(outer_elp[0][0]))
@@ -145,6 +143,15 @@ class Toroid:
             # NEW >>
             depth_img_mask = np.zeros((depth_img_original.shape[0], depth_img_original.shape[1]))
             depth_img_mask[(max(y-h/2, 0)):(min(y+h/2, 480)), (max(x-w/2, 0)):(min(x+w/2, 640))] = depth_img[(max(y-h/2, 0)):(min(y+h/2, 480)), (max(x-w/2, 0)):(min(x+w/2, 640))]
+
+            # Setting the inner part of the detected ellipse (minor axis) to 0
+            # This is needed because of previous OR-ing on image edges, so we don't know which
+            # interval produced the detected ellipse 
+            r = min(w, h)
+            y_t,x_t = np.ogrid[-y:depth_img.shape[0]-y, -x:depth_img.shape[1]-x]
+            inner_mask = x_t*x_t + y_t*y_t <= r*r
+            depth_img_mask[inner_mask] = 0
+
             depth_val_vector = depth_img_original[depth_img_mask == 1]
             depth_val_vector = depth_val_vector[np.logical_not(np.isnan(depth_val_vector))]
             # <<
@@ -175,8 +182,8 @@ class Toroid:
             #aif.major_axis = np.max(outer_elp[1])
             aif.major_axis = h
             # aif.im = np.ravel(self.bgr_img)
-            # aif.dpt = np.median(depth_val_vector)
-            # print np.median(depth_val_vector)
+            aif.dpt = np.median(depth_val_vector)
+            print np.median(depth_val_vector)
 
             #print np.median(depth_img_filtered)
 
@@ -186,8 +193,8 @@ class Toroid:
             self.toroid_pub.publish(aif)
 
         # DEVONLY: Visualize camera output
-        # cv2.imshow('Live feed', depth_img_edge*255)
-        # cv2.waitKey(1)
+        cv2.imshow('Live feed', depth_img_edge*255)
+        cv2.waitKey(1)
 
 def main():
 

@@ -1,16 +1,16 @@
 
 "use strict";
 
-let ColourClassificationSrv = require('./ColourClassificationSrv.js')
 let TerminalApproach = require('./TerminalApproach.js')
+let RingApproachPoint = require('./RingApproachPoint.js')
 let ValidRegionsMap = require('./ValidRegionsMap.js')
 let FeatureBuilder = require('./FeatureBuilder.js')
-let RingApproachPoint = require('./RingApproachPoint.js')
+let ColourClassificationSrv = require('./ColourClassificationSrv.js')
 
 module.exports = {
-  ColourClassificationSrv: ColourClassificationSrv,
   TerminalApproach: TerminalApproach,
+  RingApproachPoint: RingApproachPoint,
   ValidRegionsMap: ValidRegionsMap,
   FeatureBuilder: FeatureBuilder,
-  RingApproachPoint: RingApproachPoint,
+  ColourClassificationSrv: ColourClassificationSrv,
 };

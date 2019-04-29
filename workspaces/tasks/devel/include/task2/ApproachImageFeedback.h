@@ -28,14 +28,16 @@ struct ApproachImageFeedback_
     , center_x(0)
     , center_y(0)
     , minor_axis(0)
-    , major_axis(0)  {
+    , major_axis(0)
+    , dpt(0.0)  {
     }
   ApproachImageFeedback_(const ContainerAllocator& _alloc)
     : timestamp()
     , center_x(0)
     , center_y(0)
     , minor_axis(0)
-    , major_axis(0)  {
+    , major_axis(0)
+    , dpt(0.0)  {
   (void)_alloc;
     }
 
@@ -55,6 +57,9 @@ struct ApproachImageFeedback_
 
    typedef int32_t _major_axis_type;
   _major_axis_type major_axis;
+
+   typedef float _dpt_type;
+  _dpt_type dpt;
 
 
 
@@ -134,12 +139,12 @@ struct MD5Sum< ::task2::ApproachImageFeedback_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "9f0d914c11b2e37db5f51064189d6c63";
+    return "48f6d07ab2de708512ad475e0ac59310";
   }
 
   static const char* value(const ::task2::ApproachImageFeedback_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x9f0d914c11b2e37dULL;
-  static const uint64_t static_value2 = 0xb5f51064189d6c63ULL;
+  static const uint64_t static_value1 = 0x48f6d07ab2de7085ULL;
+  static const uint64_t static_value2 = 0x12ad475e0ac59310ULL;
 };
 
 template<class ContainerAllocator>
@@ -164,6 +169,7 @@ int32 center_x\n\
 int32 center_y\n\
 int32 minor_axis\n\
 int32 major_axis\n\
+float32 dpt\n\
 ";
   }
 
@@ -187,6 +193,7 @@ namespace serialization
       stream.next(m.center_y);
       stream.next(m.minor_axis);
       stream.next(m.major_axis);
+      stream.next(m.dpt);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -215,6 +222,8 @@ struct Printer< ::task2::ApproachImageFeedback_<ContainerAllocator> >
     Printer<int32_t>::stream(s, indent + "  ", v.minor_axis);
     s << indent << "major_axis: ";
     Printer<int32_t>::stream(s, indent + "  ", v.major_axis);
+    s << indent << "dpt: ";
+    Printer<float>::stream(s, indent + "  ", v.dpt);
   }
 };
 
