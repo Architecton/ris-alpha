@@ -4,11 +4,12 @@ import rospy
 
 from task2.srv import FeatureBuilder
 
+import pdb
+
 class Tester:
 
     def __init__(self):
         rospy.wait_for_service('feature_builder')  # Wait for service to come online.
-	print "here"
         try:
             self._feature_builder_srv = rospy.ServiceProxy('feature_builder', FeatureBuilder)  # Initialize service proxy.
         except rospy.ServiceException, e:
@@ -20,10 +21,10 @@ class Tester:
         """
         Run test of the classification service chain. 
         """
-
         self._feature_builder_srv(1)  # Start building feature matrix.
         rospy.sleep(duration)  # sleep for specified number of minutes.
-        return self._feature_builder_srv(0)  # classify built features matrix and return prediction with most votes.
+        res = self._feature_builder_srv(0)
+        return res  # classify built features matrix and return prediction with most votes.
 
 
 if __name__ == "__main__":

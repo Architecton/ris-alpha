@@ -244,7 +244,7 @@ class RingImageProcessor:
         return vals[np.argmax(ct)]
 
     def clear(self):
-        self._colour_features_mat = np.empty((0, num_bins*3), dtype=np.int)  # Matrix for storing features
+        self._colour_features_mat = np.empty((0, self._num_bins*3), dtype=np.int)  # Matrix for storing features
         
 
 

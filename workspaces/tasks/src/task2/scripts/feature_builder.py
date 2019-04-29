@@ -13,6 +13,8 @@ from task2.msg import ApproachImageFeedback
 
 from colour_detection import RingImageProcessor
 
+import pdb
+
 class FeatureBuilderSrv:
 
     """
@@ -29,7 +31,7 @@ class FeatureBuilderSrv:
 
         self._ring_image = np.empty(0, dtype=np.uint8)  # Next colour image from feedback.
         self._cv_bridge = CvBridge()  # cv bridge.
-
+	
         rospy.wait_for_service('ring_colour_classification')  # Wait for classification service to come online (on workstation).
         try:
             self._classification_serv = rospy.ServiceProxy('ring_colour_classification', ColourClassificationSrv)  # Initialize service proxy.
@@ -49,6 +51,8 @@ class FeatureBuilderSrv:
         Returns:
             None
         """
+
+	print "hopsasa"
 
         center_y = data.center_y  # Get y coordinate of center of ring.
         center_x = data.center_x  # Get x coordinate of center of ring.
@@ -80,7 +84,7 @@ class FeatureBuilderSrv:
         Returns:
             None
         """
-
+	
         # Convert to bgr image
         try:
             received_image = self._cv_bridge.imgmsg_to_cv2(data, 'bgr8')
@@ -111,7 +115,7 @@ class FeatureBuilderSrv:
         self._img_subscriber.unregister()
 
 
-    def _get_ring_color(self):
+    def _get_ring_colour(self):
 
         """
         Get prediction of ring colour based on produced features.
@@ -127,14 +131,14 @@ class FeatureBuilderSrv:
         """
         Callback used to handle the requests for the service.
         """
-
         # If request to start recording.
         if data.flg == 1:
             self._subscribe()
-            return ''
+            return "Fail"
         else:
             self._unsubscribe()
-            return self._get_ring_color()
+            res = self._get_ring_colour()
+            return res.res
 
 
     def start_service(self):
@@ -145,6 +149,7 @@ class FeatureBuilderSrv:
 
         rospy.init_node('feature_builder_service')  # Initialize node and name it.
         rospy.Service('feature_builder', FeatureBuilder, self._serv_callback)  # Initialize service and name it.
+        print "before spin"
         rospy.spin()  # Keep node alive until shut down.
 
 

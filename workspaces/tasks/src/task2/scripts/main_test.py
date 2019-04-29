@@ -185,7 +185,7 @@ class Utils:
         rospy.sleep(self._terminal_approach_duration)
         
         # TODO: get and say colour of ring.
-        ring_col = self._feature_builder_serv(0)
+        ring_col = self._feature_builder_serv(0).res
         print ring_col
         
         # Go straight to pick up ring.
@@ -229,7 +229,7 @@ class Utils:
         callback called when topic published on /toroids. Used to count ring detections.
         """
         self.offset_px += data.center_x - 640/2
-        self.depth += data.depth
+        self.depth += data.dpt
         self._detection_counter += 1  # Increment counter of detected rings.
 
 
@@ -332,8 +332,8 @@ if __name__ == "__main__":
             ac_chkpnts.wait_for_result(rospy.Duration(1.0))
 
             # mark robot trail.
-            trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
-            ut.mark_trail(trans)
+            # trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
+            # ut.mark_trail(trans)
 
             # Get checkpoint resolution goal status.
             goal_chkpnt_status = ac_chkpnts.get_state()
@@ -374,8 +374,8 @@ if __name__ == "__main__":
                         if scan_res:
 
                             # Mark ring.
-                            trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
-                            ut.mark_ring(trans, ut.depth, ut.offset_px)
+                            #trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
+                            #ut.mark_ring(trans, ut.depth, ut.offset_px)
 
                             # Perform terminal approach.
                             ut.perform_terminal_approach()
