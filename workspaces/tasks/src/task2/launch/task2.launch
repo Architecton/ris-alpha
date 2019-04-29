@@ -2,4 +2,5 @@
 	<node pkg="task2" type="toroid_detector3.py" name="toroid_detector" output="screen" />
 	<node pkg="task2" type="terminal_approach.py" name="terminal_approach" output="screen" />
 	<node pkg="task2" type="main_test.py" name="main" output="screen" />
+	<node pkg="task2" type="feature_builder.py" name="feature_builder" output="screen" />
 </launch>

@@ -49,6 +49,7 @@ class TerminalApproachHandler:
         # Initialize corrections message.
         self._corr = TerminalApproachFeedback()
         rospy.wait_for_service('terminal_approach')  # Wait for service to come online.
+	print "terminal_approach service online"
         try:
             self._corrections_serv = rospy.ServiceProxy('terminal_approach', TerminalApproach)  # Initialize service proxy.
         except rospy.ServiceException, e:
@@ -121,6 +122,7 @@ class Utils:
         self._rot_pub = rospy.Publisher('/cmd_vel_mux/input/navi', Twist, queue_size=1)
 
         rospy.wait_for_service('feature_builder')  # Wait for service to come online.
+	print "feature_builder service online"
         try:
             self._feature_builder_serv = rospy.ServiceProxy('feature_builder', FeatureBuilder)  # Initialize service proxy.
         except rospy.ServiceException, e:
@@ -191,7 +193,7 @@ class Utils:
         # Go straight to pick up ring.
         self._tah.sprint(13, forward=True)  # Final run to pick up the ring.
         self._tah.unsubscribe_from_feedback()
-        self._tah.sprint(3.6, forward=False)  # Reverse (to check if ring picked up).
+        self._tah.sprint(4.2, forward=False)  # Reverse (to check if ring picked up).
         self.offset_px = 0  # Reset mean offset and depth values.
         self.depth = 0
 
@@ -300,9 +302,11 @@ if __name__ == "__main__":
     
     # Wait for map cache to fill.
     rospy.sleep(5)
+    print "Here"
 
     # While there are unresolved checkpoints.
     while checkpoints.shape[0] > 0 and not done:
+	print "I am here"
         
         # Get robot's current position.
 
@@ -355,14 +359,14 @@ if __name__ == "__main__":
                 while not position_resolved_flg and attempt_counter < NUM_ATTEMPTS:
 
                     # See if ring detected in initial position.
-                    rospy.loginfor("detecting ring")
+                    rospy.loginfo("detecting ring")
 
                     detected_flg = ut.detect_ring()
                     if detected_flg:
                         
                         # Mark ring.
-                        trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
-                        ut.mark_ring(trans, ut.depth, ut.offset_px)
+                        #trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
+                        #ut.mark_ring(trans, ut.depth, ut.offset_px)
 
                         # Perform terminal approach.
                         ut.perform_terminal_approach()
