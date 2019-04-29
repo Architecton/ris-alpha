@@ -17,11 +17,11 @@ import tf2_geometry_msgs
 
 from geometry_msgs.msg import Point, Vector3, PoseStamped, Twist
 
-from task2.srv import TerminalApproach
+from task2.srv import TerminalApproach, FeatureBuilder
 from task2.msg import TerminalApproachFeedback
 from task2.msg import ApproachImageFeedback
 
-# from colour_detector import ColourDetector
+from colour_detector import ColourFeatureGenerator
 
 import time
 
@@ -33,6 +33,7 @@ import pdb
 ### TERMINAL APPROACH ###
 
 class TerminalApproachHandler:
+
 
     def __init__(self, window_size, target_center_x):
 
@@ -51,6 +52,7 @@ class TerminalApproachHandler:
         except rospy.ServiceException, e:
             print "Service error: {0}".format(e.message)
 
+
     def _image_feedback_callback(self, data):
         """
         callback called when feedback about ring center from /toroids topic received.
@@ -63,6 +65,7 @@ class TerminalApproachHandler:
 
         # Call service to apply correction.
         self._corrections_serv(self._corr)
+
 
     def sprint(self, sprint_duration, forward):
         """
@@ -79,12 +82,14 @@ class TerminalApproachHandler:
             # msg.angular.z = -msg.angular.z
             sprint_loop_rate.sleep()
 
+
     def subscribe_to_feedback(self):
         """
         Subscribe to feedback about ring center location.
         """
 
         self._feedback_subscriber = rospy.Subscriber('toroids', ApproachImageFeedback, self._image_feedback_callback)
+
 
     def unsubscribe_from_feedback(self):
         """
@@ -108,11 +113,11 @@ class Utils:
         # publisher of Twist messages.
         self._rot_pub = rospy.Publisher('/cmd_vel_mux/input/navi', Twist, queue_size=1)
 
-        # Load classifier.
-        #self._clf = load('ring_colour_classifier.joblib')
-        # Instantiate ColourDetector instance
-        #self._cdt = ColourDetector(self._clf, 100)
-
+        rospy.wait_for_service('feature_builder')  # Wait for service to come online.
+        try:
+            self._feature_builder_serv = rospy.ServiceProxy('feature_builder', FeatureBuilder)  # Initialize service proxy.
+        except rospy.ServiceException, e:
+            print "Service error: {0}".format(e.message)
 
     def detect_ring(self):
         """
@@ -131,7 +136,7 @@ class Utils:
 
     def ring_scan(self, ring_scan_duration):
         """
-            perform a slow rotational search for rings
+        perform a slow rotational search for rings
         """
 
         msg = Twist()
@@ -158,11 +163,15 @@ class Utils:
         perform terminal approach to the ring.
         """
         self._tah.subscribe_to_feedback()
-        # self._cdt.subscribe()
+
+        # Start constructing colour features matrix.
+        self._feature_builder_serv(1)
+
         rospy.sleep(self._terminal_approach_duration)
         
-        # TODO: say colour of ring.
-        # print self._cdt.get_ring_color()
+        # TODO: get and say colour of ring.
+        ring_col = self._feature_builder_serv(0)
+        print ring_col
         
         # Go straight to pick up ring.
         self._tah.sprint(13, forward=True)  # Final run to pick up the ring.

@@ -71,7 +71,6 @@ add_service_files(
   TerminalApproach.srv
   ValidRegionsMap.srv
   RingApproachPoint.srv
-  GetRingColor.srv
 )
 
 ## Generate actions in the 'action' folder

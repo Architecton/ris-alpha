@@ -41,11 +41,11 @@ class ColourDetector:
         # Compute coordiantes of the top left corner and bottom right corners of the
         # cropped square.
         l_u = np.array([center_y - min_axis/2, center_x - min_axis/2])
-	l_u[0] = np.clip(l_u[0], 0, 480)
-	l_u[1] = np.clip(l_u[1], 0, 640)
+        l_u[0] = np.clip(l_u[0], 0, 480)
+        l_u[1] = np.clip(l_u[1], 0, 640)
         r_d = np.array([center_y + min_axis/2, center_x + min_axis/2])
-	r_d[0] = np.clip(r_d[0], 0, 480)
-	r_d[1] = np.clip(r_d[1], 0, 640)
+        r_d[0] = np.clip(r_d[0], 0, 480)
+        r_d[1] = np.clip(r_d[1], 0, 640)
 
         if self._ring_image.shape[0] > 0:
             # Add image and class to feature generator instance

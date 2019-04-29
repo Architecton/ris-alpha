@@ -63,7 +63,8 @@ class ColourFeatureGenerator:
         self._img_counter = 0  # image index counter
         self._img_dict = dict()  # Dictionary for storing images
         self._target_dict = dict()  # Dictionary for storing target values
-    
+   
+
     def add_image(self, img, target_val, l_u, r_d):
 
         """
@@ -82,6 +83,25 @@ class ColourFeatureGenerator:
         self._img_dict[self._img_counter] = img[l_u[0]:r_d[0]+1, l_u[1]:r_d[1]+1]  # Add cropped image to dictionary.
         self._target_dict[self._img_counter] = target_val  # Add target value to dictionary.
         self._img_counter += 1  # Increment image index counter.
+
+
+    def add_image_new(self, img, l_u, r_d):
+
+        """
+        Add image to dictionary
+
+        Args:
+            img : Array[np.int8] -- image to add to dictionary of images
+            l_u : Array[np.int8] -- left upper corner of square containing the part of image to use to compute feature
+            r_d : Array[np.int8] -- right lower corner of square containing the part of image to use to compute feature
+
+        Returns:
+            None
+        """        
+
+        self._img_dict[self._img_counter] = img[l_u[0]:r_d[0]+1, l_u[1]:r_d[1]+1]  # Add cropped image to dictionary.
+        self._img_counter += 1  # Increment image index counter.
+
 
     def compute_colour_features(self):
         """
@@ -105,6 +125,29 @@ class ColourFeatureGenerator:
             target[img_idx] = self._target_dict[img_idx]  # Add target value to vector of target values.
 
         return colour_features_mat, target  # Return matrix of feature vectors and target values
+
+
+    def compute_colour_features_new(self):
+        """
+        Compute colour features for each image stored in image dictionary (no target value)
+
+        Args:
+            -
+            
+        Returns:
+           Array[np.int64] -- matrix of colour features
+        """
+
+        colour_features_mat = np.empty((self._img_counter, self._num_bins*3), dtype=np.int)  # Allocate matrix for storing feature vectors.
+        for img_idx in self._img_dict.keys():
+            hist_b, _ = np.histogram(self._img_dict[img_idx][:, :, 0], bins=self._num_bins)
+            hist_g, _ = np.histogram(self._img_dict[img_idx][:, :, 1], bins=self._num_bins)
+            hist_r, _ = np.histogram(self._img_dict[img_idx][:, :, 2], bins=self._num_bins)
+            feature = np.hstack((hist_b, hist_g, hist_r))  # Compute feature from channel histograms.
+            colour_features_mat[img_idx, :] = feature  # Add feature to features matrix.
+
+        return colour_features_mat  # Return matrix of feature vectors and target values
+
 
     def clear(self):
         """
