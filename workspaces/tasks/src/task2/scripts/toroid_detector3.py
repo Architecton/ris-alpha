@@ -3,6 +3,7 @@
 import rospy
 import cv2
 import numpy as np
+import time
 
 import pdb
 from cv2 import convertScaleAbs
@@ -54,21 +55,27 @@ class Toroid:
 
         depth_img = depth_img_original
 
-        # Set all depths greater than MAX_DPT and smaller than MIN_DPT to 0
-        depth_img = np.uint8(np.logical_and(depth_img < self.MAX_DPT, depth_img > self.MIN_DPT))
+        start = time.time()
 
-        # Perform closing operation
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (13, 13))
-        depth_img = cv2.morphologyEx(depth_img, cv2.MORPH_CLOSE, kernel)
+        depth_img_edge = np.zeros((depth_img.shape[0], depth_img.shape[1]), dtype="uint8")
 
-        # Erode a tiny bit
-        #kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
-        #depth_img = cv2.erode(depth_img, kernel, iterations=4)
+        for x in range(0,6):
+            # Set all depths greater than MAX_DPT and smaller than MIN_DPT to 0
+            depth_img_tmp = np.uint8(np.logical_and(depth_img < (self.MAX_DPT - x * 100.0), depth_img > self.MIN_DPT))
 
-        # Extract the edge
-        kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
-        eroded_img = cv2.erode(depth_img, kernel, iterations=1)
-        depth_img_edge = depth_img - eroded_img
+            # Perform closing operation
+            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (13, 13))
+            depth_img_tmp = cv2.morphologyEx(depth_img_tmp, cv2.MORPH_CLOSE, kernel)
+
+            # Erode a tiny bit
+            #kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
+            #depth_img = cv2.erode(depth_img, kernel, iterations=4)
+
+            # Extract the edge
+            kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
+            eroded_img = cv2.erode(depth_img_tmp, kernel, iterations=1)
+            depth_img_edgetmp = depth_img_tmp - eroded_img
+            depth_img_edge = np.uint8(np.logical_or(depth_img_edge, depth_img_edgetmp))
 
         # Extract contours
         _, contours, _ = cv2.findContours(depth_img_edge, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
@@ -82,7 +89,7 @@ class Toroid:
                 x,y,w,h = cv2.boundingRect(cnt)
 
                 if(y+h/2 >= self.upp_bnd_ctr and y+h/2 <= self.low_bnd_ctr):
-                    ellipse = cv2.fitEllipse(cnt)
+                    ellipse = cv2.fitEllipseDirect(cnt)
                     elps.append(ellipse)
 
         # Find two elipses with same centers
@@ -106,9 +113,15 @@ class Toroid:
                     if ((is_unique or len(candidates) == 0) and (1.1 < max(e1[1][0]/e2[1][0], e2[1][0]/e1[1][0]) < 2.3)):
                         candidates.append((e1,e2))                              
 
+        end = time.time()
+        print end - start
+
         # Build an array of detected Rings
         aif = ApproachImageFeedback()
         found = 0
+
+        # cv2.imshow('Edges', depth_img_edge*255)
+        # cv2.waitKey(1)
 
         for c in candidates:
 
@@ -128,19 +141,6 @@ class Toroid:
             y = np.uint16(round(outer_elp[0][1]))
             w = np.uint16(round(outer_elp[1][0]))
             h = np.uint16(round(outer_elp[1][1]))
-
-            # TMP
-            #depth_img_edge = depth_img_edge * 255
-            #cv2.line(depth_img_edge, (x, y), (x, y), (255, 255, 255), 5)
-            #cv2.line(depth_img_edge, (x-w/2, y), (x+w/2, y), (255,255,255), 2)
-            #cv2.line(depth_img_edge, (x, y-h/2), (x, y+h/2), (255,255,255), 2)
-            #cv2.imshow('Live feed', depth_img_edge)
-            #cv2.waitKey(1)
-            #return
-
-            # cv2.imshow('Live feed', depth_img[(y-h/2):(y+h/2), (x-w/2):(x+w/2)]*255)
-            # cv2.waitKey(1)
-            # return
 
             # NEW >>
             depth_img_mask = np.zeros((depth_img_original.shape[0], depth_img_original.shape[1]))
@@ -176,7 +176,7 @@ class Toroid:
             aif.major_axis = h
             # aif.im = np.ravel(self.bgr_img)
             # aif.dpt = np.median(depth_val_vector)
-            print np.median(depth_val_vector)
+            # print np.median(depth_val_vector)
 
             #print np.median(depth_img_filtered)
 
@@ -186,8 +186,8 @@ class Toroid:
             self.toroid_pub.publish(aif)
 
         # DEVONLY: Visualize camera output
-        cv2.imshow('Live feed', depth_img_edge*255)
-        cv2.waitKey(1)
+        # cv2.imshow('Live feed', depth_img_edge*255)
+        # cv2.waitKey(1)
 
 def main():
 

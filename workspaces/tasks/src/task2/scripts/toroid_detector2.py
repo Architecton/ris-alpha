@@ -42,12 +42,14 @@ class Toroid:
         mask = np.logical_and(depth_img < 1500.0, depth_img > 600.0)
         depth_img = depth_img * mask
 
+        print type(depth_img)
+
         # Normalize to 0..255
-        depth_img *= 255.0/depth_img.max()
+        depth_img = depth_img * (255.0/depth_img.max())
         depth_img = np.uint8(depth_img)
 
         # Apply gaussian blur
-        depth_img = cv2.GaussianBlur(depth_img, (11, 11), 0)    
+        depth_img = cv2.GaussianBlur(depth_img, (7, 7), 0)    
 
         # Setting thresholds using the global otsu
         upper, _ = cv2.threshold(depth_img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
@@ -56,6 +58,10 @@ class Toroid:
         # Canny detection
         edges = cv2.Canny(depth_img, lower, upper)
 
+        # DEVONLY: Visualize camera output
+        cv2.imshow('Output', edges)
+        cv2.waitKey(1)  
+        return
         _, contours, _ = cv2.findContours(depth_img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
         # Fit elipses to all extracted contours
@@ -69,6 +75,9 @@ class Toroid:
                 if(y+h/2 >= self.upp_bnd_ctr and y+h/2 <= self.low_bnd_ctr):
                     ellipse = cv2.fitEllipse(cnt)
                     elps.append(ellipse)
+                    cv2.ellipse(depth_img[self.upp_bnd_elps:self.low_bnd_elps], ellipse, (255, 255, 255), 2)
+
+        print len(elps)
 
         # Find two elipses with same centers
         candidates = []
@@ -130,7 +139,7 @@ class Toroid:
 
         # DEVONLY: Visualize camera output
         cv2.imshow('Output', depth_img)
-        cv2.waitKey(0)    
+        cv2.waitKey(1)    
 
 """
 def test():
