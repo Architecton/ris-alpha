@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import rospy
+import os
 import numpy as np
 from task2.srv import ColourClassificationSrv
 
@@ -18,7 +19,7 @@ class RingColourClassification:
         self._clf = clf  #  Set classifier.
         
 
-    def _perform_classification(data):
+    def _perform_classification(self, data):
 
         """
         callback that handles requests for this service. Take matrix of features, perform classification and return prediction.
@@ -31,20 +32,20 @@ class RingColourClassification:
         return vals[np.argmax(ct)]
 
 
-    def start_service():
+    def start_service(self):
         
         """
         Start service.
         """
 
-        rospy.init_node('ring_colour_classification_service')  # Initialize node and name it.
+        rospy.init_node('ring_colour_classification_service', anonymous=True)  # Initialize node and name it.
         rospy.Service('ring_colour_classification', ColourClassificationSrv, self._perform_classification)  # Initialize service and name it.
         rospy.spin()  # Keep node alive until shut down.
 
 
-if __name__ = "__main__":
+if __name__ == "__main__":
     # TODO load classifier
-    clf = load('./classifiers/ring_colour_classifier.joblib')
+    clf = load(os.path.join(os.path.dirname(__file__), './classifiers/ring_colour_classifier.joblib'))
     rc = RingColourClassification(clf)
     rc.start_service()
 
