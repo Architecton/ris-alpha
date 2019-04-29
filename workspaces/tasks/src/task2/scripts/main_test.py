@@ -197,6 +197,8 @@ if __name__ == "__main__":
     WINDOW_SIZE = 7
     TARGET_CENTER_X = 423
     TERMINAL_APPROACH_DURATION = 10
+    NUM_RINGS_TO_COLLECT = 3
+    NUM_ATTEMPTS = 3
     ################
 
     # Initialize main node.
@@ -242,12 +244,16 @@ if __name__ == "__main__":
     # Initialize coordinate transforms buffer.
     tf2_buffer = tf2_ros.Buffer()
     tf2_listener = tf2_ros.TransformListener(tf2_buffer)
+
+
+    # Flag indicating whether collection is done. 
+    done = False
     
     # Wait for map cache to fill.
     rospy.sleep(5)
 
     # While there are unresolved checkpoints.
-    while checkpoints.shape[0] > 0:
+    while checkpoints.shape[0] > 0 and not done:
         
         # Get robot's current position.
 
@@ -291,25 +297,30 @@ if __name__ == "__main__":
                 ## RING DETECTION AND COLLECTION PROCEDURE ##
                 terminal_approach_performed_flg = False
                 position_resolved_flg = False
+                attempt_counter = 0
             
-                while not position_resolved_flg:
+                while not position_resolved_flg and attempt_counter < NUM_ATTEMPTS:
                     # See if ring detected in initial position.
                     print "detecting ring"
                     detected_flg = ut.detect_ring()
                     if detected_flg:
                         ut.perform_terminal_approach()
                         terminal_approach_performed_flg = True
+                        attempt_counter += 1
                     else:
                         print "performing scan"
                         scan_res = ut.ring_scan(2)
                         if scan_res:
                             ut.perform_terminal_approach()
                             terminal_approach_performed_flg = True
+                            attempt_counter += 1
                         else:
                             position_resolved_flg = True
                             if terminal_approach_performed_flg:
                                 # TODO say that ring was successfully picked up.
                                 collected_rings_counter += 1
+                                if collected_rings_counter >= NUM_RINGS_TO_COLLECT:
+                                    done = True
 
                 checkpoints = np.delete(checkpoints, (idx_nxt), axis=0)
                 checkpoint_orientations = np.delete(checkpoint_orientations, (idx_nxt), axis=0)
