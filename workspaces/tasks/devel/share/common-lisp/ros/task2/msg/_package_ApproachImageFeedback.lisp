@@ -9,4 +9,6 @@
           MINOR_AXIS
           MAJOR_AXIS-VAL
           MAJOR_AXIS
+          DPT-VAL
+          DPT
 ))

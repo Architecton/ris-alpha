@@ -14,7 +14,7 @@
 
 (defclass task2::ApproachImageFeedback
   :super ros::object
-  :slots (_timestamp _center_x _center_y _minor_axis _major_axis ))
+  :slots (_timestamp _center_x _center_y _minor_axis _major_axis _dpt ))
 
 (defmethod task2::ApproachImageFeedback
   (:init
@@ -24,6 +24,7 @@
     ((:center_y __center_y) 0)
     ((:minor_axis __minor_axis) 0)
     ((:major_axis __major_axis) 0)
+    ((:dpt __dpt) 0.0)
     )
    (send-super :init)
    (setq _timestamp __timestamp)
@@ -31,6 +32,7 @@
    (setq _center_y (round __center_y))
    (setq _minor_axis (round __minor_axis))
    (setq _major_axis (round __major_axis))
+   (setq _dpt (float __dpt))
    self)
   (:timestamp
    (&optional __timestamp)
@@ -47,6 +49,9 @@
   (:major_axis
    (&optional __major_axis)
    (if __major_axis (setq _major_axis __major_axis)) _major_axis)
+  (:dpt
+   (&optional __dpt)
+   (if __dpt (setq _dpt __dpt)) _dpt)
   (:serialization-length
    ()
    (+
@@ -59,6 +64,8 @@
     ;; int32 _minor_axis
     4
     ;; int32 _major_axis
+    4
+    ;; float32 _dpt
     4
     ))
   (:serialize
@@ -75,6 +82,8 @@
        (write-long _minor_axis s)
      ;; int32 _major_axis
        (write-long _major_axis s)
+     ;; float32 _dpt
+       (sys::poke _dpt (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
      ;;
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
@@ -89,11 +98,13 @@
      (setq _minor_axis (sys::peek buf ptr- :integer)) (incf ptr- 4)
    ;; int32 _major_axis
      (setq _major_axis (sys::peek buf ptr- :integer)) (incf ptr- 4)
+   ;; float32 _dpt
+     (setq _dpt (sys::peek buf ptr- :float)) (incf ptr- 4)
    ;;
    self)
   )
 
-(setf (get task2::ApproachImageFeedback :md5sum-) "9f0d914c11b2e37db5f51064189d6c63")
+(setf (get task2::ApproachImageFeedback :md5sum-) "48f6d07ab2de708512ad475e0ac59310")
 (setf (get task2::ApproachImageFeedback :datatype-) "task2/ApproachImageFeedback")
 (setf (get task2::ApproachImageFeedback :definition-)
       "#coordinates of the center of the ring
@@ -102,11 +113,11 @@ int32 center_x
 int32 center_y
 int32 minor_axis
 int32 major_axis
-
+float32 dpt
 ")
 
 
 
-(provide :task2/ApproachImageFeedback "9f0d914c11b2e37db5f51064189d6c63")
+(provide :task2/ApproachImageFeedback "48f6d07ab2de708512ad475e0ac59310")
 
 
