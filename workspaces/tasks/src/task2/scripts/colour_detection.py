@@ -224,6 +224,10 @@ class RingImageProcessor:
         colour_feature_nxt = self._get_color_feature(cropped_img)
         self._colour_features_mat = np.vstack((self._colour_features_mat, colour_feature_nxt))
 
+
+    def get_colour_features_matrix(self):
+        return self._colour_features_mat
+
     
     def get_ring_color(self):
         """

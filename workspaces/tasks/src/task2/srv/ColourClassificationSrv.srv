@@ -1,3 +1,4 @@
-int64[] int_list
+int64[] features_mat
+int64 num_features
 ---
 string res

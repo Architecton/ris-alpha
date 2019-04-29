@@ -3,9 +3,17 @@
 import numpy as np
 import rospy
 
+from cv_bridge import CvBridge, CvBridgeError
+
+from sensor_msgs.msg import Image
+
 from task2.srv import ColourClassificationSrv, FeatureBuilder
 
-class FeatureBuilder:
+from task2.msg import ApproachImageFeedback
+
+from colour_detection import RingImageProcessor
+
+class FeatureBuilderSrv:
 
     """
     Build features matrix from colour image and depth image feedback and call service running on workstation to
@@ -99,8 +107,8 @@ class FeatureBuilder:
         Unsubscribe to feedback broadcasted on topics.
         """
 
-        self._depth_subscriber._unsubscribe()
-        self._img_subscriber._unsubscribe()
+        self._depth_subscriber.unregister()
+        self._img_subscriber.unregister()
 
 
     def _get_ring_color(self):
@@ -110,7 +118,7 @@ class FeatureBuilder:
         """
 
         mat = self._ring_image_processor.get_colour_features_matrix()  # Get constructed features matrix.
-        serv_res = self._classification_serv(np.ravel(mat))  # Get results of calling the classification service.
+        serv_res = self._classification_serv(np.ravel(mat), mat.shape[1])  # Get results of calling the classification service.
         self._ring_image_processor.clear()  # Clear features matrix of RingImageProcessor instance.
         return serv_res  # Return results of service.
 
@@ -121,7 +129,7 @@ class FeatureBuilder:
         """
 
         # If request to start recording.
-        if data.flag == 1:
+        if data.flg == 1:
             self._subscribe()
             return ''
         else:
@@ -142,6 +150,6 @@ class FeatureBuilder:
 
 if __name__ == '__main__':
     clf = None  # dummy classifier
-    fb = FeatureBuilder(clf, num_bins=100)  # Initialize Feature builder instance.
+    fb = FeatureBuilderSrv(clf, num_bins=100)  # Initialize Feature builder instance.
     fb.start_service()  # Start service.
 

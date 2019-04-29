@@ -1,9 +1,16 @@
+#!/usr/bin/env python
+
+import rospy
+
+from task2.srv import FeatureBuilder
+
 class Tester:
 
     def __init__(self):
-        rospy.wait_for_service('feature_builder_service')  # Wait for service to come online.
+        rospy.wait_for_service('feature_builder')  # Wait for service to come online.
+	print "here"
         try:
-            self._feature_builder_srv = rospy.ServiceProxy('feature_builder_service', FeatureBuilder)  # Initialize service proxy.
+            self._feature_builder_srv = rospy.ServiceProxy('feature_builder', FeatureBuilder)  # Initialize service proxy.
         except rospy.ServiceException, e:
             print 'Service call failed: {0}'.format(e)
 

@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
 	tf2
 	tf2_geometry_msgs
 	message_generation
+	map_server
 )
 
 find_package( OpenCV REQUIRED )
@@ -71,6 +72,8 @@ add_service_files(
   TerminalApproach.srv
   ValidRegionsMap.srv
   RingApproachPoint.srv
+  FeatureBuilder.srv
+  ColourClassificationSrv.srv
 )
 
 ## Generate actions in the 'action' folder
