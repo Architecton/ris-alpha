@@ -23,6 +23,8 @@ from task2.msg import ApproachImageFeedback
 
 from colour_detector import ColourFeatureGenerator
 
+from visualizations.targetmarker import TargetMarker
+
 import time
 
 import pdb
@@ -50,7 +52,7 @@ class TerminalApproachHandler:
         try:
             self._corrections_serv = rospy.ServiceProxy('terminal_approach', TerminalApproach)  # Initialize service proxy.
         except rospy.ServiceException, e:
-            print "Service error: {0}".format(e.message)
+            rospy.loginfo("Service error: {0}".format(e.message))
 
 
     def _image_feedback_callback(self, data):
@@ -108,7 +110,12 @@ class Utils:
     def __init__(self, window_size, target_center_x, terminal_approach_duration):
         self._terminal_approach_duration = terminal_approach_duration  # Set duration of the terminal approach homing phase.
         self._tah = TerminalApproachHandler(window_size, target_center_x)  # Terminal approach handler instance.
+        self._tm = TargetMarker()
         self._detection_counter = 0  # Counter of detected rings.
+        self.offset_px = 0  # offset from center accumulator. After successful detection of ring, holds mean offset of detected rings.
+        self.depth = 0  # Depth to ring. After successful detection of ring, holds mean depth of detected rings.
+
+        self._OFFSET_AGL_INCREMENT = 0.0017098772515631948
 
         # publisher of Twist messages.
         self._rot_pub = rospy.Publisher('/cmd_vel_mux/input/navi', Twist, queue_size=1)
@@ -117,7 +124,8 @@ class Utils:
         try:
             self._feature_builder_serv = rospy.ServiceProxy('feature_builder', FeatureBuilder)  # Initialize service proxy.
         except rospy.ServiceException, e:
-            print "Service error: {0}".format(e.message)
+            rospy.loginfo("Service error: {0}".format(e.message))
+
 
     def detect_ring(self):
         """
@@ -125,14 +133,17 @@ class Utils:
         """
 
         self._subscribe()  # Subscribe to toroids topic and wait.
-        rospy.sleep(3)
+        rospy.sleep(2)
         self._subs.unregister()
-        if self._detection_counter > 10:  # If detected more than 10 rings, declare ring found.
+        if self._detection_counter > 7:  # If detected more than 7 rings, declare ring found.
+            self.offset_px /= self._detection_counter
+            self.depth /= self._detection_counter
             self._detection_counter = 0
             return True
         else:
             self._detection_counter = 0
             return False
+
 
     def ring_scan(self, ring_scan_duration):
         """
@@ -149,6 +160,8 @@ class Utils:
         while(time.time() - start_time < ring_scan_duration):
             self._rot_pub.publish(msg)  # Publish angular velocity.
             if self._detection_counter >= 1:  # If found ring 3 or more times, declare ring found.
+                self.offset_px /= self._detection_counter
+                self.depth /= self._detection_counter
                 self._detection_counter = 0
                 self._subs.unregister()
                 return True
@@ -159,9 +172,11 @@ class Utils:
 
 
     def perform_terminal_approach(self):
+
         """
         perform terminal approach to the ring.
         """
+
         self._tah.subscribe_to_feedback()
 
         # Start constructing colour features matrix.
@@ -177,12 +192,46 @@ class Utils:
         self._tah.sprint(13, forward=True)  # Final run to pick up the ring.
         self._tah.unsubscribe_from_feedback()
         self._tah.sprint(3.6, forward=False)  # Reverse (to check if ring picked up).
+        self.offset_px = 0  # Reset mean offset and depth values.
+        self.depth = 0
+
+
+    def mark_ring(self, trans, depth, offset_px):
+        """
+        Mark position of detected ring.
+        """ # robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y]) 
+        # Initialize PosStamped instance.
+        pos_ring = PoseStamped()
+
+        # Increment/Decrement x and y to get position of ring.
+
+        dx = depth**2/np.sqrt(np.tan(offset_px*self._OFFSET_AGL_INCREMENT)**2 + 1)
+
+        pos_ring.pose.position.x = dx
+        pos_ring.pose.position.y = dx*np.tan(offset_px*self._OFFSET_AGL_INCREMENT)
+        # pos_ring.pose.orientation.w = 1.0
+
+        # Transform approach goal position to map coordinate system.
+        pos_ring_transformed = tf2_geometry_msgs.do_transform_pose(pos_ring, trans)
+
+        self._tm.push_position(np.array([pos_ring_transformed.pose.position.x, pos_ring_transformed.pose.position.y]), 'green')
+
+
+    def mark_trail(self, trans):
+        """
+        Mark trail of robot.
+        """
+        self._tm.push_position(np.array([trans.transform.translation.x, trans.transform.translation.y]), 'blue')
+
 
     def _callback(self, data):
         """
         callback called when topic published on /toroids. Used to count ring detections.
         """
+        self.offset_px += data.center_x - 640/2
+        self.depth += data.depth
         self._detection_counter += 1  # Increment counter of detected rings.
+
 
     def _subscribe(self):
         """
@@ -262,7 +311,7 @@ if __name__ == "__main__":
         
         # Get index of closest checkpoint.
         idx_nxt = np.argmin((lambda x1, x2 : np.sum(np.abs(x1 - x2)**2.0, 1)**(1.0/2.0))(robot_pos, checkpoints))
-	print "resolving next checkpoint"
+	rospy.loginfo("resolving next checkpoint")
     
         # Initialize next goal from closest checkpoint and visit it.
         goal_chkpt = MoveBaseGoal()
@@ -282,6 +331,10 @@ if __name__ == "__main__":
             # Wait 1 second for results.
             ac_chkpnts.wait_for_result(rospy.Duration(1.0))
 
+            # mark robot trail.
+            trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
+            ut.mark_trail(trans)
+
             # Get checkpoint resolution goal status.
             goal_chkpnt_status = ac_chkpnts.get_state()
 
@@ -300,20 +353,34 @@ if __name__ == "__main__":
                 attempt_counter = 0
             
                 while not position_resolved_flg and attempt_counter < NUM_ATTEMPTS:
+
                     # See if ring detected in initial position.
-                    print "detecting ring"
+                    rospy.loginfor("detecting ring")
+
                     detected_flg = ut.detect_ring()
                     if detected_flg:
+                        
+                        # Mark ring.
+                        trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
+                        ut.mark_ring(trans, ut.depth, ut.offset_px)
+
+                        # Perform terminal approach.
                         ut.perform_terminal_approach()
                         terminal_approach_performed_flg = True
-                        attempt_counter += 1
+                        attempt_counter += 1  # Increment attempt counter.
                     else:
-                        print "performing scan"
+                        rospy.loginfo("performing scan")
                         scan_res = ut.ring_scan(2)
                         if scan_res:
+
+                            # Mark ring.
+                            trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
+                            ut.mark_ring(trans, ut.depth, ut.offset_px)
+
+                            # Perform terminal approach.
                             ut.perform_terminal_approach()
                             terminal_approach_performed_flg = True
-                            attempt_counter += 1
+                            attempt_counter += 1  # Increment attempt counter.
                         else:
                             position_resolved_flg = True
                             if terminal_approach_performed_flg:
