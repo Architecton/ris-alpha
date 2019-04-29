@@ -183,7 +183,6 @@ class Toroid:
             aif.major_axis = h
             # aif.im = np.ravel(self.bgr_img)
             aif.dpt = np.median(depth_val_vector)
-            print np.median(depth_val_vector)
 
             #print np.median(depth_img_filtered)
 

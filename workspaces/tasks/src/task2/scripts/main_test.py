@@ -21,7 +21,7 @@ from task2.srv import TerminalApproach, FeatureBuilder
 from task2.msg import TerminalApproachFeedback
 from task2.msg import ApproachImageFeedback
 
-from colour_detector import ColourFeatureGenerator
+from colour_detection import ColourFeatureGenerator
 
 from visualizations.targetmarker import TargetMarker
 
