@@ -193,8 +193,8 @@ class Toroid:
             self.toroid_pub.publish(aif)
 
         # DEVONLY: Visualize camera output
-        cv2.imshow('Live feed', depth_img_edge*255)
-        cv2.waitKey(1)
+        # cv2.imshow('Live feed', depth_img_edge*255)
+        # cv2.waitKey(1)
 
 def main():
 
