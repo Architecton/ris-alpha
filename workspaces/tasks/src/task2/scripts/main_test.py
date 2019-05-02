@@ -18,8 +18,7 @@ import tf2_geometry_msgs
 from geometry_msgs.msg import Point, Vector3, PoseStamped, Twist
 
 from task2.srv import TerminalApproach, FeatureBuilder
-from task2.msg import TerminalApproachFeedback
-from task2.msg import ApproachImageFeedback
+from task2.msg import TerminalApproachFeedback, ApproachImageFeedback, SayCommand
 
 from colour_detection import ColourFeatureGenerator
 
@@ -127,6 +126,9 @@ class Utils:
         # publisher of Twist messages.
         self._rot_pub = rospy.Publisher('/cmd_vel_mux/input/navi', Twist, queue_size=1)
 
+        # publisher of voice commands.
+        self._say_pub = rospy.Publisher('say_commands', SayCommand, queue_size = 10)  # Publish on say_commands topic on which sound_player listens.
+
         rospy.wait_for_service('feature_builder')  # Wait for service to come online.
 	rospy.loginfo("feature_builder service online")
         try:
@@ -143,7 +145,7 @@ class Utils:
         self._subscribe()  # Subscribe to toroids topic and wait.
         rospy.sleep(2)
         self._subs.unregister()
-        if self._detection_counter > 7:  # If detected more than 7 rings, declare ring found.
+        if self._detection_counter > 5:  # If detected more than 5 rings, declare ring found.
             self.offset_px /= self._detection_counter
             self.depth /= self._detection_counter
             self._detection_counter = 0
@@ -194,11 +196,13 @@ class Utils:
         
         # TODO: get and say colour of ring.
         ring_col = self._feature_builder_serv(0).res
-        print ring_col
+	self.say(ring_col)  # Signal detected ring colour.
+        rospy.loginfo(ring_col)
         
         # Go straight to pick up ring.
         self._tah.sprint(13, forward=True)  # Final run to pick up the ring.
         self._tah.unsubscribe_from_feedback()
+        self.say('verifying')
         self._tah.sprint(4.2, forward=False)  # Reverse (to check if ring picked up).
         self.offset_px = 0  # Reset mean offset and depth values.
         self.depth = 0
@@ -207,7 +211,8 @@ class Utils:
     def mark_ring(self, trans, depth, offset_px):
         """
         Mark position of detected ring.
-        """ # robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y]) 
+        """ 
+        # robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y]) 
         # Initialize PosStamped instance.
         pos_ring = PoseStamped()
 
@@ -231,6 +236,13 @@ class Utils:
         """
         self._tm.push_position(np.array([trans.transform.translation.x, trans.transform.translation.y]), 'blue')
 
+    def say(self, text):
+        """
+        Say text. See sound_player.py for supported commands.
+        """
+        sc = SayCommand() 
+	sc.text = text 
+	self._say_pub.publish(sc) 
 
     def _callback(self, data):
         """
@@ -260,12 +272,6 @@ if __name__ == "__main__":
 
     # Initialize main node.
     rospy.init_node('main')
-
-    # Initialize sound node.
-    soundhandle = SoundClient()
-    rospy.sleep(1)
-    voice = 'voice_kal_diphone'
-    volume = 1.0
 
     # Initialize action client
     ac_chkpnts = actionlib.SimpleActionClient("move_base", MoveBaseAction)
@@ -299,6 +305,8 @@ if __name__ == "__main__":
     # Create instance of Utils class.
     ut = Utils(window_size=WINDOW_SIZE, target_center_x=TARGET_CENTER_X, terminal_approach_duration=TERMINAL_APPROACH_DURATION)
 
+    ut.say('initialization')
+
     # Initialize counter of collected rings.
     collected_rings_counter = 0
 
@@ -313,9 +321,12 @@ if __name__ == "__main__":
     # Wait for map cache to fill.
     rospy.sleep(5)
 
+    # Signal start of search.
+    ut.say('starting_search')
+
     while not done:
         # While there are unresolved checkpoints.
-        while checkpoints.shape[0] > 0
+        while checkpoints.shape[0] > 0:
             
             # Get robot's current position.
 
@@ -372,6 +383,9 @@ if __name__ == "__main__":
 
                         detected_flg = ut.detect_ring()
                         if detected_flg:
+
+                            # Signal detected ring.
+                            ut.say('detected')
                             
                             # Mark ring.
                             #trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
@@ -385,6 +399,9 @@ if __name__ == "__main__":
                             rospy.loginfo("performing scan")
                             scan_res = ut.ring_scan(2)
                             if scan_res:
+
+				# Signal detected ring.
+				ut.say('detected')
 
                                 # Mark ring.
                                 #trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
@@ -402,6 +419,7 @@ if __name__ == "__main__":
                                     if collected_rings_counter >= NUM_RINGS_TO_COLLECT:
                                         done = True
 
+                    # Remove resolved checkpoint.
                     checkpoints = np.delete(checkpoints, (idx_nxt), axis=0)
                     checkpoint_orientations = np.delete(checkpoint_orientations, (idx_nxt), axis=0)
                     ##############################
@@ -409,3 +427,5 @@ if __name__ == "__main__":
             checkpoints = checkpoints_backup.copy()
             checkpoint_orientations = checkpoint_orientations_backup.copy()
 
+    # Signal end of ring collection.
+    ut.say('done')
