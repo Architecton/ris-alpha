@@ -155,6 +155,6 @@ class FeatureBuilderSrv:
 
 if __name__ == '__main__':
     clf = None  # dummy classifier
-    fb = FeatureBuilderSrv(clf, num_bins=100)  # Initialize Feature builder instance.
+    fb = FeatureBuilderSrv(clf, num_bins=128)  # Initialize Feature builder instance.
     fb.start_service()  # Start service.
 
