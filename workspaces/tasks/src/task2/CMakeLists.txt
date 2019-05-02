@@ -58,6 +58,7 @@ find_package( OpenCV REQUIRED )
    TerminalApproachFeedback.msg
    ValidRegionsMapResponse.msg
    RingApproachPointResponse.msg
+   SayCommand.msg
  )
 
 ## Generate services in the 'srv' folder
