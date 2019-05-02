@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import rospy
 
 # publisher: node that broadcasts on a topic.
