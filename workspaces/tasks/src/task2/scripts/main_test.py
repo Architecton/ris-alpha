@@ -242,6 +242,7 @@ class Utils:
         """
         sc = SayCommand() 
 	sc.text = text 
+	pdb.set_trace()
 	self._say_pub.publish(sc) 
 
     def _callback(self, data):
@@ -259,8 +260,23 @@ class Utils:
         """
         self._subs = rospy.Subscriber('toroids', ApproachImageFeedback, self._callback)
 
-
 if __name__ == "__main__":
+
+    ## PARAMETERS ##
+    WINDOW_SIZE = 7
+    TARGET_CENTER_X = 423
+    TERMINAL_APPROACH_DURATION = 10
+    NUM_RINGS_TO_COLLECT = 3
+    NUM_ATTEMPTS = 3
+    ################
+
+    pdb.set_trace()
+
+    ut = Utils(window_size=WINDOW_SIZE, target_center_x=TARGET_CENTER_X, terminal_approach_duration=TERMINAL_APPROACH_DURATION)
+    ut.say('initialization')
+
+
+if __name__ == "__maintralala__":
 
     ## PARAMETERS ##
     WINDOW_SIZE = 7
