@@ -1,7 +1,7 @@
 <launch>
 	<node pkg="task2" type="toroid_detector.py" name="toroid_detector" output="screen" />
 	<node pkg="task2" type="terminal_approach.py" name="terminal_approach" output="screen" />
-	<node pkg="task2" type="main_test.py" name="main" output="screen" />
+	<node pkg="task2" type="main_test2.py" name="main" output="screen" />
 	<node pkg="task2" type="feature_builder.py" name="feature_builder" output="screen" />
 	<node pkg="task2" type="sound_player.py" name="sound_player" output="screen" />
 	<!-- <node pkg="task2" type="music_node.py" name="music_node" output="screen" /> -->
