@@ -44,7 +44,7 @@ class TerminalApproachHandler:
 	    self.mov.angular.z = np.sign(x_offset)*self.callib_coeff_agl
         else:
 	    self.mov.angular.z = 0
-        self.mov.linear.x = 0.05
+        self.mov.linear.x = 0.03
 
         # publish velocity message.
         self.vel_pub.publish(self.mov)

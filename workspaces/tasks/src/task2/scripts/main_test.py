@@ -55,6 +55,7 @@ class TerminalApproachHandler:
             rospy.loginfo("Service error: {0}".format(e.message))
 
         self._timeout_reset = False
+        self._detection_counter = 0
 
 
     def _image_feedback_callback(self, data):
@@ -69,7 +70,9 @@ class TerminalApproachHandler:
 
         # Call service to apply correction.
         self._corrections_serv(self._corr)
-        self._timeout_reset = True  # If received feedback from image, reset sprint timeout.
+        self._detection_counter += 1
+        if self._detection_counter > 5:
+            self._timeout_reset = True  # If received feedback from image, reset sprint timeout.
 
 
     def sprint(self, sprint_duration, forward):
@@ -89,6 +92,7 @@ class TerminalApproachHandler:
             if self._timeout_reset:  # If _timeout_reset flag set to true, reset timeout.
                 start_time = time.time()
                 self._timeout_reset = False
+                self._detection_counter = 0
 
 
     def subscribe_to_feedback(self):
@@ -122,6 +126,7 @@ class Utils:
         self.depth = 0  # Depth to ring. After successful detection of ring, holds mean depth of detected rings.
 
         self._OFFSET_AGL_INCREMENT = 0.0017098772515631948
+        self._DEPTH_COEFF = 1347.0/1.1
 
         # publisher of Twist messages.
         self._rot_pub = rospy.Publisher('/cmd_vel_mux/input/navi', Twist, queue_size=1)
@@ -145,7 +150,7 @@ class Utils:
         self._subscribe()  # Subscribe to toroids topic and wait.
         rospy.sleep(2)
         self._subs.unregister()
-        if self._detection_counter > 5:  # If detected more than 5 rings, declare ring found.
+        if self._detection_counter > 15:  # If detected more than 5 rings, declare ring found.
             self.offset_px /= self._detection_counter
             self.depth /= self._detection_counter
             self._detection_counter = 0
@@ -169,7 +174,7 @@ class Utils:
         # Rotate left and check for detected rings.
         while(time.time() - start_time < ring_scan_duration):
             self._rot_pub.publish(msg)  # Publish angular velocity.
-            if self._detection_counter >= 1:  # If found ring 3 or more times, declare ring found.
+            if self._detection_counter >= 30:  # If found ring 3 or more times, declare ring found.
                 self.offset_px /= self._detection_counter
                 self.depth /= self._detection_counter
                 self._detection_counter = 0
@@ -200,10 +205,10 @@ class Utils:
         rospy.loginfo(ring_col)
         
         # Go straight to pick up ring.
-        self._tah.sprint(13, forward=True)  # Final run to pick up the ring.
+        self._tah.sprint(7, forward=True)  # Final run to pick up the ring.
         self._tah.unsubscribe_from_feedback()
         self.say('verifying')
-        self._tah.sprint(4.2, forward=False)  # Reverse (to check if ring picked up).
+        self._tah.sprint(3.0, forward=False)  # Reverse (to check if ring picked up).
         self.offset_px = 0  # Reset mean offset and depth values.
         self.depth = 0
 
@@ -217,6 +222,7 @@ class Utils:
         pos_ring = PoseStamped()
 
         # Increment/Decrement x and y to get position of ring.
+	depth = depth / self._DEPTH_COEFF
 
         dx = depth**2/np.sqrt(np.tan(offset_px*self._OFFSET_AGL_INCREMENT)**2 + 1)
 
@@ -240,9 +246,9 @@ class Utils:
         """
         Say text. See sound_player.py for supported commands.
         """
+	rospy.sleep(1)
         sc = SayCommand() 
 	sc.text = text 
-	pdb.set_trace()
 	self._say_pub.publish(sc) 
 
     def _callback(self, data):
@@ -260,8 +266,7 @@ class Utils:
         """
         self._subs = rospy.Subscriber('toroids', ApproachImageFeedback, self._callback)
 
-if __name__ == "__main__":
-
+if __name__ == "__main_hopsasa__":
     ## PARAMETERS ##
     WINDOW_SIZE = 7
     TARGET_CENTER_X = 423
@@ -269,14 +274,25 @@ if __name__ == "__main__":
     NUM_RINGS_TO_COLLECT = 3
     NUM_ATTEMPTS = 3
     ################
+    rospy.sleep(3)
 
-    pdb.set_trace()
-
+    # Initialize main node.
+    rospy.init_node('main')
+   
+    # 
     ut = Utils(window_size=WINDOW_SIZE, target_center_x=TARGET_CENTER_X, terminal_approach_duration=TERMINAL_APPROACH_DURATION)
-    ut.say('initialization')
 
+    # Initialize coordinate transforms buffer.
+    tf2_buffer = tf2_ros.Buffer()
+    tf2_listener = tf2_ros.TransformListener(tf2_buffer)
+    rospy.sleep(7)
+    trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
 
-if __name__ == "__maintralala__":
+    ut.mark_ring(trans, depth=1.1, offset_px=0.1)
+
+    rospy.spin()
+
+if __name__ == "__main__":
 
     ## PARAMETERS ##
     WINDOW_SIZE = 7
@@ -372,8 +388,8 @@ if __name__ == "__maintralala__":
                 ac_chkpnts.wait_for_result(rospy.Duration(1.0))
 
                 # mark robot trail.
-                # trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
-                # ut.mark_trail(trans)
+                #trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
+                #ut.mark_trail(trans)
 
                 # Get checkpoint resolution goal status.
                 goal_chkpnt_status = ac_chkpnts.get_state()
@@ -404,8 +420,8 @@ if __name__ == "__maintralala__":
                             ut.say('detected')
                             
                             # Mark ring.
-                            #trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
-                            #ut.mark_ring(trans, ut.depth, ut.offset_px)
+                            trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
+                            ut.mark_ring(trans, ut.depth, ut.offset_px)
 
                             # Perform terminal approach.
                             ut.perform_terminal_approach()
@@ -420,8 +436,8 @@ if __name__ == "__maintralala__":
 				ut.say('detected')
 
                                 # Mark ring.
-                                #trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
-                                #ut.mark_ring(trans, ut.depth, ut.offset_px)
+                                trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
+                                ut.mark_ring(trans, ut.depth, ut.offset_px)
 
                                 # Perform terminal approach.
                                 ut.perform_terminal_approach()
@@ -432,8 +448,11 @@ if __name__ == "__maintralala__":
                                 if terminal_approach_performed_flg:
                                     # TODO say that ring was successfully picked up.
                                     collected_rings_counter += 1
+                                    rospy.loginfo("ring collected")
                                     if collected_rings_counter >= NUM_RINGS_TO_COLLECT:
+                                        rospy.loginfo("done")
                                         done = True
+                                        quit()
 
                     # Remove resolved checkpoint.
                     checkpoints = np.delete(checkpoints, (idx_nxt), axis=0)

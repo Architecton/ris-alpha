@@ -4,6 +4,7 @@ import rospy
 from sound_play.libsoundplay import SoundClient
 from task2.msg import SayCommand
 
+import pdb
 
 class SoundPlayer:
 
@@ -17,6 +18,9 @@ class SoundPlayer:
         rospy.spin()
 
     def _say(self, data):
+
+	print data.text
+	
         if data.text == 'initialization':
              self._soundhandle.playWave('/home/team_alpha/ris-alpha/workspaces/tasks/src/task2/scripts/sound/initialization.wav', self._volume)
         if data.text == 'starting_search':

@@ -32,6 +32,8 @@ class TargetMarker():
 
         markers = MarkerArray()  # Initialize markers array.
 
+        print "pushed"
+
         color = ColorRGBA(0, 1, 0, 1) if colour == 'green' else ColorRGBA(0, 0, 1, 1)
 
         id_ctr = 0  # Define id counter
@@ -39,7 +41,7 @@ class TargetMarker():
                 marker = Marker()  # Initialize marker
                 marker.header.stamp = rospy.Time.now()  # Stamp marker with time.
                 marker.header.frame_id = '/map'  # Set header frame id.
-                marker.pose.position = Point(point[0], point[1], point[2])  # Set position of marker.
+                marker.pose.position = Point(point[0], point[1], 2.0)  # Set position of marker.
                 marker.type = Marker.CUBE  # Set marker properties.
                 marker.action = Marker.ADD
                 marker.frame_locked = False
