@@ -266,32 +266,6 @@ class Utils:
         """
         self._subs = rospy.Subscriber('toroids', ApproachImageFeedback, self._callback)
 
-if __name__ == "__main_hopsasa__":
-    ## PARAMETERS ##
-    WINDOW_SIZE = 7
-    TARGET_CENTER_X = 423
-    TERMINAL_APPROACH_DURATION = 10
-    NUM_RINGS_TO_COLLECT = 3
-    NUM_ATTEMPTS = 3
-    ################
-    rospy.sleep(3)
-
-    # Initialize main node.
-    rospy.init_node('main')
-   
-    # 
-    ut = Utils(window_size=WINDOW_SIZE, target_center_x=TARGET_CENTER_X, terminal_approach_duration=TERMINAL_APPROACH_DURATION)
-
-    # Initialize coordinate transforms buffer.
-    tf2_buffer = tf2_ros.Buffer()
-    tf2_listener = tf2_ros.TransformListener(tf2_buffer)
-    rospy.sleep(7)
-    trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
-
-    ut.mark_ring(trans, depth=1.1, offset_px=0.1)
-
-    rospy.spin()
-
 if __name__ == "__main__":
 
     ## PARAMETERS ##

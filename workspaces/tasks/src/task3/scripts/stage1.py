@@ -118,7 +118,6 @@ checkpoints = np.empty((0, 3), dtype=float)
 
 # Add checkpoints to matrix.
 for point in checkpoints_res.points.points:
-    # Get next checkpoints batch.
     checkpoints_nxt = np.array([[point.x, point.y, point.z]])
     checkpoints = np.vstack((checkpoints, checkpoints_nxt))
 
@@ -169,10 +168,6 @@ while checkpoints.shape[0] > 0:
             rospy.loginfo("Checkpoint resolution goal aborted")
             break
 
-        
-
-
-
 
     ## ELLIPSE LOCATING ROTATION ##
 
@@ -202,9 +197,6 @@ while checkpoints.shape[0] > 0:
             rot_loop_rate.sleep()  # TODO: EMPIRICALLY SET
 
     ## /ELLIPSE LOCATING ROTATION ##
-
-
-
 
 
     ## HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
@@ -250,11 +242,16 @@ while checkpoints.shape[0] > 0:
 
 
 
-                        # TODO CLASSCLASSIFY COLOR HERE, CHECK FOR QR CODE OR DIGITS.
+                        # TODO READ QR CODE/DIGITS HERE
 
 
+                        # IF QR CODE DETECTED, train classifier and save indicator that classifier detected.
 
 
+                        # IF DIGITS DETECTED, if classifier trained, classify, else save and continue search for QR code.
+
+                        
+                        # IF classified, go to next stage -- cylinder search (similar).
 
 
 
