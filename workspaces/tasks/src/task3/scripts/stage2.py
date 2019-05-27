@@ -45,7 +45,7 @@ params:
 """
 
 
-def stage_two(cylinder_color):
+def stage_two(cylinder_color_goal):
 
     ### INITIALIZATIONS ###
 
@@ -115,7 +115,7 @@ def stage_two(cylinder_color):
     # First two fields store the coordinates of the cylinder center. The third field stores the perpendicular angle.
     resolved_cyl = np.empty((0, 6), dtype=float)
     resolved_cyl_ctr = 0  # Initialize resolved cylinders counter.
-    NUM_ELLIPSES_TO_FIND = 3
+    NUM_CYLINDERS_TO_FIND = 3
     end_search = False  # Flag to indicate end of search.
 
     # Number of checkpoints to generate.
@@ -185,13 +185,11 @@ def stage_two(cylinder_color):
                 break
 
 
-        ## ELLIPSE LOCATING ROTATION ##
+        ## CYLINDER LOCATING ROTATION ##
 
         soundhandle.say("Initiating rotation sequence.", voice, volume)
         for rot_idx in np.arange(NUM_ROTATIONS):
 
-
-            ## TODO change to cylinder detection
 
             # Safety sleep.
             rospy.sleep(0.5)
@@ -218,10 +216,10 @@ def stage_two(cylinder_color):
                 rotation_pub.publish(rot)  # Publish angular velocity.
                 rot_loop_rate.sleep()  # TODO: EMPIRICALLY SET
 
-        ## /ELLIPSE LOCATING ROTATION ##
+        ## /CYLINDER LOCATING ROTATION ##
 
 
-        ## HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
+        ## HANDLE CYLINDER DATA COLLECTED IN BUFFER ##
 
         try:
             # Query into cylinder buffer
@@ -267,32 +265,12 @@ def stage_two(cylinder_color):
 
                             ### TODO TODO TODO ##########################################################################
 
-
-                            # TODO READ QR CODE/DIGITS HERE
-
-                            # Try to detect QR code for N sec.
-
-                            # Try to detect digits for N sec.
-
-                            qr_detected = True  # TODO
-                            pattern_detected = True  # TODO
-
-                            # IF QR CODE DETECTED, train classifier and save indicator that classifier detected.
-                            if qr_detected:
-                                data_url = 'http://localhost:3000'  # TODO
-                                clf = clf.fit(data_url)
-                                classifier_built = True
-                                if found_pattern:
-                                    return clf.predict(found_pattern)
-
-
-                            # IF DIGITS DETECTED, if classifier trained, classify, else save and continue search for QR code.
-                            if pattern_detected:
-                                pattern = np.array([1, 2])
-                                if classifier_built:
-                                    return clf.predict(pattern)
-                                else:
-                                    found_pattern = pattern
+                            # Get color of cylinder
+                            cylinder_color = 0  ## TODO detect
+                            if cylinder_color == cylinder_color_goal:
+                                # TODO read qr code and get color
+                                color_res = None # TODO
+                                return color_res
 
 
                             ### TODO TODO TODO ##########################################################################
@@ -315,7 +293,7 @@ def stage_two(cylinder_color):
                 else:
                     cylinder_data = cylinder_locator().target
         except rospy.ServiceException, e:
-            rospy.loginfo("Cylinder locator service call failed: {0}".format(e))
+            rospy.logerr("Cylinder locator service call failed: {0}".format(e))
 
         ## /HANDLE CYLINDER DATA COLLECTED IN BUFFER ##
 

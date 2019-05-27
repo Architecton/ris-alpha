@@ -64,6 +64,7 @@ find_package( OpenCV REQUIRED )
    ScanFlag.msg
    CheckpointProcessorResponse.msg 
    RingData.msg
+   CylinderData.msg
  )
 
 ## Generate services in the 'srv' folder
