@@ -1,12 +1,7 @@
 #!/usr/bin/env python
-
 import numpy as np
-#from sklearn.neural_network import MLPClassifier
-#from sklearn.preprocessing import StandardScaler
-#import imageio
 import os
-
-import pdb
+from sklearn.ensemble import RandomForestClassifier
 
 class ColourClassifier:
 
@@ -30,7 +25,7 @@ class ColourClassifier:
         self.scaler = StandardScaler().fit(data)  # Initialize feature scaler.
 
         # Initialize learner.
-        learner = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
+        learner = RandomForestClassifier(n_estimators=100, random_state=0, max_depth=5)
         self.clf = learner.fit(self.scaler.transform(data), target)  # Train classifier.
         return self
 
@@ -248,38 +243,45 @@ class RingImageProcessor:
         
 
 
-"""
 if __name__ == '__main__':
 
+    # Initialize colour features generator.
     gen = ColourFeatureGenerator(num_bins=256)
+
+    # Add images to colour features generator.
+
+    # Add images to colour features generator.
     for img_f in os.listdir('../train_img/red'):
         im = imageio.imread('../train_img/red/' + img_f)
         target = 0
         gen.add_image(im, target, (0, 0), im.shape[:2])
-
+    
+    # Get training examples.
     data_red, target_red = gen.compute_colour_features()
     gen.clear()
 
+    # Add images to colour features generation.
     for img_f in os.listdir('../train_img/green'):
         im = imageio.imread('../train_img/green/' + img_f)
         target = 1
         gen.add_image(im, target, (0, 0), im.shape[:2])
 
+    # Get training examples.
     data_green, target_green = gen.compute_colour_features()
-    
+   
+    # Stack training examples.
     data = np.vstack((data_red, data_green))
     target = np.hstack((target_red, target_green))
 
     gen.clear()
-    
+
+    # Fit classifier with data.
     clf = ColourClassifier({0 : "red", 1 : "green"}).fit(data, target)
 
     # Load example image to classify and get feature vector.
-    pdb.set_trace()
     to_classify = imageio.imread('../test_img/avocado.jpeg')
     gen.add_image(to_classify, 0, (0, 0), to_classify.shape[:2])
     example, _ = gen.compute_colour_features()
 
     # Get prediction.
     pred = clf.predict(example)
-"""

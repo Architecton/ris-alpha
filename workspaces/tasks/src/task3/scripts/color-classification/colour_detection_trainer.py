@@ -210,5 +210,4 @@ if __name__ == '__main__':
     sio.savemat('training_data.mat', {'data' : trainer._features_mat})
     sio.savemat('training_data_target.mat', { 'data' : trainer._target_vec})
     trainer.save_obj(trainer.training_imgs, 'training_images')
-    # trainer.training_imgs.dtype='uint8'
-    # sio.savemat('training_images.mat', {'data' : trainer.training_imgs})
+
