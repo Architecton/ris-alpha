@@ -4,7 +4,7 @@
 import rospy
 import roslib
 
-roslib.load_manifest('task1')
+roslib.load_manifest('task3')
 import sensor_msgs.msg
 import message_filters
 import tf2_ros
@@ -14,12 +14,10 @@ from geometry_msgs.msg import PoseStamped
 
 from targetmarker import TargetMarker
 
-# Import message type received as data retrieved from callback.
 from task1.msg import EllipseData
 from task1.msg import ScanFlag
 from task1.msg import CheckpointProcessorResponse
 
-# Import service that is implemented by this file.
 from task1.srv import EllipseLocator
 from task1.srv import CheckpointProcessor
 
@@ -27,6 +25,14 @@ import time
 import numpy as np
 
 import pdb
+
+### /IMPORTS ###
+
+
+
+
+
+### INITIALIZATION ###
 
 tf2_buffer = None
 tf2_listener = None
@@ -36,9 +42,12 @@ buff_ptr = 0
 
 tm = TargetMarker()
 
-### /IMPORTS ###
+### /INITIALIZATION ###
+
+
 
 def changePermission(data):
+
     """
     callback executed when scanning permission changes.
     
@@ -49,24 +58,29 @@ def changePermission(data):
     Returns:
         None
     """
-    global scan_flag
 
+    
+    # variables from outer namespace.
+    global scan_flag
     global buff
     global buff_ptr
-
     global buff2
     global BUFF2_SIZE
     global buff2_ptr
     global tm
 
-
+    # Get scan flag.
     scan_flag = data.flag
 
+    # If recieved signal to stop scanning and if buffer contains more than 5 elements,
+    # add mediann to buffer.
     if scan_flag == 0 and buff2_ptr > 5:
         res = np.median(buff2[:buff2_ptr, :], 0)
         buff[buff_ptr] = res
         buff_ptr += 1
         buff2_ptr = 0
+
+
         ### DEBUGGING VISUALIZATION ###
         tm.push_position(res[:3])
         tm.push_position(res[3:6])
@@ -116,7 +130,6 @@ def callback(data):
                 raise BufferError("Attempting to add object to full buffer")
             
             # Get transformation of point using robot position and map position when the image was taken.
-
             trans = tf2_buffer.lookup_transform(target_frame='map',\
                                     source_frame='base_link',\
                                     time=rospy.Time.from_seconds(data.timestamp[ell_idx]),\
@@ -132,8 +145,6 @@ def callback(data):
             if (lambda x: np.sqrt(np.sum(x**2)))(np.array([pos_nxt.pose.position.x, pos_nxt.pose.position.y])) > 1.8:
                 break
 
-
-            
             fixed_pos_nxt_transformed = approach_checkpoint_processor(pos_nxt_transformed.pose.position.x, pos_nxt_transformed.pose.position.y)
             if fixed_pos_nxt_transformed.valid:
                 pos_nxt_transformed.pose.position.x = fixed_pos_nxt_transformed.output_x

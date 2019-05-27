@@ -17,7 +17,7 @@ from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from geometry_msgs.msg import Point, Vector3, PoseStamped, Twist
 
 from target_marking.targetmarker import TargetMarker
-from task1.srv import EllipseLocator
+from task1.srv import CylinderLocator
 
 from task1.srv import Checkpoint_res
 from task1.msg import Checkpoints
@@ -37,17 +37,15 @@ import sys
 """
 Description:
 
-Stage one performs search for circles. On locating a circle with the QR code it trains a classifier.
-On locating a circle with the test example, it classifies it and initializes stage two.
-
-If the circle with the classification example is located before the one with the QR code, the pattern is saved.
+Stage two performs search for cylinders of color obtained from first stage. Upon locating the
+correct cylinder, it obtains another color from the QR code on it.
 
 params:
-    None
+    cylinder_color: int -- color of cylinder to find
 """
 
 
-def stage_one():
+def stage_two(cylinder_color):
 
     ### INITIALIZATIONS ###
 
@@ -61,13 +59,14 @@ def stage_one():
     volume = 1.0
 
     # Notify start of initialization.
-    soundhandle.say("Starting initialization of stage one.", voice, volume)
+    soundhandle.say("Starting initialization of stage two.", voice, volume)
+
 
     # /// publishers ///
-    # Define publisher for ellipse search rotations.
+    # Define publisher for cylinder search rotations.
     rotation_pub = rospy.Publisher('/cmd_vel_mux/input/navi', Twist, queue_size=10)
     # Define publisher that publishes permissions to process input data.
-    scan_perm_pub = rospy.Publisher('/scan_perm', ScanFlag, queue_size=10)
+    scan_perm_pub_cyl = rospy.Publisher('/scan_perm_cyl', ScanFlag, queue_size=10)
     sf = ScanFlag()
     # /// /publishers ///
 
@@ -94,7 +93,7 @@ def stage_one():
 
     # Initialize action clients
     ac_chkpnts = actionlib.SimpleActionClient("move_base", MoveBaseAction)
-    ac_ellipses = actionlib.SimpleActionClient("move_base", MoveBaseAction)
+    ac_cylinders = actionlib.SimpleActionClient("move_base", MoveBaseAction)
 
     # Initialize checkpoints array.
     rospy.wait_for_service('get_checkpoints')
@@ -108,14 +107,14 @@ def stage_one():
     tf2_buffer = tf2_ros.Buffer()
     tf2_listener = tf2_ros.TransformListener(tf2_buffer)
 
-    # Set distance threshold to consider ellipse as unresolved.
+    # Set distance threshold to consider cylinder as unresolved.
     DISTINCT_ELL_THRESH = 0.7
     DISTINCT_AGL_THRESH = 0.5
 
-    # Initialize found ellipses storage.
-    # First two fields store the coordinates of the ellipse center. The third field stores the perpendicular angle.
-    resolved_ell = np.empty((0, 6), dtype=float)
-    resolved_ell_ctr = 0  # Initialize resolved ellipses counter.
+    # Initialize found cylinders storage.
+    # First two fields store the coordinates of the cylinder center. The third field stores the perpendicular angle.
+    resolved_cyl = np.empty((0, 6), dtype=float)
+    resolved_cyl_ctr = 0  # Initialize resolved cylinders counter.
     NUM_ELLIPSES_TO_FIND = 3
     end_search = False  # Flag to indicate end of search.
 
@@ -143,29 +142,11 @@ def stage_one():
     trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
     robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z]) 
 
-    # Wait for ellipse data buffer query service to come online and make a proxy function.
-    rospy.wait_for_service('ellipse_locator')
-    ellipse_locator = rospy.ServiceProxy('ellipse_locator', EllipseLocator)
+    # Wait for cylinders data buffer query service to come online and make a proxy function.
+    rospy.wait_for_service('cylinder_locator')
+    cylinder_locator = rospy.ServiceProxy('cylinder_locator', CylinderLocator)
 
     ### /INITIALIZATIONS ###
-
-
-
-
-
-    ### FLAGS ###
-
-    classifier_built = False
-    found_pattern = None
-
-    ### /FLAGS ##
-
-    ### CLASSIFIER ###
-
-    clf = UrlDataClassifier()
-
-    ### /CLASSIFIER ###
-
 
 
 
@@ -209,23 +190,27 @@ def stage_one():
         soundhandle.say("Initiating rotation sequence.", voice, volume)
         for rot_idx in np.arange(NUM_ROTATIONS):
 
+
+            ## TODO change to cylinder detection
+
             # Safety sleep.
             rospy.sleep(0.5)
 
 
             ## IMAGE PROCESSING STREAM SCAN START ###
             sf.flag = 1
-            scan_perm_pub.publish(sf)
-            # Sleep and wait for ellipse_locator service to scan robot's image processing stream for ellipses.
+            scan_perm_pub_cyl.publish(sf)
+            # Sleep and wait for cylinder_locator service to scan robot's image processing stream for cylinders.
             rospy.sleep(ROTATION_SLEEP_DURATION)
             # PUBLISH REVOCATION OF PERMISSION TO SCAN
             sf.flag = 0
-            scan_perm_pub.publish(sf)
+            scan_perm_pub_cyl.publish(sf)
             ## IMAGE PROCESSING STREAM SCAN END ###
 
 
             # Safety sleep.
             rospy.sleep(0.5)
+
 
             # ROTATE
             start_rot_time = time.time()
@@ -239,43 +224,43 @@ def stage_one():
         ## HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
 
         try:
-            # Query into ellipse buffer
-            ellipse_data = ellipse_locator().target
-            while(len(ellipse_data) > 0):  # If data in buffer...
-                comp_dists = (lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([ellipse_data[0], ellipse_data[1]]), resolved_ell[:, :2]) < DISTINCT_ELL_THRESH
-                comp_agl = euler_from_quaternion(np.array([ellipse_data[6], ellipse_data[7], ellipse_data[8], ellipse_data[9]]))
-                euler_resolved = np.apply_along_axis(euler_from_quaternion, 1, resolved_ell[:, 2:])[:, -1]
+            # Query into cylinder buffer
+            cylinder_data = cylinder_locator().target
+            while(len(cylinder_data) > 0):  # If data in buffer...
+                comp_dists = (lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([cylinder_data[0], cylinder_data[1]]), resolved_cyl[:, :2]) < DISTINCT_ELL_THRESH
+                comp_agl = euler_from_quaternion(np.array([cylinder_data[6], cylinder_data[7], cylinder_data[8], cylinder_data[9]]))
+                euler_resolved = np.apply_along_axis(euler_from_quaternion, 1, resolved_cyl[:, 2:])[:, -1]
                 comp_agls = lambda x1, x2 : np.abs(x1 - x2)(comp_agl, euler_resolved) < np.pi/3
 
                 if not np.any(np.logical_and(comp_dists, comp_agls)):
 
                     ### DEBUGGING VISUALIZATION ###
-                    tm.push_position(np.array(ellipse_data[:3]))
-                    tm.push_position(np.array(ellipse_data[3:]))
+                    tm.push_position(np.array(cylinder_data[:3]))
+                    tm.push_position(np.array(cylinder_data[3:]))
                     ### /DEBUGGING VISUALIZATION ###
 
-                    # Initialize goal to aproach new ellipse
-                    goal_ell = MoveBaseGoal()
-                    goal_ell.target_pose.header.frame_id = "map"
-                    goal_ell.target_pose.header.stamp = rospy.Time.now()
-                    goal_ell.target_pose.pose.position.x = ellipse_data[3]
-                    goal_ell.target_pose.pose.position.y = ellipse_data[4]
-                    goal_ell.target_pose.pose.orientation.x = ellipse_data[6]
-                    goal_ell.target_pose.pose.orientation.y = ellipse_data[7]
-                    goal_ell.target_pose.pose.orientation.z = ellipse_data[8]
-                    goal_ell.target_pose.pose.orientation.w = ellipse_data[9]
-                    goal_nxt_ell_status = GoalStatus.LOST
-                    # Send ellipse resolution goal.
-                    ac_ellipses.send_goal(goal_ell)
+                    # Initialize goal to aproach new cylinder
+                    goal_cyl = MoveBaseGoal()
+                    goal_cyl.target_pose.header.frame_id = "map"
+                    goal_cyl.target_pose.header.stamp = rospy.Time.now()
+                    goal_cyl.target_pose.pose.position.x = cylinder_data[3]
+                    goal_cyl.target_pose.pose.position.y = cylinder_data[4]
+                    goal_cyl.target_pose.pose.orientation.x = cylinder_data[6]
+                    goal_cyl.target_pose.pose.orientation.y = cylinder_data[7]
+                    goal_cyl.target_pose.pose.orientation.z = cylinder_data[8]
+                    goal_cyl.target_pose.pose.orientation.w = cylinder_data[9]
+                    goal_nxt_cyl_status = GoalStatus.LOST
+                    # Send cylinder resolution goal.
+                    ac_cylinders.send_goal(goal_cyl)
 
-                    while not goal_nxt_ell_status == GoalStatus.SUCCEEDED:
-                        ac_ellipses.wait_for_result(rospy.Duration(0.5))
-                        goal_nxt_ell_status = ac_ellipses.get_state()
+                    while not goal_nxt_cyl_status == GoalStatus.SUCCEEDED:
+                        ac_cylinders.wait_for_result(rospy.Duration(0.5))
+                        goal_nxt_cyl_status = ac_cylinders.get_state()
 
-                        if goal_nxt_ell_status == GoalStatus.ABORTED or goal_nxt_ell_status == GoalStatus.REJECTED:
-                            rospy.loginfo("Ellipse resolution goal aborted")
+                        if goal_nxt_cyl_status == GoalStatus.ABORTED or goal_nxt_cyl_status == GoalStatus.REJECTED:
+                            rospy.logerr("Cylinder resolution goal aborted")
                             break
-                        elif goal_nxt_ell_status == GoalStatus.SUCCEEDED:
+                        elif goal_nxt_cyl_status == GoalStatus.SUCCEEDED:
 
 
 
@@ -314,28 +299,28 @@ def stage_one():
 
 
 
-                            # Notify that ellipse has been resolved.
-                            soundhandle.say("Target number {0} resolved.".format(resolved_ell_ctr), voice, volume)
-                            rospy.loginfo("Target number {0} resolved".format(resolved_ell_ctr))
+                            # Notify that cylinder has been resolved.
+                            soundhandle.say("Target number {0} resolved.".format(resolved_cyl_ctr), voice, volume)
+                            rospy.loginfo("Target number {0} resolved".format(resolved_cyl_ctr))
 
                             # Sleep
                             rospy.sleep(2.0)
 
-                            # Add found ellipse to matrix of resolved ellipses.
-                            resolved_ell = np.vstack((resolved_ell, np.array([ellipse_data[0], ellipse_data[1], ellipse_data[3], ellipse_data[4], ellipse_data[5], ellipse_data[6]])))
-                            resolved_ell_ctr += 1
+                            # Add found cylinder to matrix of resolved cylinders.
+                            resolved_cyl = np.vstack((resolved_cyl, np.array([cylinder_data[0], cylinder_data[1], cylinder_data[3], cylinder_data[4], cylinder_data[5], cylinder_data[6]])))
+                            resolved_cyl_ctr += 1
 
                     # Get next element in service's buffer.
-                    ellipse_data = ellipse_locator().target
+                    cylinder_data = cylinder_locator().target
                 else:
-                    ellipse_data = ellipse_locator().target
+                    cylinder_data = cylinder_locator().target
         except rospy.ServiceException, e:
-            rospy.loginfo("Ellipse locator service call failed: {0}".format(e))
+            rospy.loginfo("Cylinder locator service call failed: {0}".format(e))
 
-        ## /HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
+        ## /HANDLE CYLINDER DATA COLLECTED IN BUFFER ##
 
         # Remove checkpoint from checkpoints array
-        soundhandle.say("Checkpoint number {0} resolved.".format(resolved_ell_ctr), voice, volume)
+        soundhandle.say("Checkpoint number {0} resolved.".format(resolved_cyl_ctr), voice, volume)
         checkpoints = np.delete(checkpoints, (idx_nxt), axis=0)
 
         # Get robot position in map coordinates.
