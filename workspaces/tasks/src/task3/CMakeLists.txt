@@ -59,7 +59,7 @@ find_package( OpenCV REQUIRED )
    ValidRegionsMapResponse.msg
    RingApproachPointResponse.msg
    SayCommand.msg
-   checkpoints.msg
+   Checkpoints.msg
    EllipseData.msg
    ScanFlag.msg
    CheckpointProcessorResponse.msg 
@@ -119,10 +119,6 @@ catkin_package(
 ##     find_package(catkin REQUIRED COMPONENTS ...)
 ##   * uncomment the "generate_dynamic_reconfigure_options" section below
 ##     and list every .cfg file to be processed
-
-catkin_package(
-	CATKIN_DEPENDS message_runtime
-)
 
 ###########
 ## Build ##
