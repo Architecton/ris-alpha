@@ -12,14 +12,14 @@ import tf2_geometry_msgs
 from std_msgs.msg import String, Bool, ColorRGBA
 from geometry_msgs.msg import PoseStamped
 
-from targetmarker import TargetMarker
+from target_marking.targetmarker import TargetMarker
 
-from task1.msg import EllipseData
-from task1.msg import ScanFlag
-from task1.msg import CheckpointProcessorResponse
+from task3.msg import EllipseData
+from task3.msg import ScanFlag
+from task3.msg import CheckpointProcessorResponse
 
-from task1.srv import EllipseLocator
-from task1.srv import CheckpointProcessor
+from task3.srv import EllipseLocator
+from task3.srv import CheckpointProcessor
 
 import time
 import numpy as np

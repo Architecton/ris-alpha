@@ -59,7 +59,7 @@ find_package( OpenCV REQUIRED )
    ValidRegionsMapResponse.msg
    RingApproachPointResponse.msg
    SayCommand.msg
-   checkpoints.msg
+   Checkpoints.msg
    EllipseData.msg
    ScanFlag.msg
    CheckpointProcessorResponse.msg 

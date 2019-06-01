@@ -1,4 +1,4 @@
-#!/usr/bin/env pythonA
+#!/usr/bin/env python
 
 ### IMPORTS ###
 
@@ -16,7 +16,7 @@ import tf2_geometry_msgs
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from geometry_msgs.msg import Point, Vector3, PoseStamped, Twist
 
-from target_marking.targetmarker import TargetMarker
+from locators.target_marking.targetmarker import TargetMarker
 from task3.srv import EllipseLocator
 
 from task3.srv import Checkpoint_res

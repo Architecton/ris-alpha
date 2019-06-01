@@ -2,5 +2,5 @@
 	<node pkg="task3" type="ellipse_locator.py" name="ellipse_locator" output="screen" />
 	<node pkg="task3" type="checkpoint_processor.py" name="checkpoint_processor_server" output="screen" />
 	<node pkg="task3" type="get_checkpoints.py" name="get_checkpoints_server" output="screen" />
-	<node pkg="task3" type="main.py" name="main" output="screen" />
+	<node pkg="task3" type="stage1.py" name="stage1" output="screen" />
 </launch>

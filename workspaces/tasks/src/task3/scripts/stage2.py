@@ -1,4 +1,4 @@
-#!/usr/bin/env pythonA
+#!/usr/bin/env python
 
 ### IMPORTS ###
 
@@ -16,12 +16,12 @@ import tf2_geometry_msgs
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from geometry_msgs.msg import Point, Vector3, PoseStamped, Twist
 
-from target_marking.targetmarker import TargetMarker
-from task1.srv import CylinderLocator
+from locators.target_marking.targetmarker import TargetMarker
+from task3.srv import CylinderLocator
 
-from task1.srv import Checkpoint_res
-from task1.msg import Checkpoints
-from task1.msg import ScanFlag
+from task3.srv import Checkpoint_res
+from task3.msg import Checkpoints
+from task3.msg import ScanFlag
 
 from sound_play.msg import SoundRequest
 from sound_play.libsoundplay import SoundClient
