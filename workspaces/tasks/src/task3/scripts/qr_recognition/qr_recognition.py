@@ -2,7 +2,9 @@
 
 import rospy
 import cv2
+import datetime
 import numpy as np
+import pyzbar.pyzbar as pyzbar
 from sensor_msgs.msg import Image
 from sensor_msgs.msg import LaserScan
 from cv_bridge import CvBridge, CvBridgeError
@@ -143,7 +145,7 @@ class The_QR:
              
                 ## Draw the convext hull
                 for j in range(0,n):
-                    cv2.line(img_original, hull[j], hull[ (j+1) % n], (0,255,0), 2)
+                    cv2.line(img_original, hull[j], hull[ (j+1) % n], (0,255,0), 2)           
 
         # Build an array of detected Rings
         ed = EllipseData()
@@ -162,6 +164,14 @@ class The_QR:
             cv2.ellipse(img_original[self.upp_bnd_elps:self.low_bnd_elps, 0:len(img_original)], e2, (0, 255, 0), 2)
 
             center = (e1[0][0], e1[0][1] + self.upp_bnd_elps)
+
+            # TMP
+            cimg = np.zeros_like(img_original)
+            cv2.ellipse(cimg[self.upp_bnd_elps:self.low_bnd_elps, 0:len(cimg)], e1, 255, 1)
+            cv2.ellipse(cimg[self.upp_bnd_elps:self.low_bnd_elps, 0:len(cimg)], e2, 255, 1)
+            cv2.imshow('TMP', cimg)
+            cv2.waitKey(1)
+
 
             # Add a detected ring to the array
             # Check if detected center is out of bounds
@@ -233,7 +243,7 @@ class The_QR:
 
 def main():
 
-    ring_finder = The_Ring()
+    ring_finder = The_QR()
 
     try:
         rospy.spin()
