@@ -2,7 +2,6 @@
 
 import rospy
 import cv2
-import datetime
 import numpy as np
 import pyzbar.pyzbar as pyzbar
 from sensor_msgs.msg import Image
@@ -114,38 +113,48 @@ class The_QR:
                         
                         if(dist2 < 10):
                             is_unique = False
-                
-                    if ((is_unique or len(candidates) == 0) and (1.2 < max(e1[1][0]/e2[1][0], e2[1][0]/e1[1][0]) < 1.5)):
+                    
+                    if ((is_unique or len(candidates) == 0) and (1.25 < max(e1[1][1]/e2[1][1], e2[1][1]/e1[1][1]) < 1.35) and (np.abs(e1[2]-e2[2]) < 10)):
                         candidates.append((e1,e2))                               
 
         # Perform QR Detection
         if len(candidates) >= 1:
 
             # Find a QR code in the image
-            decodedObjects = pyzbar.decode(cv_image)
+            decodedObjects = pyzbar.decode(img_original)
 
             if len(decodedObjects) == 1:
                 dObject = decodedObjects[0]
+
+                # Check if the QR code is inside a ring
+                accepted = False
+                for c in candidates:
+                    dCx = np.abs(c[0][0][0] - (dObject.rect[0] + dObject.rect[2] / 2))
+                    dCy = np.abs((c[0][0][1] + self.upp_bnd_elps) - (dObject.rect[1] + dObject.rect[3] / 2))
+
+                    if(dCx < 20 and dCy < 20):
+                        accepted = True
                 
                 # If it is a QR code, we get a vector of 4 points
                 # If there are more points, we need to draw a convex hull which is the outer boundary of the barcode
 
-                print("Data: ", dObject.data,'\n')
+                if accepted:
+                    print("Data: ", dObject.data,'\n')
 
-                # Visualize the detected QR code in the image
-                points  = dObject.polygon
-                if len(points) > 4 : 
-                    hull = cv2.convexHull(np.array([point for point in points], dtype=np.float32))
-                    hull = list(map(tuple, np.squeeze(hull)))
-                else : 
-                    hull = points;
+                    # Visualize the detected QR code in the image
+                    points  = dObject.polygon
+                    if len(points) > 4 : 
+                        hull = cv2.convexHull(np.array([point for point in points], dtype=np.float32))
+                        hull = list(map(tuple, np.squeeze(hull)))
+                    else : 
+                        hull = points;
+                     
+                    ## Number of points in the convex hull
+                    n = len(hull)
                  
-                ## Number of points in the convex hull
-                n = len(hull)
-             
-                ## Draw the convext hull
-                for j in range(0,n):
-                    cv2.line(img_original, hull[j], hull[ (j+1) % n], (0,255,0), 2)           
+                    ## Draw the convext hull
+                    for j in range(0,n):
+                        cv2.line(img_original, hull[j], hull[ (j+1) % n], (0,255,0), 2)
 
         # Build an array of detected Rings
         ed = EllipseData()
@@ -158,19 +167,12 @@ class The_QR:
 
             e1 = c[0]
             e2 = c[1]
+            center = (e1[0][0], e1[0][1] + self.upp_bnd_elps)
 
             # DEVONLY: Draw the detections
             cv2.ellipse(img_original[self.upp_bnd_elps:self.low_bnd_elps, 0:len(img_original)], e1, (0, 255, 0), 2)
             cv2.ellipse(img_original[self.upp_bnd_elps:self.low_bnd_elps, 0:len(img_original)], e2, (0, 255, 0), 2)
 
-            center = (e1[0][0], e1[0][1] + self.upp_bnd_elps)
-
-            # TMP
-            cimg = np.zeros_like(img_original)
-            cv2.ellipse(cimg[self.upp_bnd_elps:self.low_bnd_elps, 0:len(cimg)], e1, 255, 1)
-            cv2.ellipse(cimg[self.upp_bnd_elps:self.low_bnd_elps, 0:len(cimg)], e2, 255, 1)
-            cv2.imshow('TMP', cimg)
-            cv2.waitKey(1)
 
 
             # Add a detected ring to the array
@@ -200,6 +202,9 @@ class The_QR:
                     ed.perp_agl.append(perp_agl)
                     ed.perp_y_itrcpt.append(perp_y_itrcpt)
                     ed.found = 1
+
+                    print(dpt)
+                    print("---")
   
         if (ed.found == 1):
             self.rings_pub.publish(ed)

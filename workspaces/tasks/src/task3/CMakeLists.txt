@@ -85,6 +85,7 @@ add_service_files(
   CheckpointProcessor.srv
   EllipseLocator.srv
   CylinderLocator.srv
+  QRDetector.srv
 )
 
 ## Generate actions in the 'action' folder
