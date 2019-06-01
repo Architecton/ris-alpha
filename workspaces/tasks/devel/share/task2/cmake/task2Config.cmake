@@ -67,14 +67,23 @@ set(task2_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("TRUE" STREQUAL "TRUE")
+<<<<<<< HEAD
   set(task2_SOURCE_PREFIX /home/dkalsan/ris-alpha/workspaces/tasks/src/task2)
   set(task2_DEVEL_PREFIX /home/dkalsan/ris-alpha/workspaces/tasks/devel)
+=======
+  set(task2_SOURCE_PREFIX /home/jernej/ris-alpha/workspaces/tasks/src/task2)
+  set(task2_DEVEL_PREFIX /home/jernej/ris-alpha/workspaces/tasks/devel)
+>>>>>>> 421acea4e6516f0b1f751f12223a0631f49cf0f4
   set(task2_INSTALL_PREFIX "")
   set(task2_PREFIX ${task2_DEVEL_PREFIX})
 else()
   set(task2_SOURCE_PREFIX "")
   set(task2_DEVEL_PREFIX "")
+<<<<<<< HEAD
   set(task2_INSTALL_PREFIX /home/dkalsan/ris-alpha/workspaces/tasks/install)
+=======
+  set(task2_INSTALL_PREFIX /home/jernej/ris-alpha/workspaces/tasks/install)
+>>>>>>> 421acea4e6516f0b1f751f12223a0631f49cf0f4
   set(task2_PREFIX ${task2_INSTALL_PREFIX})
 endif()
 
@@ -91,9 +100,15 @@ endif()
 # flag project as catkin-based to distinguish if a find_package()-ed project is a catkin project
 set(task2_FOUND_CATKIN_PROJECT TRUE)
 
+<<<<<<< HEAD
 if(NOT "/home/dkalsan/ris-alpha/workspaces/tasks/devel/include " STREQUAL " ")
   set(task2_INCLUDE_DIRS "")
   set(_include_dirs "/home/dkalsan/ris-alpha/workspaces/tasks/devel/include")
+=======
+if(NOT "/home/jernej/ris-alpha/workspaces/tasks/devel/include " STREQUAL " ")
+  set(task2_INCLUDE_DIRS "")
+  set(_include_dirs "/home/jernej/ris-alpha/workspaces/tasks/devel/include")
+>>>>>>> 421acea4e6516f0b1f751f12223a0631f49cf0f4
   if(NOT " " STREQUAL " ")
     set(_report "Check the issue tracker '' and consider creating a ticket if the problem has not been reported yet.")
   elseif(NOT " " STREQUAL " ")
@@ -110,7 +125,11 @@ if(NOT "/home/dkalsan/ris-alpha/workspaces/tasks/devel/include " STREQUAL " ")
         message(FATAL_ERROR "Project 'task2' specifies '${idir}' as an include dir, which is not found.  It does not exist in '${include}'.  ${_report}")
       endif()
     else()
+<<<<<<< HEAD
       message(FATAL_ERROR "Project 'task2' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/dkalsan/ris-alpha/workspaces/tasks/src/task2/${idir}'.  ${_report}")
+=======
+      message(FATAL_ERROR "Project 'task2' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/jernej/ris-alpha/workspaces/tasks/src/task2/${idir}'.  ${_report}")
+>>>>>>> 421acea4e6516f0b1f751f12223a0631f49cf0f4
     endif()
     _list_append_unique(task2_INCLUDE_DIRS ${include})
   endforeach()
@@ -129,7 +148,11 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
+<<<<<<< HEAD
     foreach(path /home/dkalsan/ris-alpha/workspaces/tasks/devel/lib;/home/dkalsan/ris-alpha/workspaces/tasks/devel/lib;/opt/ros/kinetic/lib)
+=======
+    foreach(path /home/jernej/ris-alpha/workspaces/tasks/devel/lib;/opt/ros/kinetic/lib)
+>>>>>>> 421acea4e6516f0b1f751f12223a0631f49cf0f4
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)

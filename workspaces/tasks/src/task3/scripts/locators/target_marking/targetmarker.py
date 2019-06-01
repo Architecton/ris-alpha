@@ -29,7 +29,7 @@ class TargetMarker():
         try:
             self.target_buff = np.vstack((self.target_buff, pos))  # pos should be a numpy 1x3 array.
         except Exception as e:
-            print e
+            rospy.logerr(e)
 
         markers = MarkerArray()  # Initialize markers array.
 

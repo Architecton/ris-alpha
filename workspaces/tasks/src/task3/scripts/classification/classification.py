@@ -2,6 +2,7 @@
 
 import numpy as np
 from sklearn.neural_network import MLPClassifier
+import requests as request
 
 class UrlDataClassifier:
 

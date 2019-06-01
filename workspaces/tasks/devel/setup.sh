@@ -10,7 +10,11 @@
 
 # since this file is sourced either use the provided _CATKIN_SETUP_DIR
 # or fall back to the destination set at configure time
+<<<<<<< HEAD
 : ${_CATKIN_SETUP_DIR:=/home/dkalsan/ris-alpha/workspaces/tasks/devel}
+=======
+: ${_CATKIN_SETUP_DIR:=/home/jernej/ris-alpha/workspaces/tasks/devel}
+>>>>>>> 421acea4e6516f0b1f751f12223a0631f49cf0f4
 _SETUP_UTIL="$_CATKIN_SETUP_DIR/_setup_util.py"
 unset _CATKIN_SETUP_DIR
 
