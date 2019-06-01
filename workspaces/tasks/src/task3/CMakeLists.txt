@@ -120,6 +120,10 @@ catkin_package(
 ##   * uncomment the "generate_dynamic_reconfigure_options" section below
 ##     and list every .cfg file to be processed
 
+catkin_package(
+	CATKIN_DEPENDS message_runtime
+)
+
 ###########
 ## Build ##
 ###########
