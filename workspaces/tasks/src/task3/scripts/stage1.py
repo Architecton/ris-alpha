@@ -17,11 +17,11 @@ from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from geometry_msgs.msg import Point, Vector3, PoseStamped, Twist
 
 from target_marking.targetmarker import TargetMarker
-from task1.srv import EllipseLocator
+from task3.srv import EllipseLocator
 
-from task1.srv import Checkpoint_res
-from task1.msg import Checkpoints
-from task1.msg import ScanFlag
+from task3.srv import Checkpoint_res
+from task3.msg import Checkpoints
+from task3.msg import ScanFlag
 
 from sound_play.msg import SoundRequest
 from sound_play.libsoundplay import SoundClient

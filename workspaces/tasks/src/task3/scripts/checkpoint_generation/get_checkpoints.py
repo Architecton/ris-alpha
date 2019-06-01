@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import rospy
-from task1.srv import Checkpoint_res
-from task1.msg import Checkpoints
+from task3.srv import Checkpoint_res
+from task3.msg import Checkpoints
 from nav_msgs.msg import OccupancyGrid, MapMetaData
 from geometry_msgs.msg import Point, Vector3, PoseStamped
 

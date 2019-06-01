@@ -14,12 +14,12 @@ from geometry_msgs.msg import PoseStamped
 
 from targetmarker import TargetMarker  # TODO: import
 
-from task1.msg import CylinderData
-from task1.msg import ScanFlag
-from task1.msg import CheckpointProcessorResponse
+from task3.msg import CylinderData
+from task3.msg import ScanFlag
+from task3.msg import CheckpointProcessorResponse
 
-from task1.srv import CylinderLocator
-from task1.srv import CheckpointProcessor
+from task3.srv import CylinderLocator
+from task3.srv import CheckpointProcessor
 
 import time
 import numpy as np
