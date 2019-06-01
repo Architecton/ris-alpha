@@ -286,11 +286,14 @@ def stage_one():
                             # TODO READ QR CODE/DIGITS HERE
 
                             # Try to detect QR code for N sec.
+                            qr_detection_serv(1)
+                            rospy.sleep(2)
+                            qr_detected = qr_detection_serv(0)
 
                             # Try to detect digits for N sec.
-
-                            qr_detected = True  # TODO
-                            pattern_detected = True  # TODO
+                            digit_detection_serv(1)
+                            rospy.sleep(2)
+                            found_pattern = digit_detection_serv(0)
 
                             # IF QR CODE DETECTED, train classifier and save indicator that classifier detected.
                             if qr_detected:
@@ -302,12 +305,9 @@ def stage_one():
 
 
                             # IF DIGITS DETECTED, if classifier trained, classify, else save and continue search for QR code.
-                            if pattern_detected:
-                                pattern = np.array([1, 2])
+                            if found_pattern:
                                 if classifier_built:
-                                    return clf.predict(pattern)
-                                else:
-                                    found_pattern = pattern
+                                    return clf.predict(found_pattern)
 
 
                             ### TODO TODO TODO ##########################################################################
