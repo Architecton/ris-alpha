@@ -96,13 +96,31 @@ def stage_one():
     ac_chkpnts = actionlib.SimpleActionClient("move_base", MoveBaseAction)
     ac_ellipses = actionlib.SimpleActionClient("move_base", MoveBaseAction)
 
-    # Initialize checkpoints array.
-    rospy.wait_for_service('get_checkpoints')
 
+
+
+    ### SERVICE PROXY INITIALIZATION ###
+    rospy.wait_for_service('get_checkpoints')
     try:
         checkpoint_gen = rospy.ServiceProxy('get_checkpoints', Checkpoint_res)
     except rospy.ServiceException, e:
         rospy.logerr("Service error: {0}".format(e.message))
+
+    rospy.wait_for_service('detect_qr')
+    try:
+        qr_detection_serv = rospy.ServiceProxy('qr_detector', QRDetector)
+    except rospy.ServiceException, e:
+        rospy.logerr("Service error: {0}".format(e.message))
+
+    rospy.wait_for_service('detect_digits')
+    try:
+        digit_detection_serv = rospy.ServiceProxy('digit_detector', DigitDetector)
+    except rospy.ServiceException, e:
+        rospy.logerr("Service error: {0}".format(e.message))
+    ### /SERVICE PROXY INITIALIZATION ###
+
+
+
 
     # Initialize coordinate transforms buffer.
     tf2_buffer = tf2_ros.Buffer()
@@ -286,27 +304,29 @@ def stage_one():
                             # TODO READ QR CODE/DIGITS HERE
 
                             # Try to detect QR code for N sec.
-                            qr_detection_serv(1)
-                            rospy.sleep(2)
-                            qr_detected = qr_detection_serv(0)
+                            qr_detected = None
+                            if not classifier_built:
+                                qr_detection_serv(1)
+                                rospy.sleep(2)
+                                qr_detected = qr_detection_serv(0)
 
                             # Try to detect digits for N sec.
-                            digit_detection_serv(1)
-                            rospy.sleep(2)
-                            found_pattern = digit_detection_serv(0)
+                            if not qr_detected:
+                                digit_detection_serv(1)
+                                rospy.sleep(2)
+                                found_pattern = digit_detection_serv(0)
+
+                                # IF DIGITS DETECTED, if classifier trained, classify, else save and continue search for QR code.
+                                if found_pattern:
+                                    if classifier_built:
+                                        return clf.predict(found_pattern)
 
                             # IF QR CODE DETECTED, train classifier and save indicator that classifier detected.
-                            if qr_detected:
-                                data_url = 'http://localhost:3000'  # TODO
+                            else:
+                                data_url = qr_detected
                                 clf = clf.fit(data_url)
                                 classifier_built = True
                                 if found_pattern:
-                                    return clf.predict(found_pattern)
-
-
-                            # IF DIGITS DETECTED, if classifier trained, classify, else save and continue search for QR code.
-                            if found_pattern:
-                                if classifier_built:
                                     return clf.predict(found_pattern)
 
 
