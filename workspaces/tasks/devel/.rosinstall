@@ -1,6 +1,2 @@
 - setup-file:
-<<<<<<< HEAD
-    local-name: /home/jernej/ris-alpha/workspaces/tasks/devel/setup.sh
-=======
-    local-name: /home/team_alpha/ris-alpha/workspaces/tasks/devel/setup.sh
->>>>>>> parent of 6f930b0... Fixed package.xml and some message names
+    local-name: /home/dkalsan/ris-alpha/workspaces/tasks/devel/setup.sh

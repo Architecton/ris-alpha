@@ -262,11 +262,7 @@ if __name__ == '__main__':
             sys.exit(1)
 
         # environment at generation time
-<<<<<<< HEAD
-        CMAKE_PREFIX_PATH = '/opt/ros/kinetic'.split(';')
-=======
-        CMAKE_PREFIX_PATH = '/home/team_alpha/ris-alpha/workspaces/tasks/devel;/opt/ros/kinetic'.split(';')
->>>>>>> parent of 6f930b0... Fixed package.xml and some message names
+        CMAKE_PREFIX_PATH = '/home/dkalsan/ris-alpha/workspaces/tasks/devel;/opt/ros/kinetic'.split(';')
         # prepend current workspace if not already part of CPP
         base_path = os.path.dirname(__file__)
         if base_path not in CMAKE_PREFIX_PATH:

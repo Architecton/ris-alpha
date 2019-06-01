@@ -58,11 +58,7 @@
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
-<<<<<<< HEAD
   <exec_depend>message_runtime</exec_depend>
-=======
->>>>>>> parent of 6f930b0... Fixed package.xml and some message names
-
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

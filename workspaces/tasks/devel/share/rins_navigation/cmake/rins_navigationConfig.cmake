@@ -67,23 +67,14 @@ set(rins_navigation_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("TRUE" STREQUAL "TRUE")
-<<<<<<< HEAD
-  set(rins_navigation_SOURCE_PREFIX /home/jernej/ris-alpha/workspaces/tasks/src/rins_navigation)
-  set(rins_navigation_DEVEL_PREFIX /home/jernej/ris-alpha/workspaces/tasks/devel)
-=======
-  set(rins_navigation_SOURCE_PREFIX /home/team_alpha/ris-alpha/workspaces/tasks/src/rins_navigation)
-  set(rins_navigation_DEVEL_PREFIX /home/team_alpha/ris-alpha/workspaces/tasks/devel)
->>>>>>> parent of 6f930b0... Fixed package.xml and some message names
+  set(rins_navigation_SOURCE_PREFIX /home/dkalsan/ris-alpha/workspaces/tasks/src/rins_navigation)
+  set(rins_navigation_DEVEL_PREFIX /home/dkalsan/ris-alpha/workspaces/tasks/devel)
   set(rins_navigation_INSTALL_PREFIX "")
   set(rins_navigation_PREFIX ${rins_navigation_DEVEL_PREFIX})
 else()
   set(rins_navigation_SOURCE_PREFIX "")
   set(rins_navigation_DEVEL_PREFIX "")
-<<<<<<< HEAD
-  set(rins_navigation_INSTALL_PREFIX /home/jernej/ris-alpha/workspaces/tasks/install)
-=======
-  set(rins_navigation_INSTALL_PREFIX /home/team_alpha/ris-alpha/workspaces/tasks/install)
->>>>>>> parent of 6f930b0... Fixed package.xml and some message names
+  set(rins_navigation_INSTALL_PREFIX /home/dkalsan/ris-alpha/workspaces/tasks/install)
   set(rins_navigation_PREFIX ${rins_navigation_INSTALL_PREFIX})
 endif()
 
@@ -119,11 +110,7 @@ if(NOT " " STREQUAL " ")
         message(FATAL_ERROR "Project 'rins_navigation' specifies '${idir}' as an include dir, which is not found.  It does not exist in '${include}'.  ${_report}")
       endif()
     else()
-<<<<<<< HEAD
-      message(FATAL_ERROR "Project 'rins_navigation' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/jernej/ris-alpha/workspaces/tasks/src/rins_navigation/${idir}'.  ${_report}")
-=======
-      message(FATAL_ERROR "Project 'rins_navigation' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/team_alpha/ris-alpha/workspaces/tasks/src/rins_navigation/${idir}'.  ${_report}")
->>>>>>> parent of 6f930b0... Fixed package.xml and some message names
+      message(FATAL_ERROR "Project 'rins_navigation' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/dkalsan/ris-alpha/workspaces/tasks/src/rins_navigation/${idir}'.  ${_report}")
     endif()
     _list_append_unique(rins_navigation_INCLUDE_DIRS ${include})
   endforeach()
@@ -142,11 +129,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-<<<<<<< HEAD
-    foreach(path /home/jernej/ris-alpha/workspaces/tasks/devel/lib;/opt/ros/kinetic/lib)
-=======
-    foreach(path /home/team_alpha/ris-alpha/workspaces/tasks/devel/lib;/home/team_alpha/ris-alpha/workspaces/tasks/devel/lib;/opt/ros/kinetic/lib)
->>>>>>> parent of 6f930b0... Fixed package.xml and some message names
+    foreach(path /home/dkalsan/ris-alpha/workspaces/tasks/devel/lib;/home/dkalsan/ris-alpha/workspaces/tasks/devel/lib;/opt/ros/kinetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
