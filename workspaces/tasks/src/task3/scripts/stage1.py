@@ -106,13 +106,13 @@ def stage_one():
     except rospy.ServiceException, e:
         rospy.logerr("Service error: {0}".format(e.message))
 
-    rospy.wait_for_service('detect_qr')
+    rospy.wait_for_service('qr_detector')
     try:
         qr_detection_serv = rospy.ServiceProxy('qr_detector', QRDetector)
     except rospy.ServiceException, e:
         rospy.logerr("Service error: {0}".format(e.message))
 
-    rospy.wait_for_service('detect_digits')
+    rospy.wait_for_service('digit_detector')
     try:
         digit_detection_serv = rospy.ServiceProxy('digit_detector', DigitDetector)
     except rospy.ServiceException, e:

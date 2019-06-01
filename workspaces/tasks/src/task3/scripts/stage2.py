@@ -95,13 +95,23 @@ def stage_two(cylinder_color_goal):
     ac_chkpnts = actionlib.SimpleActionClient("move_base", MoveBaseAction)
     ac_cylinders = actionlib.SimpleActionClient("move_base", MoveBaseAction)
 
-    # Initialize checkpoints array.
+    
+    ### SERVICE PROXY INITIALIZATION ###
+    
     rospy.wait_for_service('get_checkpoints')
-
     try:
         checkpoint_gen = rospy.ServiceProxy('get_checkpoints', Checkpoint_res)
     except rospy.ServiceException, e:
         rospy.logerr("Service error: {0}".format(e.message))
+
+    rospy.wait_for_service('qr_detector')
+    try:
+        qr_detection_serv = rospy.ServiceProxy('qr_detector', QRDetector)
+    except rospy.ServiceException, e:
+        rospy.logerr("Service error: {0}".format(e.message))
+
+    ### /SERVICE PROXY INITIALIZATION ###
+
 
     # Initialize coordinate transforms buffer.
     tf2_buffer = tf2_ros.Buffer()
@@ -261,20 +271,19 @@ def stage_two(cylinder_color_goal):
                         elif goal_nxt_cyl_status == GoalStatus.SUCCEEDED:
 
 
-
-
                             ### TODO TODO TODO ##########################################################################
 
                             # Get color of cylinder
                             cylinder_color = 0  ## TODO detect
                             if cylinder_color == cylinder_color_goal:
-                                # TODO read qr code and get color
-                                color_res = None # TODO
+                                qr_detection_serv(1)
+                                rospy.sleep(2)
+                                qr_detected = qr_detection_serv(0)
+                                color_res = qr_detected
                                 return color_res
 
 
                             ### TODO TODO TODO ##########################################################################
-
 
 
                             # Notify that cylinder has been resolved.
