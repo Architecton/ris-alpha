@@ -112,3 +112,9 @@ if __name__ == '__main__':
 # 23 detections: nothing (rectified)
 # 46 detections: nothing (non-rectified)
 # x detections: binary (rectified)
+
+
+# (25, 2): 130 markers
+# (8, 4): 136 markers
+# (14, 2): 137 markers
+# (10, 2): 140 markers

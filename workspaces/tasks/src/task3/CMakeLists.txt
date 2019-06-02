@@ -86,6 +86,7 @@ add_service_files(
   EllipseLocator.srv
   CylinderLocator.srv
   QRDetector.srv
+  DigitDetector.srv
 )
 
 ## Generate actions in the 'action' folder
