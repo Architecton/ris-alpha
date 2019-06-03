@@ -33,6 +33,8 @@ import time
 import pdb
 import sys
 
+import pdb
+
 ### /IMPORTS ###
 
 """
@@ -261,12 +263,7 @@ def stage_one():
             # Query into ellipse buffer
             ellipse_data = ellipse_locator().target
             while(len(ellipse_data) > 0):  # If data in buffer...
-                comp_dists = (lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([ellipse_data[0], ellipse_data[1]]), resolved_ell[:, :2]) < DISTINCT_ELL_THRESH
-                comp_agl = euler_from_quaternion(np.array([ellipse_data[6], ellipse_data[7], ellipse_data[8], ellipse_data[9]]))
-                euler_resolved = np.apply_along_axis(euler_from_quaternion, 1, resolved_ell[:, 2:])[:, -1]
-                comp_agls = lambda x1, x2 : np.abs(x1 - x2)(comp_agl, euler_resolved) < np.pi/3
-
-                if not np.any(np.logical_and(comp_dists, comp_agls)):
+                if not np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([ellipse_data[0], ellipse_data[1]]), resolved_ell[:, :2]) < DISTINCT_ELL_THRESH):
 
                     ### DEBUGGING VISUALIZATION ###
                     tm.push_position(np.array(ellipse_data[:3]))
@@ -305,6 +302,7 @@ def stage_one():
                             # TODO READ QR CODE/DIGITS HERE
 
                             # Try to detect QR code for N sec.
+		            pdb.set_trace()	
                             qr_detected = None
                             if not classifier_built:
                                 qr_detection_serv(1)

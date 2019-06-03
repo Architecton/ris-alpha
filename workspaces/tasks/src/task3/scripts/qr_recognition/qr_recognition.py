@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#/usr/bin/env python
 
 import rospy
 import cv2
@@ -139,14 +139,14 @@ class The_QR:
                 # If there are more points, we need to draw a convex hull which is the outer boundary of the barcode
 
                 if accepted:
-                    print("Data: ", dObject.data,'\n')
+                    # print("Data: ", dObject.data,'\n')
 
                     # Visualize the detected QR code in the image
                     points  = dObject.polygon
                     if len(points) > 4 : 
                         hull = cv2.convexHull(np.array([point for point in points], dtype=np.float32))
                         hull = list(map(tuple, np.squeeze(hull)))
-                    else : 
+                    else: 
                         hull = points;
                      
                     ## Number of points in the convex hull
@@ -203,8 +203,8 @@ class The_QR:
                     ed.perp_y_itrcpt.append(perp_y_itrcpt)
                     ed.found = 1
 
-                    print(dpt)
-                    print("---")
+                    # print(dpt)
+                    # print("---")
   
         if (ed.found == 1):
             self.rings_pub.publish(ed)

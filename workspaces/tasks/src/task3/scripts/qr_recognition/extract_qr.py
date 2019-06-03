@@ -14,11 +14,11 @@ dictm = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
 # The object that we will pass to the markerDetect function
 params =  cv2.aruco.DetectorParameters_create()
 
-print(params.adaptiveThreshConstant) 
-print(params.adaptiveThreshWinSizeMax)
-print(params.adaptiveThreshWinSizeMin)
-print(params.minCornerDistanceRate)
-print(params.adaptiveThreshWinSizeStep)
+# print(params.adaptiveThreshConstant) 
+# print(params.adaptiveThreshWinSizeMax)
+# print(params.adaptiveThreshWinSizeMin)
+# print(params.minCornerDistanceRate)
+# print(params.adaptiveThreshWinSizeStep)
 
 # To see description of the parameters
 # https://docs.opencv.org/3.3.1/d1/dcd/structcv_1_1aruco_1_1DetectorParameters.html
@@ -149,7 +149,7 @@ class The_QR:
 
         if (req.flg == 0):
             if(len(self.urls) > 0):
-                print(self.urls)
+                # print(self.urls)
                 return max(self.urls, key=self.urls.get)
             else:
                 return ""    
