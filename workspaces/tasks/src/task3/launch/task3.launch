@@ -2,5 +2,7 @@
 	<node pkg="task3" type="ellipse_locator.py" name="ellipse_locator" output="screen" />
 	<node pkg="task3" type="checkpoint_processor.py" name="checkpoint_processor_server" output="screen" />
 	<node pkg="task3" type="get_checkpoints.py" name="get_checkpoints_server" output="screen" />
-	<node pkg="task3" type="stage1.py" name="stage1" output="screen" />
+	<node pkg="task3" type="extract_qr.py" name="extract_qr" output="screen" />
+	<node pkg="task3" type="extract_digits.py" name="extract_digits" output="screen" />
+	<node pkg="task3" type="master.py" name="master" output="screen" />
 </launch>

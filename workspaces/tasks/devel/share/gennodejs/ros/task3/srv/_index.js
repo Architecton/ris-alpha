@@ -1,28 +1,28 @@
 
 "use strict";
 
-let Checkpoint_res = require('./Checkpoint_res.js')
+let ColourClassificationSrv = require('./ColourClassificationSrv.js')
 let DigitDetector = require('./DigitDetector.js')
-let CylinderLocator = require('./CylinderLocator.js')
+let Checkpoint_res = require('./Checkpoint_res.js')
 let TerminalApproach = require('./TerminalApproach.js')
-let RingApproachPoint = require('./RingApproachPoint.js')
+let CylinderLocator = require('./CylinderLocator.js')
+let CheckpointProcessor = require('./CheckpointProcessor.js')
 let ValidRegionsMap = require('./ValidRegionsMap.js')
 let FeatureBuilder = require('./FeatureBuilder.js')
-let ColourClassificationSrv = require('./ColourClassificationSrv.js')
-let QRDetector = require('./QRDetector.js')
-let CheckpointProcessor = require('./CheckpointProcessor.js')
 let EllipseLocator = require('./EllipseLocator.js')
+let RingApproachPoint = require('./RingApproachPoint.js')
+let QRDetector = require('./QRDetector.js')
 
 module.exports = {
-  Checkpoint_res: Checkpoint_res,
+  ColourClassificationSrv: ColourClassificationSrv,
   DigitDetector: DigitDetector,
-  CylinderLocator: CylinderLocator,
+  Checkpoint_res: Checkpoint_res,
   TerminalApproach: TerminalApproach,
-  RingApproachPoint: RingApproachPoint,
+  CylinderLocator: CylinderLocator,
+  CheckpointProcessor: CheckpointProcessor,
   ValidRegionsMap: ValidRegionsMap,
   FeatureBuilder: FeatureBuilder,
-  ColourClassificationSrv: ColourClassificationSrv,
-  QRDetector: QRDetector,
-  CheckpointProcessor: CheckpointProcessor,
   EllipseLocator: EllipseLocator,
+  RingApproachPoint: RingApproachPoint,
+  QRDetector: QRDetector,
 };
