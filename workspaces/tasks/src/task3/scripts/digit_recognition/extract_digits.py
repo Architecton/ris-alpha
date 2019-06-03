@@ -82,7 +82,7 @@ class The_Digit:
 
             if not ids is None:
                 if len(ids)==4:
-                    print('4 Markers detected')
+                    # print('4 Markers detected')
             
                     for idx in ids:
                         # Calculate the center point of all markers
@@ -124,14 +124,14 @@ class The_Digit:
                     config = '--psm 13 outputbase nobatch digits'
                     
                     # Visualize the image we are passing to Tesseract
-                    cv2.imshow('Warped image',img_out)
-                    cv2.waitKey(1)
+                    # cv2.imshow('Warped image',img_out)
+                    # cv2.waitKey(1)
             
                     # Extract text from image
                     text = pytesseract.image_to_string(img_out, config = config)
                     
                     # Check and extract data from text
-                    print('Extracted>>',text)
+                    # print('Extracted>>',text)
                     
                     # Remove any whitespaces from the left and right
                     text = text.strip()
@@ -139,17 +139,17 @@ class The_Digit:
                     # If the extracted text is of the right length
                     if len(text)==2:
                         if (text[0].isdigit() and text[1].isdigit()):
-                            x=int(text[0])
-                            y=int(text[1])
+                            # x=int(text[0])
+                            # y=int(text[1])
                             self.digits[text] += 1
 
-                            print('The extracted datapoints are x=%d, y=%d' % (x,y))
-                    else:
-                        print('The extracted text has is of length %d. Aborting processing' % len(text))
+                            # print('The extracted datapoints are x=%d, y=%d' % (x,y))
+                    # else:
+                    #     print('The extracted text has is of length %d. Aborting processing' % len(text))
 
             # DEVONLY: Visualize camera output
-            cv2.imshow('Live feed', img_original)
-            cv2.waitKey(1)
+            # cv2.imshow('Live feed', img_original)
+            # cv2.waitKey(1)
 
     def toggle_output(self, req):
         self.flg = req.flg
