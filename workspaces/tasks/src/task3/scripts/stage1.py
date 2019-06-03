@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 ### IMPORTS ###
-
 import numpy as np
 import roslib
 roslib.load_manifest('task3')
@@ -18,6 +17,8 @@ from geometry_msgs.msg import Point, Vector3, PoseStamped, Twist
 
 from locators.target_marking.targetmarker import TargetMarker
 from task3.srv import EllipseLocator
+from task3.srv import QRDetector
+from task3.srv import DigitDetector
 
 from task3.srv import Checkpoint_res
 from task3.msg import Checkpoints
@@ -52,7 +53,7 @@ def stage_one():
     ### INITIALIZATIONS ###
 
     # Initialize main node.
-    rospy.init_node('main')
+    # rospy.init_node('main')
 
     # Initialize sound node.
     soundhandle = SoundClient()
