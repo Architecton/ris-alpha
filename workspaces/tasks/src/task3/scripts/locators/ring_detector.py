@@ -175,7 +175,7 @@ class The_Ring:
                         if(dist2 < 10):
                             is_unique = False
                 
-                    if ((is_unique or len(candidates) == 0) and (1.2 < max(e1[1][0]/e2[1][0], e2[1][0]/e1[1][0]) < 1.5)):
+                    if ((is_unique or len(candidates) == 0) and (1.25 < max(e1[1][1]/e2[1][1], e2[1][1]/e1[1][1]) < 1.35) and (np.abs(e1[2]-e2[2]) < 10)):
                     # if (is_unique or len(candidates) == 0):
                         candidates.append((e1,e2))   
 
