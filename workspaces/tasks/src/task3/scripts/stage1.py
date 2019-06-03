@@ -310,7 +310,7 @@ def stage_one():
                                 qr_detected = qr_detection_serv(0)
 
                             # Try to detect digits for N sec.
-                            if not qr_detected:
+                            if qr_detected == '':
                                 digit_detection_serv(1)
                                 rospy.sleep(2)
                                 found_pattern = digit_detection_serv(0)
