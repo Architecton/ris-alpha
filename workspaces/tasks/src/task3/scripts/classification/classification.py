@@ -12,18 +12,19 @@ class UrlDataClassifier:
     """
    
     # Constructor
-    def __init__(learner=MLPClassifier, **kwargs):
-        self._clf = learner(**kwargs)
+    def __init__(self, learner=MLPClassifier, **kwargs):
+        # self._clf = learner(**kwargs)
+        self._clf = MLPClassifier()
 
     # Fit: use learner to produce classifier.
-    def fit(data_url):
+    def fit(self, data_url):
         data = np.fromstring(requests.get(data_url).text)
         target = None # TODO
         self._clf = self._clf.fit(data, target)
         return self  # Return reference to self (to allow .fit(url).predict(example) calls)
    
     # predict: predict class of example using learned classifier.
-    def predict(example):
+    def predict(self, example):
         return self._clf.predict(example)
 
 
