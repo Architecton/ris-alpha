@@ -37,6 +37,7 @@ import pdb
 
 ### /IMPORTS ###
 
+
 """
 Description:
 
@@ -65,6 +66,7 @@ def stage_one():
 
     # Notify start of initialization.
     soundhandle.say("Starting initialization of stage one.", voice, volume)
+
 
     # /// publishers ///
     # Define publisher for ellipse search rotations.
@@ -302,10 +304,12 @@ def stage_one():
                             # TODO READ QR CODE/DIGITS HERE
 
                             # Try to detect QR code for N sec.
-		            pdb.set_trace()	
                             qr_detected = None
                             if not classifier_built:
                                 qr_detection_serv(1)
+
+                                # TODO move left, move right, 
+                                
                                 rospy.sleep(2)
                                 qr_detected = qr_detection_serv(0)
 
