@@ -1,19 +1,18 @@
 #!/usr/bin/env python
 import numpy as np
+
 import rospy
-from colour_detection import RingImageProcessor
+from colour_detection import CylinderImageProcessor
 from joblib import load
-from task2.msg import ApproachImageFeedback
+from task3.msg import CylinderImageFeedback
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 
-
-class ColourDetector:
+class ColourDetectorCyl:
     def __init__(self, clf, num_bins):
-        self._ring_image_processor = RingImageProcessor(clf, 100)
-        self._num_bins = num_bins  # Number of bins to use in histograms.
-        self._ring_image = np.empty(0, dtype=np.uint8)
+        self._cylinder_image_processor = CylinderImageProcessor(clf, num_bins)
+        self._cylinder_image = np.empty(0, dtype=np.uint8)
         self._cv_bridge = CvBridge()
 
 
@@ -23,7 +22,7 @@ class ColourDetector:
         Callback called when broadcast on topic received.
 
         Args:
-            data -- RingData message instance
+            data -- CylinderData message instance
 
         Returns:
             None
@@ -43,9 +42,9 @@ class ColourDetector:
         r_d[0] = np.clip(r_d[0], 0, 480)
         r_d[1] = np.clip(r_d[1], 0, 640)
 
-        if self._ring_image.shape[0] > 0:
+        if self._cylinder_image.shape[0] > 0:
             # Add image and class to feature generator instance
-            self._ring_image_processor.img_to_feature(self._ring_image, l_u, r_d)
+            self._cylinder_image_processor.img_to_feature(self._cylinder_image, l_u, r_d)
 
 
     def _img_callback(self, data):
@@ -67,11 +66,11 @@ class ColourDetector:
             print(e)
 
         # Add image and class to feature generator instance
-        self._ring_image = received_image
+        self._cylinder_image = received_image
 
 
     def subscribe(self):
-        self._depth_subscriber = rospy.Subscriber('cylinders', ApproachImageFeedback, self._depth_callback)
+        self._depth_subscriber = rospy.Subscriber('cylinders', CylinderImageFeedback, self._depth_callback)
         self._img_subscriber = rospy.Subscriber('/camera/rgb/image_raw', Image, self._img_callback)
 
 
@@ -80,15 +79,18 @@ class ColourDetector:
         self._img_subscriber.unregister()
 
 
-    def get_ring_color(self):
+    def get_cylinder_color(self):
         self._unsubscribe()
-        res = self._ring_image_processor.get_ring_color()
-        self._ring_image_processor.clear()
+        res = self._cylinder_image_processor.get_cylinder_color()
+        self._cylinder_image_processor.clear()
         return res
      
-    
+
 if __name__ == '__main__':
-    clf = load('ring_colour_classifier.joblib')
-    cdt = ColourDetector(clf, 100)
-    cdt.subscribe()
-    rospy.spin()
+    clf = load('cylinder_colour_classifier.joblib')
+    NUM_BINS = 50
+    cdt = ColourDetectorCyl(clf, NUM_BINS)
+    while True:
+        cdt.subscribe()
+        rospy.sleep(3)
+        print cdt.get_cylinder_color()
