@@ -3,7 +3,7 @@
 import numpy as np
 import rospy
 from colour_detection import ColourFeatureGenerator, ColourClassifier
-from task2.msg import ApproachImageFeedback
+from task3.msg import ApproachImageFeedback
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
@@ -59,7 +59,7 @@ class ColourDetectionTrainer:
 
 
     def _depth_callback(self, data):
-	print "tralala"
+	print "_depth_callback called"
 
         """
         Callback called when broadcast on topic received.
@@ -167,9 +167,12 @@ if __name__ == '__main__':
     
     # Clear terminal.
     os.system('clear')
-
+   
+    # Set number of bins to use
+    NUM_BINS = 50
+    
     # Initialize trainer
-    trainer = ColourDetectionTrainer(num_bins=100)    
+    trainer = ColourDetectionTrainer(num_bins=NUM_BINS)
     
     # Go over ring colours.
     for colour in trainer.colour_dict.keys():
@@ -186,7 +189,7 @@ if __name__ == '__main__':
         # Set target value, subscribe to topic and initialize recording timeout.
         trainer.set_target(colour)
         trainer.subscribe()
-        recording_timeout = 10*60
+        recording_timeout = 0.5*60
 
         # Record training data for specified duration.
         while(recording_timeout >= 1):

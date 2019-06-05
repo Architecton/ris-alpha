@@ -1,28 +1,32 @@
 
 "use strict";
 
-let CheckpointProcessorResponse = require('./CheckpointProcessorResponse.js');
-let RingData = require('./RingData.js');
+let SayCommand = require('./SayCommand.js');
+let Checkpoints = require('./Checkpoints.js');
+let TerminalApproachFeedback = require('./TerminalApproachFeedback.js');
 let RingApproachPointResponse = require('./RingApproachPointResponse.js');
 let ScanFlag = require('./ScanFlag.js');
-let ApproachImageFeedback = require('./ApproachImageFeedback.js');
-let Checkpoints = require('./Checkpoints.js');
 let ValidRegionsMapResponse = require('./ValidRegionsMapResponse.js');
-let CylinderData = require('./CylinderData.js');
-let SayCommand = require('./SayCommand.js');
+let CheckpointProcessorResponse = require('./CheckpointProcessorResponse.js');
+let TreasureLocatorResponse = require('./TreasureLocatorResponse.js');
+let ApproachImageFeedback = require('./ApproachImageFeedback.js');
 let EllipseData = require('./EllipseData.js');
-let TerminalApproachFeedback = require('./TerminalApproachFeedback.js');
+let CylinderImageFeedback = require('./CylinderImageFeedback.js');
+let RingData = require('./RingData.js');
+let CylinderData = require('./CylinderData.js');
 
 module.exports = {
-  CheckpointProcessorResponse: CheckpointProcessorResponse,
-  RingData: RingData,
+  SayCommand: SayCommand,
+  Checkpoints: Checkpoints,
+  TerminalApproachFeedback: TerminalApproachFeedback,
   RingApproachPointResponse: RingApproachPointResponse,
   ScanFlag: ScanFlag,
-  ApproachImageFeedback: ApproachImageFeedback,
-  Checkpoints: Checkpoints,
   ValidRegionsMapResponse: ValidRegionsMapResponse,
-  CylinderData: CylinderData,
-  SayCommand: SayCommand,
+  CheckpointProcessorResponse: CheckpointProcessorResponse,
+  TreasureLocatorResponse: TreasureLocatorResponse,
+  ApproachImageFeedback: ApproachImageFeedback,
   EllipseData: EllipseData,
-  TerminalApproachFeedback: TerminalApproachFeedback,
+  CylinderImageFeedback: CylinderImageFeedback,
+  RingData: RingData,
+  CylinderData: CylinderData,
 };

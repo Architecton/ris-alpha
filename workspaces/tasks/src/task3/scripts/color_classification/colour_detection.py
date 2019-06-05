@@ -2,6 +2,8 @@
 import numpy as np
 import os
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.svm import SVC
 
 class ColourClassifier:
 
@@ -25,6 +27,9 @@ class ColourClassifier:
         self.scaler = StandardScaler().fit(data)  # Initialize feature scaler.
 
         # Initialize learner.
+        # learner = RandomForestClassifier(n_estimators=100, random_state=0, max_depth=5)
+        # learner = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
+        # learner = SVC(gamma='auto')
         learner = RandomForestClassifier(n_estimators=100, random_state=0, max_depth=5)
         self.clf = learner.fit(self.scaler.transform(data), target)  # Train classifier.
         return self
@@ -240,48 +245,89 @@ class RingImageProcessor:
 
     def clear(self):
         self._colour_features_mat = np.empty((0, self._num_bins*3), dtype=np.int)  # Matrix for storing features
-        
+       
 
 
-if __name__ == '__main__':
+class CylinderImageProcessor:
 
-    # Initialize colour features generator.
-    gen = ColourFeatureGenerator(num_bins=256)
+    """
+    Class used to detect colors of cylinders from stream of data containing the bgr image of the
+    cylinder, the indices of the center of the cylinder and its dimensions
+    """
 
-    # Add images to colour features generator.
+    # Constructor
+    def __init__(self, clf, num_bins):
+        self._clf = clf  # learned classifier
+        self._num_bins = num_bins  # number of bins to use when computing histograms
+        self._colour_features_mat = np.empty((0, num_bins*3), dtype=np.int)  # Matrix for storing features
 
-    # Add images to colour features generator.
-    for img_f in os.listdir('../train_img/red'):
-        im = imageio.imread('../train_img/red/' + img_f)
-        target = 0
-        gen.add_image(im, target, (0, 0), im.shape[:2])
+    def _crop_to_cylinder(self, img, l_u, r_d):
+        """
+        Crop image to extract part where cylinder is located
+
+        Args:
+            img : Array[np.int8] -- raw rgb image
+            l_u : Array[np.int] -- pixel indices of the left upper corner of location to extract
+            r_d : Array[np.int] -- pixel indices of the right lower corner of location to extract
+
+        Returns:
+            None
+        """
+
+        return img[l_u[0]:r_d[0]+1, l_u[1]:r_d[1]+1, :]  # Return cropped image.
+
+    def _get_color_feature(self, cropped_img):
+        """
+        Compute color feature vector of cropped image
+
+        Args:
+            cropped_img: image cropped to part where cylinder is located
+
+        Returns:
+            None
+        """
+
+        # Compute channel histograms.
+        hist_b, _ = np.histogram(cropped_img[:, :, 0], bins=self._num_bins)
+        hist_g, _ = np.histogram(cropped_img[:, :, 1], bins=self._num_bins)
+        hist_r, _ = np.histogram(cropped_img[:, :, 2], bins=self._num_bins)
+        return np.hstack((hist_r, hist_g, hist_b))  # Return computed colour feature.
+
+    def img_to_feature(self, img, l_u, r_d):
+        """
+        Compute colour feature from image and add to matrix of features
+
+        Args:
+            img : Array[np.int8] -- image from which to compute the colour feature (nxmx3 matrix)
+            l_u : Array[np.int8] -- coordinates of the left upper corner of the part of image on which to compute feature
+            r_d : Array[np.int8] -- coordinates of the right lower corner of the part of image on which to compute feature
+
+        Returns:
+            None
+        """
+        cropped_img = self._crop_to_cylinder(img, l_u, r_d)
+        colour_feature_nxt = self._get_color_feature(cropped_img)
+        self._colour_features_mat = np.vstack((self._colour_features_mat, colour_feature_nxt))
+
+
+    def get_colour_features_matrix(self):
+        return self._colour_features_mat
+
     
-    # Get training examples.
-    data_red, target_red = gen.compute_colour_features()
-    gen.clear()
+    def get_cylinder_color(self):
+        """
+        Classify color based on colour features in colour features matrix.
 
-    # Add images to colour features generation.
-    for img_f in os.listdir('../train_img/green'):
-        im = imageio.imread('../train_img/green/' + img_f)
-        target = 1
-        gen.add_image(im, target, (0, 0), im.shape[:2])
+        Args:
+            
 
-    # Get training examples.
-    data_green, target_green = gen.compute_colour_features()
-   
-    # Stack training examples.
-    data = np.vstack((data_red, data_green))
-    target = np.hstack((target_red, target_green))
+        Returns:
+            The name of colour with most "votes"
+        """
+        predictions = self._clf.predict(self._colour_features_mat)
+        (vals, ct) = np.unique(predictions, return_counts=True)
+        return vals[np.argmax(ct)]
 
-    gen.clear()
-
-    # Fit classifier with data.
-    clf = ColourClassifier({0 : "red", 1 : "green"}).fit(data, target)
-
-    # Load example image to classify and get feature vector.
-    to_classify = imageio.imread('../test_img/avocado.jpeg')
-    gen.add_image(to_classify, 0, (0, 0), to_classify.shape[:2])
-    example, _ = gen.compute_colour_features()
-
-    # Get prediction.
-    pred = clf.predict(example)
+    def clear(self):
+        self._colour_features_mat = np.empty((0, self._num_bins*3), dtype=np.int)  # Matrix for storing features
+       

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 ### IMPORTS ###
-
 import numpy as np
 import roslib
 roslib.load_manifest('task3')
@@ -18,6 +17,8 @@ from geometry_msgs.msg import Point, Vector3, PoseStamped, Twist
 
 from locators.target_marking.targetmarker import TargetMarker
 from task3.srv import CylinderLocator
+from task3.srv import QRDetector
+from task3.srv import DigitDetector
 
 from task3.srv import Checkpoint_res
 from task3.msg import Checkpoints
@@ -32,25 +33,28 @@ import time
 import pdb
 import sys
 
+import pdb
+
 ### /IMPORTS ###
+
 
 """
 Description:
 
-Stage two performs search for cylinders of color obtained from first stage. Upon locating the
-correct cylinder, it obtains another color from the QR code on it.
+Stage two performs search for cylinders. On locating a cylinder with the correct code it trains a classifier.
+On locating a cylinder of correct color, it reads the QR code located on it and returns the color encoded in it.
 
 params:
-    cylinder_color: int -- color of cylinder to find
+    goal_color: int - color of cylinder from which to read the QR code
 """
 
 
-def stage_two(cylinder_color_goal):
+def stage_two(goal_color):
 
     ### INITIALIZATIONS ###
 
     # Initialize main node.
-    rospy.init_node('main')
+    # rospy.init_node('main')
 
     # Initialize sound node.
     soundhandle = SoundClient()
@@ -59,14 +63,14 @@ def stage_two(cylinder_color_goal):
     volume = 1.0
 
     # Notify start of initialization.
-    soundhandle.say("Starting initialization of stage two.", voice, volume)
+    soundhandle.say("Starting initialization of stage one.", voice, volume)
 
 
     # /// publishers ///
     # Define publisher for cylinder search rotations.
     rotation_pub = rospy.Publisher('/cmd_vel_mux/input/navi', Twist, queue_size=10)
     # Define publisher that publishes permissions to process input data.
-    scan_perm_pub_cyl = rospy.Publisher('/scan_perm_cyl', ScanFlag, queue_size=10)
+    scan_perm_pub = rospy.Publisher('/scan_perm', ScanFlag, queue_size=10)
     sf = ScanFlag()
     # /// /publishers ///
 
@@ -95,9 +99,9 @@ def stage_two(cylinder_color_goal):
     ac_chkpnts = actionlib.SimpleActionClient("move_base", MoveBaseAction)
     ac_cylinders = actionlib.SimpleActionClient("move_base", MoveBaseAction)
 
-    
+
+
     ### SERVICE PROXY INITIALIZATION ###
-    
     rospy.wait_for_service('get_checkpoints')
     try:
         checkpoint_gen = rospy.ServiceProxy('get_checkpoints', Checkpoint_res)
@@ -118,14 +122,13 @@ def stage_two(cylinder_color_goal):
     tf2_listener = tf2_ros.TransformListener(tf2_buffer)
 
     # Set distance threshold to consider cylinder as unresolved.
-    DISTINCT_ELL_THRESH = 0.7
+    DISTINCT_CYL_THRESH = 0.7
     DISTINCT_AGL_THRESH = 0.5
 
     # Initialize found cylinders storage.
     # First two fields store the coordinates of the cylinder center. The third field stores the perpendicular angle.
     resolved_cyl = np.empty((0, 6), dtype=float)
     resolved_cyl_ctr = 0  # Initialize resolved cylinders counter.
-    NUM_CYLINDERS_TO_FIND = 3
     end_search = False  # Flag to indicate end of search.
 
     # Number of checkpoints to generate.
@@ -152,7 +155,7 @@ def stage_two(cylinder_color_goal):
     trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
     robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z]) 
 
-    # Wait for cylinders data buffer query service to come online and make a proxy function.
+    # Wait for cylinder data buffer query service to come online and make a proxy function.
     rospy.wait_for_service('cylinder_locator')
     cylinder_locator = rospy.ServiceProxy('cylinder_locator', CylinderLocator)
 
@@ -200,25 +203,23 @@ def stage_two(cylinder_color_goal):
         soundhandle.say("Initiating rotation sequence.", voice, volume)
         for rot_idx in np.arange(NUM_ROTATIONS):
 
-
             # Safety sleep.
             rospy.sleep(0.5)
 
 
             ## IMAGE PROCESSING STREAM SCAN START ###
             sf.flag = 1
-            scan_perm_pub_cyl.publish(sf)
+            scan_perm_pub.publish(sf)
             # Sleep and wait for cylinder_locator service to scan robot's image processing stream for cylinders.
             rospy.sleep(ROTATION_SLEEP_DURATION)
             # PUBLISH REVOCATION OF PERMISSION TO SCAN
             sf.flag = 0
-            scan_perm_pub_cyl.publish(sf)
+            scan_perm_pub.publish(sf)
             ## IMAGE PROCESSING STREAM SCAN END ###
 
 
             # Safety sleep.
             rospy.sleep(0.5)
-
 
             # ROTATE
             start_rot_time = time.time()
@@ -229,18 +230,14 @@ def stage_two(cylinder_color_goal):
         ## /CYLINDER LOCATING ROTATION ##
 
 
+
         ## HANDLE CYLINDER DATA COLLECTED IN BUFFER ##
 
         try:
             # Query into cylinder buffer
             cylinder_data = cylinder_locator().target
             while(len(cylinder_data) > 0):  # If data in buffer...
-                comp_dists = (lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([cylinder_data[0], cylinder_data[1]]), resolved_cyl[:, :2]) < DISTINCT_ELL_THRESH
-                comp_agl = euler_from_quaternion(np.array([cylinder_data[6], cylinder_data[7], cylinder_data[8], cylinder_data[9]]))
-                euler_resolved = np.apply_along_axis(euler_from_quaternion, 1, resolved_cyl[:, 2:])[:, -1]
-                comp_agls = lambda x1, x2 : np.abs(x1 - x2)(comp_agl, euler_resolved) < np.pi/3
-
-                if not np.any(np.logical_and(comp_dists, comp_agls)):
+                if not np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([cylinder_data[0], cylinder_data[1]]), resolved_cyl[:, :2]) < DISTINCT_CYL_THRESH):
 
                     ### DEBUGGING VISUALIZATION ###
                     tm.push_position(np.array(cylinder_data[:3]))
@@ -266,24 +263,21 @@ def stage_two(cylinder_color_goal):
                         goal_nxt_cyl_status = ac_cylinders.get_state()
 
                         if goal_nxt_cyl_status == GoalStatus.ABORTED or goal_nxt_cyl_status == GoalStatus.REJECTED:
-                            rospy.logerr("Cylinder resolution goal aborted")
+                            rospy.loginfo("Cylinder resolution goal aborted")
                             break
                         elif goal_nxt_cyl_status == GoalStatus.SUCCEEDED:
 
 
-                            ### TODO TODO TODO ##########################################################################
-
-                            # Get color of cylinder
-                            cylinder_color = 0  ## TODO detect
-                            if cylinder_color == cylinder_color_goal:
-                                qr_detection_serv(1)
-                                rospy.sleep(2)
-                                qr_detected = qr_detection_serv(0)
-                                color_res = qr_detected
-                                return color_res
 
 
                             ### TODO TODO TODO ##########################################################################
+				
+			    # TODO handle colour detection and QR readings here
+
+
+
+                            ### TODO TODO TODO ##########################################################################
+
 
 
                             # Notify that cylinder has been resolved.
@@ -302,7 +296,7 @@ def stage_two(cylinder_color_goal):
                 else:
                     cylinder_data = cylinder_locator().target
         except rospy.ServiceException, e:
-            rospy.logerr("Cylinder locator service call failed: {0}".format(e))
+            rospy.loginfo("Cylinder locator service call failed: {0}".format(e))
 
         ## /HANDLE CYLINDER DATA COLLECTED IN BUFFER ##
 

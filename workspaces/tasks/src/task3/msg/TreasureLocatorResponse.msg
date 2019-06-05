@@ -1,0 +1,2 @@
+float64 treasure_x
+float64 treasure_y

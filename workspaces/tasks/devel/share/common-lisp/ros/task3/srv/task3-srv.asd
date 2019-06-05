@@ -2,7 +2,8 @@
 (cl:in-package :asdf)
 
 (defsystem "task3-srv"
-  :depends-on (:roslisp-msg-protocol :roslisp-utils :task3-msg
+  :depends-on (:roslisp-msg-protocol :roslisp-utils :sensor_msgs-msg
+               :task3-msg
 )
   :components ((:file "_package")
     (:file "CheckpointProcessor" :depends-on ("_package_CheckpointProcessor"))
@@ -25,6 +26,8 @@
     (:file "_package_RingApproachPoint" :depends-on ("_package"))
     (:file "TerminalApproach" :depends-on ("_package_TerminalApproach"))
     (:file "_package_TerminalApproach" :depends-on ("_package"))
+    (:file "TreasureLocator" :depends-on ("_package_TreasureLocator"))
+    (:file "_package_TreasureLocator" :depends-on ("_package"))
     (:file "ValidRegionsMap" :depends-on ("_package_ValidRegionsMap"))
     (:file "_package_ValidRegionsMap" :depends-on ("_package"))
   ))

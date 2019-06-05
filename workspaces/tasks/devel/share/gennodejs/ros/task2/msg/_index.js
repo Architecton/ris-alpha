@@ -1,16 +1,16 @@
 
 "use strict";
 
-let RingApproachPointResponse = require('./RingApproachPointResponse.js');
 let ApproachImageFeedback = require('./ApproachImageFeedback.js');
 let ValidRegionsMapResponse = require('./ValidRegionsMapResponse.js');
-let SayCommand = require('./SayCommand.js');
+let RingApproachPointResponse = require('./RingApproachPointResponse.js');
 let TerminalApproachFeedback = require('./TerminalApproachFeedback.js');
+let SayCommand = require('./SayCommand.js');
 
 module.exports = {
-  RingApproachPointResponse: RingApproachPointResponse,
   ApproachImageFeedback: ApproachImageFeedback,
   ValidRegionsMapResponse: ValidRegionsMapResponse,
-  SayCommand: SayCommand,
+  RingApproachPointResponse: RingApproachPointResponse,
   TerminalApproachFeedback: TerminalApproachFeedback,
+  SayCommand: SayCommand,
 };
