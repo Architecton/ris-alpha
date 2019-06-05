@@ -1,4 +1,4 @@
-#!usr/bin/env python
+#!/usr/bin/env python
 
 import rospy
 from sensor_msgs.msg import LaserScan
@@ -38,7 +38,7 @@ class DetectionObjectiveApproachHandler:
         msg.linear.x = 0.1 
         start_time = time.time()
         while self._dist_to_wall > 0.1:
-            self._vel_pub(msg)
+            self._vel_pub.publish(msg)
         self._dist_to_wall = 100 
         self._laser_sub.unregister()
         return time.time() - start_time
@@ -52,13 +52,13 @@ class DetectionObjectiveApproachHandler:
             self._vel_pub(msg)
 
 
-¸   def approach_procedure():
+    def approach_procedure(self):
         approach_duration = self._approach()
         self._side_scan()
-        self._reverse()
-        pass
+        self._reverse(approach_duration)
 
 
 if __name__ == '__main__':
+    rospy.init_node('master')
     doah = DetectionObjectiveApproachHandler()
     doah.approach_procedure()
