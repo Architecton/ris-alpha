@@ -217,7 +217,7 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
 int main (int argc, char** argv) {
   
     // Initialize ROS
-    ros::init (argc, argv, "cylinder_segment");
+    ros::init (argc, argv, "cylinder_detector");
     ros::NodeHandle nh;
 
     // For transforming between coordinate frames
