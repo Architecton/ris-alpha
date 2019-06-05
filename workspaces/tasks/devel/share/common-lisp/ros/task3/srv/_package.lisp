@@ -1,0 +1,10 @@
+(cl:defpackage task3-srv
+  (:use )
+  (:export
+   "TREASURELOCATOR"
+   "<TREASURELOCATOR-REQUEST>"
+   "TREASURELOCATOR-REQUEST"
+   "<TREASURELOCATOR-RESPONSE>"
+   "TREASURELOCATOR-RESPONSE"
+  ))
+
