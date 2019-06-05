@@ -17,6 +17,7 @@
 #include "tf2_ros/transform_listener.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include "geometry_msgs/PointStamped.h"
+#include <pcl/visualization/cloud_viewer.h>
 
 ros::Publisher pubx;
 ros::Publisher puby;
@@ -209,6 +210,13 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
         pcl::PCLPointCloud2 outcloud_cylinder;
         pcl::toPCLPointCloud2 (*cloud_cylinder, outcloud_cylinder);
         puby.publish (outcloud_cylinder);
+
+        // Visualization (Type might be wrong)
+        pcl::visualization::CloudViewer viewer ("Simple cloud viewer");
+        viewer.showCloud (cloud_cylinder)
+        while (!viewer.wasStopped) {
+
+        }
 
     }
   

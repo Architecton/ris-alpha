@@ -88,7 +88,15 @@ link_directories(
   ${catkin_LIBRARY_DIRS}
 )
 
-link_libraries(${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+add_definitions(
+  ${PCL_DEFINITIONS}
+)
+
+link_libraries(
+  ${Boost_LIBRARIES} 
+  ${catkin_LIBRARIES} 
+  ${PCL_LIBRARIES}
+)
 
 ## Declare the catkin package
 catkin_package(
