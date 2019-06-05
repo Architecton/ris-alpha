@@ -51,11 +51,11 @@ find_package( OpenCV REQUIRED )
 ##   * uncomment the generate_messages entry below
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
-## Generate messages in the 'msg' folder
- add_message_files(
+add_message_files(
    FILES
    ApproachImageFeedback.msg
    TerminalApproachFeedback.msg
+   CylinderImageFeedback.msg
    ValidRegionsMapResponse.msg
    RingApproachPointResponse.msg
    SayCommand.msg
@@ -65,14 +65,14 @@ find_package( OpenCV REQUIRED )
    CheckpointProcessorResponse.msg 
    RingData.msg
    CylinderData.msg
- )
+   TreasureLocatorResponse.msg
+)
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+   FILES
+   TreasureLocator.srv
+)
 
 add_service_files(
   FILES
@@ -95,7 +95,6 @@ add_service_files(
 #   Action1.action
 #   Action2.action
 # )
-
 
 generate_messages(
    DEPENDENCIES
@@ -213,3 +212,4 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+

@@ -53,7 +53,7 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
   
     // Read in the cloud data
     pcl::fromPCLPointCloud2 (*cloud_blob, *cloud);
-    std::cerr << "PointCloud has: " << cloud->points.size () << " data points." << std::endl;
+    // std::cerr << "PointCloud has: " << cloud->points.size () << " data points." << std::endl;
 
     // Build a passthrough filter to remove spurious NaNs
     // Removes values on the z axis that are outside 0 and 1.5m range
@@ -61,7 +61,7 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     pass.setFilterFieldName ("z");
     pass.setFilterLimits (0, 1.5);
     pass.filter (*cloud_filtered);
-    std::cerr << "PointCloud after filtering has: " << cloud_filtered->points.size () << " data points." << std::endl;
+    // std::cerr << "PointCloud after filtering has: " << cloud_filtered->points.size () << " data points." << std::endl;
 
     // Estimate point normals
     // The larger the K-search, the more distorted are the point normals on edges (cup edge), but that issue is not a problem for our case
@@ -82,7 +82,7 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
 
     // Obtain the plane inliers and coefficients
     seg.segment (*inliers_plane, *coefficients_plane);
-    std::cerr << "Plane coefficients: " << *coefficients_plane << std::endl;
+    // std::cerr << "Plane coefficients: " << *coefficients_plane << std::endl;
 
     // Extract the planar inliers from the input cloud
     extract.setInputCloud (cloud_filtered);
@@ -92,7 +92,7 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     // Write the planar inliers to disk
     pcl::PointCloud<PointT>::Ptr cloud_plane (new pcl::PointCloud<PointT> ());
     extract.filter (*cloud_plane);
-    std::cerr << "PointCloud representing the planar component: " << cloud_plane->points.size () << " data points." << std::endl;
+    // std::cerr << "PointCloud representing the planar component: " << cloud_plane->points.size () << " data points." << std::endl;
   
     pcl::PCLPointCloud2 outcloud_plane;
     pcl::toPCLPointCloud2 (*cloud_plane, outcloud_plane);
@@ -119,7 +119,7 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
 
     // Obtain the cylinder inliers and coefficients
     seg.segment (*inliers_cylinder, *coefficients_cylinder);
-    std::cerr << "Cylinder coefficients: " << *coefficients_cylinder << std::endl;
+    // std::cerr << "Cylinder coefficients: " << *coefficients_cylinder << std::endl;
 
     // Write the cylinder inliers to disk
     extract.setInputCloud (cloud_filtered2);
@@ -129,9 +129,9 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     extract.filter (*cloud_cylinder);
 
     if (cloud_cylinder->points.empty ()) {
-        std::cerr << "Can't find the cylindrical component." << std::endl;
+        // std::cerr << "Can't find the cylindrical component." << std::endl;
     } else {
-        std::cerr << "PointCloud representing the cylindrical component: " << cloud_cylinder->points.size () << " data points." << std::endl;
+        // std::cerr << "PointCloud representing the cylindrical component: " << cloud_cylinder->points.size () << " data points." << std::endl;
           
         pcl::compute3DCentroid (*cloud_cylinder, centroid);
         std::cerr << "centroid of the cylindrical component: " << centroid[0] << " " <<  centroid[1] << " " <<   centroid[2] << " " <<   centroid[3] << std::endl;
@@ -155,8 +155,8 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
         try {
             time_test = ros::Time::now();
 
-            std::cerr << time_rec << std::endl;
-            std::cerr << time_test << std::endl;
+            // std::cerr << time_rec << std::endl;
+            // std::cerr << time_test << std::endl;
             tss = tf2_buffer.lookupTransform("map","camera_rgb_optical_frame", time_rec);
             //tf2_buffer.transform(point_camera, point_map, "map", ros::Duration(2));
         } catch (tf2::TransformException &ex) {
@@ -167,12 +167,17 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
 
         tf2::doTransform(point_camera, point_map, tss);
 
-        std::cerr << "point_camera: " << point_camera.point.x << " " <<  point_camera.point.y << " " <<  point_camera.point.z << std::endl;
+        // std::cerr << "point_camera: " << point_camera.point.x << " " <<  point_camera.point.y << " " <<  point_camera.point.z << std::endl;
 
-        std::cerr << "point_map: " << point_map.point.x << " " <<  point_map.point.y << " " <<  point_map.point.z << std::endl;
+        // std::cerr << "point_map: " << point_map.point.x << " " <<  point_map.point.y << " " <<  point_map.point.z << std::endl;
 
         marker.header.frame_id = "map";
-        marker.header.stamp = ros::Time::now();
+
+        // Display only if recent enough
+        // marker.header.stamp = ros::Time::now();
+
+        // Always display
+        marker.header.stamp = ros::Time();
 
         marker.ns = "cylinder";
         marker.id = 0;
@@ -225,7 +230,7 @@ int main (int argc, char** argv) {
     pubx = nh.advertise<pcl::PCLPointCloud2> ("planes", 1);
     puby = nh.advertise<pcl::PCLPointCloud2> ("cylinder", 1);
 
-    pubm = nh.advertise<visualization_msgs::Marker>("detected_cylinder",1);
+    pubm = nh.advertise<visualization_msgs::Marker>("detected_cylinder", 1);
 
     // Spin
     ros::spin ();
