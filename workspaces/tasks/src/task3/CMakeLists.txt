@@ -55,7 +55,7 @@ add_message_files(
    FILES
    ApproachImageFeedback.msg
    TerminalApproachFeedback.msg
-   CylinderApproachFeedback.msg
+   CylinderImageFeedback.msg
    ValidRegionsMapResponse.msg
    RingApproachPointResponse.msg
    SayCommand.msg
