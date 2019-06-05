@@ -212,3 +212,4 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
