@@ -12,7 +12,7 @@ import tf2_geometry_msgs
 from std_msgs.msg import String, Bool, ColorRGBA
 from geometry_msgs.msg import PoseStamped
 
-from targetmarker import TargetMarker  # TODO: import
+from target_marking.targetmarker import TargetMarker
 
 from task3.msg import CylinderData
 from task3.msg import ScanFlag
@@ -252,7 +252,7 @@ def cylinder_locator_server():
     """
 
     # Subscribe to /cylinders topic broadcasted by the robot's computer.
-    rospy.Subscriber('cylinders', CylinderData, callback)
+    rospy.Subscriber('cylinder_data', CylinderData, callback)
 
     # Subscribe to /scan_perm topic that is broadcasted by the robot controlling node
     # and contains messages that signal whether robot is in correct state for taking good
