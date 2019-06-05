@@ -2,8 +2,9 @@
 
 import numpy as np
 from sklearn.neural_network import MLPClassifier
+import requests as request
 
-class URLDataClassifier:
+class UrlDataClassifier:
 
     """
     Create a classifier from data on specified url and provide a transform method
@@ -11,26 +12,20 @@ class URLDataClassifier:
     """
    
     # Constructor
-    def __init__(learner=MLPClassifier, **kwargs):
-        self._learner = learner(**kwargs)
+    def __init__(self, learner=MLPClassifier, **kwargs):
+        # self._clf = learner(**kwargs)
+        self._clf = MLPClassifier()
 
     # Fit: use learner to produce classifier.
-    def fit(data_url):
-        data = np.fromstring(requests.get(data_url).text)
+    def fit(self, data_url):
+        data_raw = request.get(data_url).text.splitlines()[1:]
+	data_processed = np.array([np.fromstring(el, sep=",") for el in data_raw])
         target = None # TODO
-        self._classifier = self._learner.fit(data, target)
+        self._clf = self._clf.fit(data, target)
         return self  # Return reference to self (to allow .fit(url).predict(example) calls)
    
     # predict: predict class of example using learned classifier.
-    def predict(example):
-        return self._classifier.predict(example)
+    def predict(self, example):
+        return self._clf.predict(example)
 
 
-
-## TEST ###
-if __name__ === '__main__':
-    data_url = 'http://localhost:3000'      # Url from which to load the training data.
-    to_predict = np.array([2, 3])           # Example to classify.
-    clf = URLDataClassifier(MLPClassifier)  # Initialize classifier.
-    clf.fit(data_url)                       # Fit to training data.
-    print clf.predict(to_predict)           # Classify example.

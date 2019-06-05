@@ -147,7 +147,6 @@ while resolved_ell_ctr < NUM_ELLIPSES_TO_FIND:
 
         # Get index of closest checkpoint.
         idx_nxt = np.argmin((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(robot_pos, checkpoints))
-
         
         # Create goal for next checkpoint.
         goal_chkpt = MoveBaseGoal()
