@@ -3,7 +3,7 @@
 import numpy as np
 import rospy
 from colour_detection import ColourFeatureGenerator, ColourClassifier
-from task3.msg import ApproachImageFeedback
+from task3.msg import CylinderImageFeedback
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
@@ -18,9 +18,9 @@ import pdb
 
 from joblib import dump, load
 
-class ColourDetectionTrainer:
+class ColourDetectionTrainerCyl:
     """
-    Class used to record training data for ring colours and produce a classifier
+    Class used to record training data for cylinder colours and produce a classifier
     """
 
     def __init__(self, num_bins):
@@ -38,7 +38,7 @@ class ColourDetectionTrainer:
         self._IMAGE_HEIGHT = 480
         self._IMAGE_WIDTH = 640
 
-        self._ring_image = np.empty(0, dtype=np.uint8)
+        self._cylinder_image = np.empty(0, dtype=np.uint8)
         self._cv_bridge = CvBridge()
 
         # initialize node
@@ -65,14 +65,14 @@ class ColourDetectionTrainer:
         Callback called when broadcast on topic received.
 
         Args:
-            data -- RingData message instance
+            data -- CylinderData message instance
 
         Returns:
             None
         """
 
-        center_y = data.center_y + 27  # Get y coordinate of center of ring.
-        center_x = data.center_x - 17  # Get x coordinate of center of ring.
+        center_y = data.center_y + 27  # Get y coordinate of center of cylinder.
+        center_x = data.center_x - 17  # Get x coordinate of center of cylinder.
         min_axis = data.minor_axis  # Get minor axis of ellipse.
         maj_axis = data.major_axis  # Get major axis of ellipse.
 
@@ -85,12 +85,12 @@ class ColourDetectionTrainer:
 	r_d[0] = np.clip(r_d[0], 0, 480)
 	r_d[1] = np.clip(r_d[1], 0, 640)
 
-        if self._ring_image.shape[0] > 0:
+        if self._cylinder_image.shape[0] > 0:
             # Add image and class to feature generator instance
-            self._feature_gen.add_image(self._ring_image, self._target, l_u, r_d)
+            self._feature_gen.add_image(self._cylinder_image, self._target, l_u, r_d)
 
 	    # Add cropped image to array of training samples.
-   	    self.training_imgs[self._training_img_counter] = self._ring_image[center_y-min_axis/2:center_y+min_axis/2, center_x-maj_axis/2:center_x+maj_axis/2]
+   	    self.training_imgs[self._training_img_counter] = self._cylinder_image[center_y-min_axis/2:center_y+min_axis/2, center_x-maj_axis/2:center_x+maj_axis/2]
 	    self._training_img_counter += 1
 
     def _img_callback(self, data):
@@ -112,7 +112,7 @@ class ColourDetectionTrainer:
             print(e)
 
         # Add image and class to feature generator instance
-        self._ring_image = received_image
+        self._cylinder_image = received_image
 
 
     def get_data(self):
@@ -146,7 +146,7 @@ class ColourDetectionTrainer:
 
     def subscribe(self):
         # subscribe to topic
-        self._depth_subscriber = rospy.Subscriber('toroids', ApproachImageFeedback, self._depth_callback)
+        self._depth_subscriber = rospy.Subscriber('cylinders', CylinderImageFeedback, self._depth_callback)
         self._img_subscriber = rospy.Subscriber('/camera/rgb/image_raw', Image, self._img_callback)
 
     def unsubscribe(self):
@@ -172,15 +172,15 @@ if __name__ == '__main__':
     NUM_BINS = 50
     
     # Initialize trainer
-    trainer = ColourDetectionTrainer(num_bins=NUM_BINS)
+    trainer = ColourDetectionTrainerCyl(num_bins=NUM_BINS)
     
-    # Go over ring colours.
+    # Go over cylinder colours.
     for colour in trainer.colour_dict.keys():
     
         # Countdown to start of training data recording.
         countdown_val = 120
         while(countdown_val >= 1):
-            print("Starting recording of {0} ring training data in:".format(trainer.colour_dict[colour]))
+            print("Starting recording of {0} cylinder training data in:".format(trainer.colour_dict[colour]))
             print("{0}".format(countdown_val))
             countdown_val -= 1
             rospy.sleep(1)
@@ -193,7 +193,7 @@ if __name__ == '__main__':
 
         # Record training data for specified duration.
         while(recording_timeout >= 1):
-            print("Recording {0} ring training data:".format(trainer.colour_dict[colour]))
+            print("Recording {0} cylinder training data:".format(trainer.colour_dict[colour]))
             print("{0}".format(recording_timeout))
             recording_timeout -= 1
             rospy.sleep(1)
@@ -209,7 +209,7 @@ if __name__ == '__main__':
     clf = trainer.get_classifier()
     
     # Save classifier.
-    dump(clf, 'ring_colour_classifier.joblib') 
+    dump(clf, 'cylinder_colour_classifier.joblib') 
     sio.savemat('training_data.mat', {'data' : trainer._features_mat})
     sio.savemat('training_data_target.mat', { 'data' : trainer._target_vec})
     trainer.save_obj(trainer.training_imgs, 'training_images')

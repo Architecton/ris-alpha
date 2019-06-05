@@ -247,11 +247,12 @@ class RingImageProcessor:
         self._colour_features_mat = np.empty((0, self._num_bins*3), dtype=np.int)  # Matrix for storing features
        
 
+
 class CylinderImageProcessor:
 
     """
     Class used to detect colors of cylinders from stream of data containing the bgr image of the
-    ring, the indices of the center of the cylinder and its dimensions
+    cylinder, the indices of the center of the cylinder and its dimensions
     """
 
     # Constructor
@@ -280,7 +281,7 @@ class CylinderImageProcessor:
         Compute color feature vector of cropped image
 
         Args:
-            cropped_img: image cropped to part where ring is located
+            cropped_img: image cropped to part where cylinder is located
 
         Returns:
             None

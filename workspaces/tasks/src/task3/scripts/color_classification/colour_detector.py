@@ -22,7 +22,7 @@ class ColourDetector:
         Callback called when broadcast on topic received.
 
         Args:
-            data -- RingData message instance
+            data -- ApproachImageFeedback message instance
 
         Returns:
             None
