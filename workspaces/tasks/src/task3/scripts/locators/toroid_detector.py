@@ -194,6 +194,7 @@ def main():
     toroid_finder = Toroid()
 
     try:
+	print "hopsasa"
         rospy.spin()
     except KeyboardInterrupt:
         print("Shutting down")
