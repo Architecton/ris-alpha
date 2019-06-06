@@ -23,7 +23,7 @@ class The_Cylinder:
         self.image_sub = rospy.Subscriber("/camera/rgb/image_raw", Image, self.image_callback)
 
         # Add cylinder subset publisher
-        self.toroid_pub = rospy.Publisher('cylinders', CylinderImageFeedback, queue_size=1000) 
+        self.cylinders_pub = rospy.Publisher('cylinders', CylinderImageFeedback, queue_size=1000) 
 
     def image_callback(self,data):
 
@@ -37,12 +37,15 @@ class The_Cylinder:
 
         # Publish cylinder subset data
         cif = CylinderImageFeedback()
+        cif.timestamp = data.header.stamp
+        cif.dpt = -1.0
         cif.center_x = 320
         cif.center_y = 470
         # width
         cif.minor_axis = 40
         # height
         cif.major_axis = 40
+        self.cylinders_pub.publish(cif)
 
         # DEVONLY: Visualize camera output
         # cv2.imshow('Live feed', img_original)
