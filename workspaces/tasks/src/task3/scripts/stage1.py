@@ -87,7 +87,7 @@ def stage_one():
     rotation_dur_callib = 0.3 # Constant used to calibrate rotation duration.
     # Duration for which to publish specified rotation velocity to get rotation_agl angle.
     rotation_dur = (rotation_agl/ROTATION_SPEED_X)*rotation_dur_callib 
-    ROTATION_SLEEP_DURATION = 2
+    ROTATION_SLEEP_DURATION = 1.0
     rot = Twist()
     rot.angular.x = ROTATION_SPEED_X
     rot.angular.y = ROTATION_SPEED_Y
@@ -174,8 +174,6 @@ def stage_one():
 
 
 
-
-
     ### FLAGS ###
 
     classifier_built = False
@@ -191,199 +189,207 @@ def stage_one():
     ### /CLASSIFIER ###
 
 
+    # Loop until return hit.
+    while True:
+
+        # While there are unresolved checkpoints left
+        while checkpoints.shape[0] > 0:
+
+            # Get index of closest checkpoint.
+            idx_nxt = np.argmin((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(robot_pos, checkpoints))
+
+            
+            # Create goal for next checkpoint.
+            goal_chkpt = MoveBaseGoal()
+            goal_chkpt.target_pose.header.frame_id = "map"
+            goal_chkpt.target_pose.header.stamp = rospy.Time.now()
+            goal_chkpt.target_pose.pose.position.x = checkpoints[idx_nxt, 0]
+            goal_chkpt.target_pose.pose.position.y = checkpoints[idx_nxt, 1]
+            goal_chkpt.target_pose.pose.orientation.w = checkpoints[idx_nxt, 2]
+
+            goal_chkpnt_status = GoalStatus.LOST  # Set status for next checkpoint goal.
+            ac_chkpnts.send_goal(goal_chkpt) # Send checkpoint goal.
+
+            soundhandle.say("Resolving checkpoint {0}".format(checkpoint_ctr), voice, volume)
+
+            # Loop for next checkpoint goal.
+            while not goal_chkpnt_status == GoalStatus.SUCCEEDED:
+
+                ac_chkpnts.wait_for_result(rospy.Duration(1.0))
+
+                # Get checkpoint resolution goal status.
+                goal_chkpnt_status = ac_chkpnts.get_state()
+
+                # Handle abortions
+                if goal_chkpnt_status == GoalStatus.ABORTED or goal_chkpnt_status == GoalStatus.REJECTED:
+                    rospy.loginfo("Checkpoint resolution goal aborted")
+                    break
+
+
+            ## ELLIPSE LOCATING ROTATION ##
+
+            soundhandle.say("Initiating rotation sequence.", voice, volume)
+            for rot_idx in np.arange(NUM_ROTATIONS):
+
+                # Safety sleep.
+                rospy.sleep(0.2)
+
+
+                ## IMAGE PROCESSING STREAM SCAN START ###
+                sf.flag = 1
+                scan_perm_pub.publish(sf)
+                # Sleep and wait for ellipse_locator service to scan robot's image processing stream for ellipses.
+                rospy.sleep(ROTATION_SLEEP_DURATION)
+                # PUBLISH REVOCATION OF PERMISSION TO SCAN
+                sf.flag = 0
+                scan_perm_pub.publish(sf)
+                ## IMAGE PROCESSING STREAM SCAN END ###
+
+                # Safety sleep.
+                rospy.sleep(0.2)
+
+                # ROTATE
+                start_rot_time = time.time()
+                while(time.time() - start_rot_time < rotation_dur):
+                    rotation_pub.publish(rot)  # Publish angular velocity.
+                    rot_loop_rate.sleep()
+
+            ## /ELLIPSE LOCATING ROTATION ##
+
+
+            ## HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
+
+            try:
+                # Query into ellipse buffer
+                ellipse_data = ellipse_locator().target
+                while(len(ellipse_data) > 0):  # If data in buffer...
+                    if not np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([ellipse_data[0], ellipse_data[1]]), resolved_ell[:, :2]) < DISTINCT_ELL_THRESH):
+
+                        ### DEBUGGING VISUALIZATION ###
+                        tm.push_position(np.array(ellipse_data[:3]))
+                        tm.push_position(np.array(ellipse_data[3:]))
+                        ### /DEBUGGING VISUALIZATION ###
+
+                        # Initialize goal to aproach new ellipse
+                        goal_ell = MoveBaseGoal()
+                        goal_ell.target_pose.header.frame_id = "map"
+                        goal_ell.target_pose.header.stamp = rospy.Time.now()
+                        goal_ell.target_pose.pose.position.x = ellipse_data[3]
+                        goal_ell.target_pose.pose.position.y = ellipse_data[4]
+                        goal_ell.target_pose.pose.orientation.x = ellipse_data[6]
+                        goal_ell.target_pose.pose.orientation.y = ellipse_data[7]
+                        goal_ell.target_pose.pose.orientation.z = ellipse_data[8]
+                        goal_ell.target_pose.pose.orientation.w = ellipse_data[9]
+                        goal_nxt_ell_status = GoalStatus.LOST
+                        # Send ellipse resolution goal.
+                        ac_ellipses.send_goal(goal_ell)
+
+                        while not goal_nxt_ell_status == GoalStatus.SUCCEEDED:
+                            ac_ellipses.wait_for_result(rospy.Duration(0.5))
+                            goal_nxt_ell_status = ac_ellipses.get_state()
+
+                            if goal_nxt_ell_status == GoalStatus.ABORTED or goal_nxt_ell_status == GoalStatus.REJECTED:
+                                rospy.loginfo("Ellipse resolution goal aborted")
+                                break
+                            elif goal_nxt_ell_status == GoalStatus.SUCCEEDED:
+
+
+                                ### TODO TODO TODO ##########################################################################
+
+                                # If nor QR code nor pattern yet found...
+                                if not classifier_built and not found_pattern:
+
+                                    # Try to detect both the QR code and the pattern.
+                                    qr_detection_serv(1)
+                                    digit_detection_serv(1)
+                                    doah.approach_procedure()
+                                    qr_detected = qr_detection_serv(0).res
+                                    found_pattern = digit_detection_serv(0).result
+                                    
+                                    # If QR code detected, build classifier.
+                                    if qr_detected != '':
+                                        data_url = qr_detected
+                                        clf = clf.fit(data_url)
+                                        classifier_built = True
+                                    elif found_pattern:
+                                        # If pattern found, flag is set.
+                                        print "pattern found"
+                                    else:
+                                        print "map found"
+                               
+                                # If QR not yet found...
+                                elif not classifier_built:
+                                    qr_detection_serv(1)
+                                    doah.approach_procedure()
+                                    qr_detected = qr_detection_serv(0)
+
+
+                                    # If QR code detected:..
+                                    if qr_detected:
+
+                                        # Build classifier and classify pattern.
+                                        data_url = qr_detected
+                                        clf = clf.fit(data_url)
+                                        classifier_built = True
+                                        return clf.predict(found_pattern)
+
+                                # if pattern not yet found...
+                                elif not found_pattern:
+                                    digit_detection_serv(1)
+                                    doah.approach_procedure()
+                                    found_pattern = digit_detection_serv(0)
+                                    
+                                    # If pattern detected:
+                                    if found_pattern:
+
+                                        # classify patern.
+                                        return clf.predict(found_pattern)
+
+
+                                ### TODO TODO TODO ##########################################################################
 
 
 
-    # While there are unresolved checkpoints left
-    while checkpoints.shape[0] > 0:
+                                # Notify that ellipse has been resolved.
+                                soundhandle.say("Target number {0} resolved.".format(resolved_ell_ctr), voice, volume)
+                                rospy.loginfo("Target number {0} resolved".format(resolved_ell_ctr))
 
-        # Get index of closest checkpoint.
-        idx_nxt = np.argmin((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(robot_pos, checkpoints))
+                                # Sleep
+                                rospy.sleep(1.0)
 
-        
-        # Create goal for next checkpoint.
-        goal_chkpt = MoveBaseGoal()
-        goal_chkpt.target_pose.header.frame_id = "map"
-        goal_chkpt.target_pose.header.stamp = rospy.Time.now()
-        goal_chkpt.target_pose.pose.position.x = checkpoints[idx_nxt, 0]
-        goal_chkpt.target_pose.pose.position.y = checkpoints[idx_nxt, 1]
-        goal_chkpt.target_pose.pose.orientation.w = checkpoints[idx_nxt, 2]
+                                # Add found ellipse to matrix of resolved ellipses.
+                                resolved_ell = np.vstack((resolved_ell, np.array([ellipse_data[0], ellipse_data[1], ellipse_data[3], ellipse_data[4], ellipse_data[5], ellipse_data[6]])))
+                                resolved_ell_ctr += 1
 
-        goal_chkpnt_status = GoalStatus.LOST  # Set status for next checkpoint goal.
-        ac_chkpnts.send_goal(goal_chkpt) # Send checkpoint goal.
+                        # Get next element in service's buffer.
+                        ellipse_data = ellipse_locator().target
+                    else:
+                        ellipse_data = ellipse_locator().target
+            except rospy.ServiceException, e:
+                rospy.loginfo("Ellipse locator service call failed: {0}".format(e))
 
-        soundhandle.say("Resolving checkpoint {0}".format(checkpoint_ctr), voice, volume)
+            ## /HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
 
-        # Loop for next checkpoint goal.
-        while not goal_chkpnt_status == GoalStatus.SUCCEEDED:
+            # Remove checkpoint from checkpoints array
+            soundhandle.say("Checkpoint number {0} resolved.".format(resolved_ell_ctr), voice, volume)
+            checkpoints = np.delete(checkpoints, (idx_nxt), axis=0)
 
-            ac_chkpnts.wait_for_result(rospy.Duration(1.0))
-
-            # Get checkpoint resolution goal status.
-            goal_chkpnt_status = ac_chkpnts.get_state()
-
-            # Handle abortions
-            if goal_chkpnt_status == GoalStatus.ABORTED or goal_chkpnt_status == GoalStatus.REJECTED:
-                rospy.loginfo("Checkpoint resolution goal aborted")
-                break
+            # Get robot position in map coordinates.
+            trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
+            robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z])
+            checkpoint_ctr += 1  # Increment checkpoint counter.
 
 
-        ## ELLIPSE LOCATING ROTATION ##
+        # HERE IF ALL CHECKPOINTS RESOLVED
 
-        soundhandle.say("Initiating rotation sequence.", voice, volume)
-        for rot_idx in np.arange(NUM_ROTATIONS):
+        # Call checkpoints generating service to get generated checkpoints.
+        checkpoints_res = checkpoint_gen(NUM_CHECKPOINTS)
 
-            # Safety sleep.
-            rospy.sleep(0.5)
+        # Add checkpoints to matrix.
+        for point in checkpoints_res.points.points:
+            checkpoints_nxt = np.array([[point.x, point.y, point.z]])
+            checkpoints = np.vstack((checkpoints, checkpoints_nxt))
 
+        checkpoint_ctr = 0  # Initialize visited checkpoints counter.
 
-            ## IMAGE PROCESSING STREAM SCAN START ###
-            sf.flag = 1
-            scan_perm_pub.publish(sf)
-            # Sleep and wait for ellipse_locator service to scan robot's image processing stream for ellipses.
-            rospy.sleep(ROTATION_SLEEP_DURATION)
-            # PUBLISH REVOCATION OF PERMISSION TO SCAN
-            sf.flag = 0
-            scan_perm_pub.publish(sf)
-            ## IMAGE PROCESSING STREAM SCAN END ###
-
-
-            # Safety sleep.
-            rospy.sleep(0.5)
-
-            # ROTATE
-            start_rot_time = time.time()
-            while(time.time() - start_rot_time < rotation_dur):
-                rotation_pub.publish(rot)  # Publish angular velocity.
-                rot_loop_rate.sleep()  # TODO: EMPIRICALLY SET
-
-        ## /ELLIPSE LOCATING ROTATION ##
-
-
-        ## HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
-
-        try:
-            # Query into ellipse buffer
-            ellipse_data = ellipse_locator().target
-            while(len(ellipse_data) > 0):  # If data in buffer...
-                if not np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([ellipse_data[0], ellipse_data[1]]), resolved_ell[:, :2]) < DISTINCT_ELL_THRESH):
-
-                    ### DEBUGGING VISUALIZATION ###
-                    tm.push_position(np.array(ellipse_data[:3]))
-                    tm.push_position(np.array(ellipse_data[3:]))
-                    ### /DEBUGGING VISUALIZATION ###
-
-                    # Initialize goal to aproach new ellipse
-                    goal_ell = MoveBaseGoal()
-                    goal_ell.target_pose.header.frame_id = "map"
-                    goal_ell.target_pose.header.stamp = rospy.Time.now()
-                    goal_ell.target_pose.pose.position.x = ellipse_data[3]
-                    goal_ell.target_pose.pose.position.y = ellipse_data[4]
-                    goal_ell.target_pose.pose.orientation.x = ellipse_data[6]
-                    goal_ell.target_pose.pose.orientation.y = ellipse_data[7]
-                    goal_ell.target_pose.pose.orientation.z = ellipse_data[8]
-                    goal_ell.target_pose.pose.orientation.w = ellipse_data[9]
-                    goal_nxt_ell_status = GoalStatus.LOST
-                    # Send ellipse resolution goal.
-                    ac_ellipses.send_goal(goal_ell)
-
-                    while not goal_nxt_ell_status == GoalStatus.SUCCEEDED:
-                        ac_ellipses.wait_for_result(rospy.Duration(0.5))
-                        goal_nxt_ell_status = ac_ellipses.get_state()
-
-                        if goal_nxt_ell_status == GoalStatus.ABORTED or goal_nxt_ell_status == GoalStatus.REJECTED:
-                            rospy.loginfo("Ellipse resolution goal aborted")
-                            break
-                        elif goal_nxt_ell_status == GoalStatus.SUCCEEDED:
-
-
-
-
-                            ### TODO TODO TODO ##########################################################################
-
-                            # If nor QR code nor pattern yet found...
-                            if not classifier_built and not found_pattern:
-
-                                # Try to detect both the QR code and the pattern.
-                                qr_detection_serv(1)
-                                digit_detection_serv(1)
-                                doah.approach_procedure()
-                                qr_detected = qr_detection_serv(0).res
-                                found_pattern = digit_detection_serv(0).result
-                                
-                                # If QR code detected, build classifier.
-                                if qr_detected != '':
-                                    data_url = qr_detected
-                                    clf = clf.fit(data_url)
-                                    classifier_built = True
-                                elif found_pattern:
-                                    # If pattern found, flag is set.
-                                    print "pattern found"
-                                else:
-                                    print "map found"
-                           
-                            # If QR not yet found...
-                            elif not classifier_built:
-                                qr_detection_serv(1)
-                                doah.approach_procedure()
-                                qr_detected = qr_detection_serv(0)
-
-
-                                # If QR code detected:..
-                                if qr_detected:
-
-                                    # Build classifier and classify pattern.
-                                    data_url = qr_detected
-                                    clf = clf.fit(data_url)
-                                    classifier_built = True
-                                    return clf.predict(found_pattern)
-
-                            # if pattern not yet found...
-                            elif not found_pattern:
-                                digit_detection_serv(1)
-                                doah.approach_procedure()
-                                found_pattern = digit_detection_serv(0)
-                                
-                                # If pattern detected:
-                                if found_pattern:
-
-                                    # classify patern.
-                                    return clf.predict(found_pattern)
-
-
-                            ### TODO TODO TODO ##########################################################################
-
-
-
-                            # Notify that ellipse has been resolved.
-                            soundhandle.say("Target number {0} resolved.".format(resolved_ell_ctr), voice, volume)
-                            rospy.loginfo("Target number {0} resolved".format(resolved_ell_ctr))
-
-                            # Sleep
-                            rospy.sleep(2.0)
-
-                            # Add found ellipse to matrix of resolved ellipses.
-                            resolved_ell = np.vstack((resolved_ell, np.array([ellipse_data[0], ellipse_data[1], ellipse_data[3], ellipse_data[4], ellipse_data[5], ellipse_data[6]])))
-                            resolved_ell_ctr += 1
-
-                    # Get next element in service's buffer.
-                    ellipse_data = ellipse_locator().target
-                else:
-                    ellipse_data = ellipse_locator().target
-        except rospy.ServiceException, e:
-            rospy.loginfo("Ellipse locator service call failed: {0}".format(e))
-
-        ## /HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
-
-        # Remove checkpoint from checkpoints array
-        soundhandle.say("Checkpoint number {0} resolved.".format(resolved_ell_ctr), voice, volume)
-        checkpoints = np.delete(checkpoints, (idx_nxt), axis=0)
-
-        # Get robot position in map coordinates.
-        trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
-        robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z])
-        checkpoint_ctr += 1  # Increment checkpoint counter.
-
-
-    soundhandle.say("All checkpoints visited.", voice, volume)
 
