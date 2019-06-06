@@ -30,7 +30,7 @@ class DetectionObjectiveApproachHandler:
             scan_loop_rate.sleep()
         msg.angular.z = -0.1
         start_time = time.time()
-        while(time.time() - start_time < duration):
+        while(time.time() - start_time < duration*2):
             self._vel_pub.publish(msg)
             scan_loop_rate.sleep()
         msg.angular.z = 0.1
@@ -48,23 +48,23 @@ class DetectionObjectiveApproachHandler:
             self._vel_pub.publish(msg)
         self._dist_to_wall = 100 
         self._laser_sub.unregister()
-        return time.time() - start_time
 
 
     def _reverse(self, duration):
         msg = Twist()
-        msg.linear.x = -1.0
+        msg.linear.x = -0.5
         start_time = time.time()
-        while (time.time() - start_time < duration//3):
+        while (time.time() - start_time < duration):
             self._vel_pub.publish(msg)
 
 
     def approach_procedure(self):
-        GOAL_DIST = 0.05
+        GOAL_DIST = 0.15
         SIDE_ROT_DURATION = 2.0
-        approach_duration = self._approach(GOAL_DIST)
+        REVERSE_DURATION = 0.5
+        self._approach(GOAL_DIST)
         self._side_scan(SIDE_ROT_DURATION)
-        self._reverse(approach_duration)
+        self._reverse(REVERSE_DURATION)
 
 
 if __name__ == '__main__':

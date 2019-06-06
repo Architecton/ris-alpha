@@ -127,7 +127,6 @@ def stage_one():
 
 
 
-
     # Initialize coordinate transforms buffer.
     tf2_buffer = tf2_ros.Buffer()
     tf2_listener = tf2_ros.TransformListener(tf2_buffer)
@@ -181,6 +180,7 @@ def stage_one():
 
     classifier_built = False
     found_pattern = None
+    qr_detected = None
 
     ### /FLAGS ##
 
@@ -302,32 +302,40 @@ def stage_one():
                             ### TODO TODO TODO ##########################################################################
 
 
-                            # TODO READ QR CODE/DIGITS HERE
-
-                            # Try to detect QR code for N sec.
-                            qr_detected = None
-                            if not classifier_built:
+                            if not classifier_built and not found_pattern:
                                 qr_detection_serv(1)
+                                digit_detection_serv(1)
                                 doah.approach_procedure()
                                 qr_detected = qr_detection_serv(0).res
-
-                            # Try to detect digits for N sec.
-                            if qr_detected == '':
-                                digit_detection_serv(1)
-				doah.approach_procedure_side_scan()
                                 found_pattern = digit_detection_serv(0).result
 
-                                # IF DIGITS DETECTED, if classifier trained, classify, else save and continue search for QR code.
-                                if found_pattern:
-                                    if classifier_built:
-					pdb.set_trace()
-                                        return clf.predict(found_pattern)
+                                if qr_detected != '':
+                                    data_url = qr_detected
+                                    clf = clf.fit(data_url)
+                                    classifier_built = True
+                                elif found_pattern:
+                                    print "pattern found"
+                                else:
+                                    print "map found"
+                           
+                            # If qr not yet found
+                            elif not classifier_built:
+                                qr_detection_serv(1)
+                                doah.approach_procedure()
+                                qr_detected = qr_detection_serv(0)
 
-                            # IF QR CODE DETECTED, train classifier and save indicator that classifier detected.
-                            else:
-                                data_url = qr_detected
-                                clf = clf.fit(data_url)
-                                classifier_built = True
+                                if qr_detected:
+                                    data_url = qr_detected
+                                    clf = clf.fit(data_url)
+                                    classifier_built = True
+                                    return clf.predict(found_pattern)
+
+                            # if digits not yet found
+                            elif not found_pattern:
+                                digit_detection_serv(1)
+                                doah.approach_procedure()
+                                found_pattern = digit_detection_serv(0)
+
                                 if found_pattern:
                                     return clf.predict(found_pattern)
 
