@@ -27,7 +27,7 @@ class ColourDetectionTrainerCyl:
         self._num_bins = num_bins  # Number of bins to use in histograms.
         self._target = -1  # Initialize target value.
         self._feature_gen = ColourFeatureGenerator(self._num_bins)  # Initialize feature generator instance.
-        self.colour_dict = {0 : "red", 1 : "green", 2 : "blue", 3 : "black"}  # Initialize colour dictionary.
+        self.colour_dict = {0 : "red", 1 : "green", 2 : "blue", 3 : "yellow"}  # Initialize colour dictionary.
         self._learner = ColourClassifier(self.colour_dict)  # Initialize learner.
         self._features_mat = np.empty((0, self._num_bins*3), dtype=np.int)  # Initialize matrix of features.
         self._target_vec = np.empty(0, dtype=np.int)  # Initialize target vector.
@@ -109,7 +109,7 @@ class ColourDetectionTrainerCyl:
         try:
             received_image = self._cv_bridge.imgmsg_to_cv2(data, 'bgr8')
         except CvBridgeError as e:
-            print(e)
+            rospy.logerr(e)
 
         # Add image and class to feature generator instance
         self._cylinder_image = received_image
@@ -140,8 +140,7 @@ class ColourDetectionTrainerCyl:
             trained classifier instance
         """
 
-        # Train classifier using data in _features_mat and _target_vec
-        # and return it.
+        # Train classifier using data in _features_mat and _target_vec and return it.
         return self._learner.fit(self._features_mat, self._target_vec)
 
     def subscribe(self):
@@ -169,7 +168,7 @@ if __name__ == '__main__':
     os.system('clear')
    
     # Set number of bins to use
-    NUM_BINS = 50
+    NUM_BINS = 10
     
     # Initialize trainer
     trainer = ColourDetectionTrainerCyl(num_bins=NUM_BINS)
@@ -178,7 +177,7 @@ if __name__ == '__main__':
     for colour in trainer.colour_dict.keys():
     
         # Countdown to start of training data recording.
-        countdown_val = 120
+        countdown_val = 10
         while(countdown_val >= 1):
             print("Starting recording of {0} cylinder training data in:".format(trainer.colour_dict[colour]))
             print("{0}".format(countdown_val))
@@ -209,8 +208,8 @@ if __name__ == '__main__':
     clf = trainer.get_classifier()
     
     # Save classifier.
-    dump(clf, 'cylinder_colour_classifier.joblib') 
-    sio.savemat('training_data.mat', {'data' : trainer._features_mat})
-    sio.savemat('training_data_target.mat', { 'data' : trainer._target_vec})
-    trainer.save_obj(trainer.training_imgs, 'training_images')
+    dump(clf, '/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/cylinder_colour_classifier.joblib') 
+    sio.savemat('training_data_cyl.mat', {'data' : trainer._features_mat})
+    sio.savemat('training_data_target_cyl.mat', { 'data' : trainer._target_vec})
+    trainer.save_obj(trainer.training_imgs, 'training_images_cyl')
 

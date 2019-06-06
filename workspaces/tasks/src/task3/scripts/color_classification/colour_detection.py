@@ -298,10 +298,10 @@ class CylinderImageProcessor:
         """
 
         # Compute channel histograms.
-	cropped_img = cv.cvtColor(cropped_img, cv.COLOR_BGR2HSV)
-        hist_b, _ = np.histogram(cropped_img[:, :, 0], bins=self._num_bins)
-        hist_g, _ = np.histogram(cropped_img[:, :, 1], bins=self._num_bins)
-        hist_r, _ = np.histogram(cropped_img[:, :, 2], bins=self._num_bins)
+	cropped_img_hsv = cv.cvtColor(cropped_img, cv.COLOR_BGR2HSV)
+        hist_b, _ = np.histogram(cropped_img_hsv[:, :, 0], bins=self._num_bins)
+        hist_g, _ = np.histogram(cropped_img_hsv[:, :, 1], bins=self._num_bins)
+        hist_r, _ = np.histogram(cropped_img_hsv[:, :, 2], bins=self._num_bins)
         return np.hstack((hist_r, hist_g, hist_b))  # Return computed colour feature.
 
     def img_to_feature(self, img, l_u, r_d):
