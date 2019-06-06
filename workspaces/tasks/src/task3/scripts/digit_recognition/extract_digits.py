@@ -50,6 +50,9 @@ class The_Digit:
         # Set urls dictionary
         self.digits = defaultdict(int)
 
+        # The number of times digits must be read in order to be accepted
+        self.CL_THRESHOLD = 5
+
         s = rospy.Service('digit_detector', DigitDetector, self.toggle_output)
 
     def image_callback(self,data):
@@ -156,8 +159,11 @@ class The_Digit:
 
         if (req.flg == 0):
             if(len(self.digits) > 0):
-                text = max(self.digits, key=self.digits.get)
-                return np.array([int(text[0]), int(text[1])])
+                max_key = max(self.digits, key=self.digits.get)
+                if(self.digits[max_key] >= self.CL_THRESHOLD):
+                    return np.array([int(max_key[0]), int(max_key[1])])
+                else:
+                    return []
             else:
                 return []    
         elif (req.flg == 1):

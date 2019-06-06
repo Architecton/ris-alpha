@@ -45,6 +45,9 @@ class The_QR:
         # Set urls dictionary
         self.urls = defaultdict(int)
 
+        # The number of times digits must be read in order to be accepted
+        self.CL_THRESHOLD = 5
+
         s = rospy.Service('qr_detector', QRDetector, self.toggle_output)
 
     def image_callback(self,data):
@@ -149,8 +152,11 @@ class The_QR:
 
         if (req.flg == 0):
             if(len(self.urls) > 0):
-                # print(self.urls)
-                return max(self.urls, key=self.urls.get)
+                max_key = max(self.urls, key=self.urls.get)
+                if(self.urls[max_key] >= self.CL_THRESHOLD):
+                    return max_key
+                else:
+                    return ""
             else:
                 return ""    
         elif (req.flg == 1):
