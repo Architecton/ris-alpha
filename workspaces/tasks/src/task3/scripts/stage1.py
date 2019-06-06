@@ -294,8 +294,6 @@ def stage_one():
                             elif goal_nxt_ell_status == GoalStatus.SUCCEEDED:
 
 
-
-
                                 ### TODO TODO TODO ##########################################################################
 
                                 # If nor QR code nor pattern yet found...

@@ -172,7 +172,7 @@ def stage_two(goal_color, stage1_color_dict):
     
     ### CYLINDER LOCATION BUFFER ###
     cyl_buff_ptr = -1
-    cyl_buff = np.empty((100, 3), dtype=float)
+    cyl_buff = np.empty((100, 6), dtype=float)
     ### /CYLINDER LOCATION BUFFER ###
 
 
@@ -232,7 +232,13 @@ def stage_two(goal_color, stage1_color_dict):
                 rospy.sleep(ROTATION_SLEEP_DURATION)
                 cylinder_detection_res = cylinder_detection_serv(0)
                 if cylinder_detection_res.flg == 1:
-                    cyl_approach_goal_nxt = np.array([cylinder_detection_res.x_a, cylinder_detection_res.y_a, cylinder_detection_res.z_a])
+                    trans_scan_pos = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
+                    cyl_approach_goal_nxt = np.array([cylinder_detection_res.x_a, 
+                                                      cylinder_detection_res.y_a, 
+                                                      trans_scan_pos.transform.rotation.x, 
+                                                      trans_scan_pos.transform.rotation.y, 
+                                                      trans_scan_pos.transform.rotation.z, 
+                                                      trans_scan_pos.transform.rotation.w])
                     cyl_buff[cyl_buff_ptr+1, :] = cyl_approach_goal_nxt
                     cyl_buff += 1
             
@@ -270,6 +276,9 @@ def stage_two(goal_color, stage1_color_dict):
                     goal_cyl.target_pose.pose.position.x = cylinder_data[0]
                     goal_cyl.target_pose.pose.position.y = cylinder_data[1]
                     goal_cyl.target_pose.pose.orientation.x = cylinder_data[2]
+                    goal_cyl.target_pose.pose.orientation.y = cylinder_data[3]
+                    goal_cyl.target_pose.pose.orientation.z = cylinder_data[4]
+                    goal_cyl.target_pose.pose.orientation.w = cylinder_data[5]
                     goal_nxt_cyl_status = GoalStatus.LOST
                     # Send cylinder resolution goal.
                     ac_cylinders.send_goal(goal_cyl)
