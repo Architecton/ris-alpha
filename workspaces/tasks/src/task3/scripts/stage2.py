@@ -16,8 +16,8 @@ from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from geometry_msgs.msg import Point, Vector3, PoseStamped, Twist
 
 from locators.target_marking.targetmarker import TargetMarker
-from task3.srv import CylinderLocator
 from task3.srv import QRDetector
+from task3.srv import CylinderLocation
 
 from task3.srv import Checkpoint_res
 from task3.msg import Checkpoints
