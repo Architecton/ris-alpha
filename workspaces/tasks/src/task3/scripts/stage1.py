@@ -301,42 +301,53 @@ def stage_one():
 
                             ### TODO TODO TODO ##########################################################################
 
-
+                            # If nor QR code nor pattern yet found...
                             if not classifier_built and not found_pattern:
+
+                                # Try to detect both the QR code and the pattern.
                                 qr_detection_serv(1)
                                 digit_detection_serv(1)
                                 doah.approach_procedure()
                                 qr_detected = qr_detection_serv(0).res
                                 found_pattern = digit_detection_serv(0).result
-
+                                
+                                # If QR code detected, build classifier.
                                 if qr_detected != '':
                                     data_url = qr_detected
                                     clf = clf.fit(data_url)
                                     classifier_built = True
                                 elif found_pattern:
+                                    # If pattern found, flag is set.
                                     print "pattern found"
                                 else:
                                     print "map found"
                            
-                            # If qr not yet found
+                            # If QR not yet found...
                             elif not classifier_built:
                                 qr_detection_serv(1)
                                 doah.approach_procedure()
                                 qr_detected = qr_detection_serv(0)
 
+
+                                # If QR code detected:..
                                 if qr_detected:
+
+                                    # Build classifier and classify pattern.
                                     data_url = qr_detected
                                     clf = clf.fit(data_url)
                                     classifier_built = True
                                     return clf.predict(found_pattern)
 
-                            # if digits not yet found
+                            # if pattern not yet found...
                             elif not found_pattern:
                                 digit_detection_serv(1)
                                 doah.approach_procedure()
                                 found_pattern = digit_detection_serv(0)
-
+                                
+                                # If pattern detected:
                                 if found_pattern:
+
+                                    # classify patern.
                                     return clf.predict(found_pattern)
 
 
