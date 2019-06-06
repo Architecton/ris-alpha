@@ -63,6 +63,7 @@ add_service_files(
   QRDetector.srv
   DigitDetector.srv
   TreasureLocator.srv
+  CylinderLocation.srv
 )
 
 generate_messages(

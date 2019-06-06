@@ -1,3 +1,5 @@
+int64 flg
+---
 # Found flag that takes on values 1 or 0 (cylinder detected or not)
 uint8 found
 
