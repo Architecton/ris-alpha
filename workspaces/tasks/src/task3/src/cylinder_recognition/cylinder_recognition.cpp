@@ -42,6 +42,7 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     pcl::ExtractIndices<pcl::Normal> extract_normals;
     pcl::search::KdTree<PointT>::Ptr tree (new pcl::search::KdTree<PointT> ());
     Eigen::Vector4f centroid;
+    Eigen::Vector3f centroid_tmp
 
     // Datasets
     pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
@@ -51,6 +52,8 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     pcl::PointCloud<pcl::Normal>::Ptr cloud_normals2 (new pcl::PointCloud<pcl::Normal>);
     pcl::ModelCoefficients::Ptr coefficients_plane (new pcl::ModelCoefficients), coefficients_cylinder (new pcl::ModelCoefficients);
     pcl::PointIndices::Ptr inliers_plane (new pcl::PointIndices), inliers_cylinder (new pcl::PointIndices);
+    pcl::RangeImage::Ptr range_image_ptr(new pcl::RangeImage);
+    pcl::RangeImage& range_image = *range_image_ptr; 
   
     // Read in the cloud data
     pcl::fromPCLPointCloud2 (*cloud_blob, *cloud);
@@ -130,7 +133,7 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     extract.filter (*cloud_cylinder);
 
     if (cloud_cylinder->points.empty ()) {
-        // std::cerr << "Can't find the cylindrical component." << std::endl;
+        std::cerr << "Can't find the cylindrical component." << std::endl;
     } else {
         // std::cerr << "PointCloud representing the cylindrical component: " << cloud_cylinder->points.size () << " data points." << std::endl;
           
@@ -211,11 +214,32 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
         pcl::toPCLPointCloud2 (*cloud_cylinder, outcloud_cylinder);
         puby.publish (outcloud_cylinder);
 
+
+        // TMP: Trying to convert the centroid to pixels >>
+        std::cerr << "Cloud width: " << cloud_filtered->width << std::endl;
+
+        float x_real, y_real, range_curr;
+        int x, y;
+
+        centroid_tmp = centroid
+        range_image.createFromPointCloud (cloud_cylinder,  0.0903125, 0.0895833,
+                                    pcl::deg2rad (57.8f), pcl::deg2rad (43.0f),
+                                    Eigen::Affine3f::Identity (), CAMERA_FRAME, 0.0f, 0.0f, 0);
+
+        range_image.getImagePoint(centroid_tmp, x_real, y_real, range_curr);
+        range_image.real2DToInt2D(x_real, y_real, x, y);
+
+        std::cerr << "X: " << x << " Y: " << y << std::endl;
+        // << TMP
+
+        
+
         // Visualization (Type might be wrong)
         pcl::visualization::CloudViewer viewer ("Simple cloud viewer");
-        viewer.showCloud (cloud_cylinder)
-        while (!viewer.wasStopped) {
-
+        viewer.showCloud (cloud_cylinder);
+        int c = -1;
+        while (c == -1) {
+            c = getchar();
         }
 
     }
