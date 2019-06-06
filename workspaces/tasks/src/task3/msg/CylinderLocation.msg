@@ -5,3 +5,8 @@ uint8 found
 float64 x
 float64 y
 float64 z
+
+# Cylinder approact location in map coordinates
+float64 x_a
+float64 y_a
+float54 z_a
