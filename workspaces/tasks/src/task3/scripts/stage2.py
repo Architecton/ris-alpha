@@ -18,7 +18,6 @@ from geometry_msgs.msg import Point, Vector3, PoseStamped, Twist
 from locators.target_marking.targetmarker import TargetMarker
 from task3.srv import CylinderLocator
 from task3.srv import QRDetector
-from task3.srv import DigitDetector
 
 from task3.srv import Checkpoint_res
 from task3.msg import Checkpoints
@@ -28,6 +27,9 @@ from sound_play.msg import SoundRequest
 from sound_play.libsoundplay import SoundClient
 
 from classification.classification import UrlDataClassifier
+from detection_objective_approach.detectionObjectiveApproachHandler import DetectionObjectiveApproachHandler
+
+from color_classification.colour_detector_cyl import ColourDetectorCyl
 
 import time
 import pdb
@@ -49,7 +51,7 @@ params:
 """
 
 
-def stage_two(goal_color):
+def stage_two(goal_color, stage1_color_dict):
 
     ### INITIALIZATIONS ###
 
@@ -63,7 +65,12 @@ def stage_two(goal_color):
     volume = 1.0
 
     # Notify start of initialization.
-    soundhandle.say("Starting initialization of stage one.", voice, volume)
+    soundhandle.say("Starting initialization of stage two.", voice, volume)
+
+    # Initialize cylinder colour detector.
+    NUM_BINS = 10
+    clf = load('cylinder_colour_classifier.joblib')
+    cdt = ColourDetectorCyl(clf, NUM_BINS)
 
 
     # /// publishers ///
@@ -99,6 +106,8 @@ def stage_two(goal_color):
     ac_chkpnts = actionlib.SimpleActionClient("move_base", MoveBaseAction)
     ac_cylinders = actionlib.SimpleActionClient("move_base", MoveBaseAction)
 
+    # Initialize detection objective approach handler instance.
+    doah = DetectionObjectiveApproachHandler()
 
 
     ### SERVICE PROXY INITIALIZATION ###
@@ -159,6 +168,14 @@ def stage_two(goal_color):
     rospy.wait_for_service('cylinder_locator')
     cylinder_locator = rospy.ServiceProxy('cylinder_locator', CylinderLocator)
 
+    
+    ### CYLINDER LOCATION BUFFER ###
+    cyl_buff_ptr = -1
+    cyl_buff = np.empty((100, 3), dtype=float)
+    ### /CYLINDER LOCATION BUFFER ###
+
+
+
     ### /INITIALIZATIONS ###
 
 
@@ -203,29 +220,30 @@ def stage_two(goal_color):
         soundhandle.say("Initiating rotation sequence.", voice, volume)
         for rot_idx in np.arange(NUM_ROTATIONS):
 
+
             # Safety sleep.
-            rospy.sleep(0.5)
+            rospy.sleep(0.2)
 
 
-            ## IMAGE PROCESSING STREAM SCAN START ###
-            sf.flag = 1
-            scan_perm_pub.publish(sf)
+            ## IMAGE PROCESSING STREAM SCAN START ### 
+            # Start scanning for cylinders.
+            cylinder_detection_serv(1)
             # Sleep and wait for cylinder_locator service to scan robot's image processing stream for cylinders.
             rospy.sleep(ROTATION_SLEEP_DURATION)
-            # PUBLISH REVOCATION OF PERMISSION TO SCAN
-            sf.flag = 0
-            scan_perm_pub.publish(sf)
+            cylinder_detection_serv(0)
             ## IMAGE PROCESSING STREAM SCAN END ###
 
 
             # Safety sleep.
-            rospy.sleep(0.5)
+            rospy.sleep(0.2)
+
+
 
             # ROTATE
             start_rot_time = time.time()
             while(time.time() - start_rot_time < rotation_dur):
                 rotation_pub.publish(rot)  # Publish angular velocity.
-                rot_loop_rate.sleep()  # TODO: EMPIRICALLY SET
+                rot_loop_rate.sleep()
 
         ## /CYLINDER LOCATING ROTATION ##
 
@@ -268,11 +286,22 @@ def stage_two(goal_color):
                         elif goal_nxt_cyl_status == GoalStatus.SUCCEEDED:
 
 
-
-
                             ### TODO TODO TODO ##########################################################################
-				
-			    # TODO handle colour detection and QR readings here
+
+                            #subscribe
+                            cdt.subscribe()
+                            rospy.sleep(1.5)
+                            detected_cylinder_color = cdt.get_cylinder_color()
+
+                            if detected_cylinder_color == goal_color:
+                                res = ''
+                                while res == '':
+                                    qr_detection_serv(1)
+                                    doah.approach_procedure()
+                                    res = qr_detection_serv(0)
+                                    if res != '':
+                                        return res
+
 
 
 
