@@ -27,7 +27,6 @@ tf2_ros::Buffer tf2_buffer;
 
 typedef pcl::PointXYZ PointT;
 
-
 void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
   
     // All the objects needed
@@ -263,6 +262,8 @@ int main (int argc, char** argv) {
     puby = nh.advertise<pcl::PCLPointCloud2> ("cylinder", 1);
 
     pubm = nh.advertise<visualization_msgs::Marker>("detected_cylinder", 1);
+
+    // Init service named cylinder_detector
 
     // Spin
     ros::spin ();
