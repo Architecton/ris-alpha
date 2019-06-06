@@ -91,7 +91,7 @@ def stage_two(goal_color, stage1_color_dict):
     rotation_dur_callib = 0.3 # Constant used to calibrate rotation duration.
     # Duration for which to publish specified rotation velocity to get rotation_agl angle.
     rotation_dur = (rotation_agl/ROTATION_SPEED_X)*rotation_dur_callib 
-    ROTATION_SLEEP_DURATION = 2
+    ROTATION_SLEEP_DURATION = 1.0
     rot = Twist()
     rot.angular.x = ROTATION_SPEED_X
     rot.angular.y = ROTATION_SPEED_Y
@@ -123,6 +123,12 @@ def stage_two(goal_color, stage1_color_dict):
     except rospy.ServiceException, e:
         rospy.logerr("Service error: {0}".format(e.message))
 
+    rospy.wait_for_service('cylinder_detector')
+    try:
+        cylinder_detection_serv = rospy.ServiceProxy('cylinder_detector', CylinderLocation)
+    except rospy.ServiceException, e:
+        rospy.logerr("Service error: {0}".format(e.message))
+
     ### /SERVICE PROXY INITIALIZATION ###
 
 
@@ -136,9 +142,8 @@ def stage_two(goal_color, stage1_color_dict):
 
     # Initialize found cylinders storage.
     # First two fields store the coordinates of the cylinder center. The third field stores the perpendicular angle.
-    resolved_cyl = np.empty((0, 6), dtype=float)
+    resolved_cyl = np.empty((0, 2), dtype=float)
     resolved_cyl_ctr = 0  # Initialize resolved cylinders counter.
-    end_search = False  # Flag to indicate end of search.
 
     # Number of checkpoints to generate.
     NUM_CHECKPOINTS = 8
@@ -164,10 +169,6 @@ def stage_two(goal_color, stage1_color_dict):
     trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
     robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z]) 
 
-    # Wait for cylinder data buffer query service to come online and make a proxy function.
-    rospy.wait_for_service('cylinder_locator')
-    cylinder_locator = rospy.ServiceProxy('cylinder_locator', CylinderLocator)
-
     
     ### CYLINDER LOCATION BUFFER ###
     cyl_buff_ptr = -1
@@ -175,103 +176,100 @@ def stage_two(goal_color, stage1_color_dict):
     ### /CYLINDER LOCATION BUFFER ###
 
 
-
     ### /INITIALIZATIONS ###
 
 
 
+    # Loop until return:
+    while True:
+        # While there are unresolved checkpoints left
+        while checkpoints.shape[0] > 0:
 
-    # While there are unresolved checkpoints left
-    while checkpoints.shape[0] > 0:
+            # Get index of closest checkpoint.
+            idx_nxt = np.argmin((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(robot_pos, checkpoints))
 
-        # Get index of closest checkpoint.
-        idx_nxt = np.argmin((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(robot_pos, checkpoints))
+            
+            # Create goal for next checkpoint.
+            goal_chkpt = MoveBaseGoal()
+            goal_chkpt.target_pose.header.frame_id = "map"
+            goal_chkpt.target_pose.header.stamp = rospy.Time.now()
+            goal_chkpt.target_pose.pose.position.x = checkpoints[idx_nxt, 0]
+            goal_chkpt.target_pose.pose.position.y = checkpoints[idx_nxt, 1]
+            goal_chkpt.target_pose.pose.orientation.w = checkpoints[idx_nxt, 2]
 
-        
-        # Create goal for next checkpoint.
-        goal_chkpt = MoveBaseGoal()
-        goal_chkpt.target_pose.header.frame_id = "map"
-        goal_chkpt.target_pose.header.stamp = rospy.Time.now()
-        goal_chkpt.target_pose.pose.position.x = checkpoints[idx_nxt, 0]
-        goal_chkpt.target_pose.pose.position.y = checkpoints[idx_nxt, 1]
-        goal_chkpt.target_pose.pose.orientation.w = checkpoints[idx_nxt, 2]
+            goal_chkpnt_status = GoalStatus.LOST  # Set status for next checkpoint goal.
+            ac_chkpnts.send_goal(goal_chkpt) # Send checkpoint goal.
 
-        goal_chkpnt_status = GoalStatus.LOST  # Set status for next checkpoint goal.
-        ac_chkpnts.send_goal(goal_chkpt) # Send checkpoint goal.
+            soundhandle.say("Resolving checkpoint {0}".format(checkpoint_ctr), voice, volume)
 
-        soundhandle.say("Resolving checkpoint {0}".format(checkpoint_ctr), voice, volume)
+            # Loop for next checkpoint goal.
+            while not goal_chkpnt_status == GoalStatus.SUCCEEDED:
 
-        # Loop for next checkpoint goal.
-        while not goal_chkpnt_status == GoalStatus.SUCCEEDED:
+                ac_chkpnts.wait_for_result(rospy.Duration(1.0))
 
-            ac_chkpnts.wait_for_result(rospy.Duration(1.0))
+                # Get checkpoint resolution goal status.
+                goal_chkpnt_status = ac_chkpnts.get_state()
 
-            # Get checkpoint resolution goal status.
-            goal_chkpnt_status = ac_chkpnts.get_state()
-
-            # Handle abortions
-            if goal_chkpnt_status == GoalStatus.ABORTED or goal_chkpnt_status == GoalStatus.REJECTED:
-                rospy.loginfo("Checkpoint resolution goal aborted")
-                break
-
-
-        ## CYLINDER LOCATING ROTATION ##
-
-        soundhandle.say("Initiating rotation sequence.", voice, volume)
-        for rot_idx in np.arange(NUM_ROTATIONS):
+                # Handle abortions
+                if goal_chkpnt_status == GoalStatus.ABORTED or goal_chkpnt_status == GoalStatus.REJECTED:
+                    rospy.loginfo("Checkpoint resolution goal aborted")
+                    break
 
 
-            # Safety sleep.
-            rospy.sleep(0.2)
+            ## CYLINDER LOCATING ROTATION ##
+
+            soundhandle.say("Initiating rotation sequence.", voice, volume)
+            for rot_idx in np.arange(NUM_ROTATIONS):
 
 
-            ## IMAGE PROCESSING STREAM SCAN START ### 
-            # Start scanning for cylinders.
-            cylinder_detection_serv(1)
-            # Sleep and wait for cylinder_locator service to scan robot's image processing stream for cylinders.
-            rospy.sleep(ROTATION_SLEEP_DURATION)
-            cylinder_detection_serv(0)
-            ## IMAGE PROCESSING STREAM SCAN END ###
+                # Safety sleep.
+                rospy.sleep(0.2)
+
+                ## IMAGE PROCESSING STREAM SCAN START ### 
+                # Start scanning for cylinders.
+                cylinder_detection_serv(1)
+                # Sleep and wait for service to scan robot's image processing stream for cylinders.
+                rospy.sleep(ROTATION_SLEEP_DURATION)
+                cylinder_detection_res = cylinder_detection_serv(0)
+                if cylinder_detection_res.flg == 1:
+                    cyl_approach_goal_nxt = np.array([cylinder_detection_res.x_a, cylinder_detection_res.y_a, cylinder_detection_res.z_a])
+                    cyl_buff[cyl_buff_ptr+1, :] = cyl_approach_goal_nxt
+                    cyl_buff += 1
+            
+                ## IMAGE PROCESSING STREAM SCAN END ###
+
+                # Safety sleep.
+                rospy.sleep(0.2)
+
+                # ROTATE
+                start_rot_time = time.time()
+                while(time.time() - start_rot_time < rotation_dur):
+                    rotation_pub.publish(rot)  # Publish angular velocity.
+                    rot_loop_rate.sleep()
+
+            ## /CYLINDER LOCATING ROTATION ##
 
 
-            # Safety sleep.
-            rospy.sleep(0.2)
 
+            ## HANDLE CYLINDER DATA COLLECTED IN BUFFER ##
 
-
-            # ROTATE
-            start_rot_time = time.time()
-            while(time.time() - start_rot_time < rotation_dur):
-                rotation_pub.publish(rot)  # Publish angular velocity.
-                rot_loop_rate.sleep()
-
-        ## /CYLINDER LOCATING ROTATION ##
-
-
-
-        ## HANDLE CYLINDER DATA COLLECTED IN BUFFER ##
-
-        try:
             # Query into cylinder buffer
-            cylinder_data = cylinder_locator().target
-            while(len(cylinder_data) > 0):  # If data in buffer...
+            while cyl_buff_ptr >= 0 :  # If data in buffer...
+                cylinder_data = cyl_buff[cyl_buff_ptr]
+                cyl_buff_ptr -= 1
                 if not np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([cylinder_data[0], cylinder_data[1]]), resolved_cyl[:, :2]) < DISTINCT_CYL_THRESH):
 
                     ### DEBUGGING VISUALIZATION ###
                     tm.push_position(np.array(cylinder_data[:3]))
-                    tm.push_position(np.array(cylinder_data[3:]))
                     ### /DEBUGGING VISUALIZATION ###
 
                     # Initialize goal to aproach new cylinder
                     goal_cyl = MoveBaseGoal()
                     goal_cyl.target_pose.header.frame_id = "map"
                     goal_cyl.target_pose.header.stamp = rospy.Time.now()
-                    goal_cyl.target_pose.pose.position.x = cylinder_data[3]
-                    goal_cyl.target_pose.pose.position.y = cylinder_data[4]
-                    goal_cyl.target_pose.pose.orientation.x = cylinder_data[6]
-                    goal_cyl.target_pose.pose.orientation.y = cylinder_data[7]
-                    goal_cyl.target_pose.pose.orientation.z = cylinder_data[8]
-                    goal_cyl.target_pose.pose.orientation.w = cylinder_data[9]
+                    goal_cyl.target_pose.pose.position.x = cylinder_data[0]
+                    goal_cyl.target_pose.pose.position.y = cylinder_data[1]
+                    goal_cyl.target_pose.pose.orientation.x = cylinder_data[2]
                     goal_nxt_cyl_status = GoalStatus.LOST
                     # Send cylinder resolution goal.
                     ac_cylinders.send_goal(goal_cyl)
@@ -288,21 +286,24 @@ def stage_two(goal_color, stage1_color_dict):
 
                             ### TODO TODO TODO ##########################################################################
 
-                            #subscribe
+                            # Detect cylinder color.
                             cdt.subscribe()
                             rospy.sleep(1.5)
                             detected_cylinder_color = cdt.get_cylinder_color()
-
+                            
+                            # If detected correct color:
                             if detected_cylinder_color == goal_color:
                                 res = ''
                                 while res == '':
+
+                                    # Try to detect qr code on cylinder.
                                     qr_detection_serv(1)
                                     doah.approach_procedure()
                                     res = qr_detection_serv(0)
+
+                                    # If detected, return found color.
                                     if res != '':
                                         return res
-
-
 
 
                             ### TODO TODO TODO ##########################################################################
@@ -314,30 +315,33 @@ def stage_two(goal_color, stage1_color_dict):
                             rospy.loginfo("Target number {0} resolved".format(resolved_cyl_ctr))
 
                             # Sleep
-                            rospy.sleep(2.0)
+                            rospy.sleep(1.0)
 
                             # Add found cylinder to matrix of resolved cylinders.
-                            resolved_cyl = np.vstack((resolved_cyl, np.array([cylinder_data[0], cylinder_data[1], cylinder_data[3], cylinder_data[4], cylinder_data[5], cylinder_data[6]])))
+                            resolved_cyl = np.vstack((resolved_cyl, np.array([cylinder_data[0], cylinder_data[1])))
                             resolved_cyl_ctr += 1
 
-                    # Get next element in service's buffer.
-                    cylinder_data = cylinder_locator().target
-                else:
-                    cylinder_data = cylinder_locator().target
-        except rospy.ServiceException, e:
-            rospy.loginfo("Cylinder locator service call failed: {0}".format(e))
+            ## /HANDLE CYLINDER DATA COLLECTED IN BUFFER ##
 
-        ## /HANDLE CYLINDER DATA COLLECTED IN BUFFER ##
+            # Remove checkpoint from checkpoints array
+            soundhandle.say("Checkpoint number {0} resolved.".format(resolved_cyl_ctr), voice, volume)
+            checkpoints = np.delete(checkpoints, (idx_nxt), axis=0)
 
-        # Remove checkpoint from checkpoints array
-        soundhandle.say("Checkpoint number {0} resolved.".format(resolved_cyl_ctr), voice, volume)
-        checkpoints = np.delete(checkpoints, (idx_nxt), axis=0)
-
-        # Get robot position in map coordinates.
-        trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
-        robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z])
-        checkpoint_ctr += 1  # Increment checkpoint counter.
+            # Get robot position in map coordinates.
+            trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
+            robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z])
+            checkpoint_ctr += 1  # Increment checkpoint counter.
 
 
-    soundhandle.say("All checkpoints visited.", voice, volume)
+        # HERE IF ALL CHECKPOINTS RESOLVED
+
+        # Call checkpoints generating service to get generated checkpoints.
+        checkpoints_res = checkpoint_gen(NUM_CHECKPOINTS)
+
+        # Add checkpoints to matrix.
+        for point in checkpoints_res.points.points:
+            checkpoints_nxt = np.array([[point.x, point.y, point.z]])
+            checkpoints = np.vstack((checkpoints, checkpoints_nxt))
+
+        checkpoint_ctr = 0  # Initialize visited checkpoints counter.
 
