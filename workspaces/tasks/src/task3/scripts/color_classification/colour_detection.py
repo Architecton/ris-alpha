@@ -5,6 +5,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
+import cv2 as cv
 
 class ColourClassifier:
 
@@ -118,9 +119,10 @@ class ColourFeatureGenerator:
         colour_features_mat = np.empty((self._img_counter, self._num_bins*3), dtype=np.int)  # Allocate matrix for storing feature vectors.
         target = np.empty(self._img_counter, dtype=np.int)  # Allocate vector for storing target values.
         for img_idx in self._img_dict.keys():
-            hist_b, _ = np.histogram(self._img_dict[img_idx][:, :, 0], bins=self._num_bins)
-            hist_g, _ = np.histogram(self._img_dict[img_idx][:, :, 1], bins=self._num_bins)
-            hist_r, _ = np.histogram(self._img_dict[img_idx][:, :, 2], bins=self._num_bins)
+	    img_nxt = cv.cvtColor(self._img_dict[img_idx], cv.COLOR_BGR2HSV)
+            hist_b, _ = np.histogram(img_nxt[:, :, 0], bins=self._num_bins)
+            hist_g, _ = np.histogram(img_nxt[:, :, 1], bins=self._num_bins)
+            hist_r, _ = np.histogram(img_nxt[:, :, 2], bins=self._num_bins)
             feature = np.hstack((hist_b, hist_g, hist_r))  # Compute feature from channel histograms.
             colour_features_mat[img_idx, :] = feature  # Add feature to features matrix.
             target[img_idx] = self._target_dict[img_idx]  # Add target value to vector of target values.
@@ -141,9 +143,10 @@ class ColourFeatureGenerator:
 
         colour_features_mat = np.empty((self._img_counter, self._num_bins*3), dtype=np.int)  # Allocate matrix for storing feature vectors.
         for img_idx in self._img_dict.keys():
-            hist_b, _ = np.histogram(self._img_dict[img_idx][:, :, 0], bins=self._num_bins)
-            hist_g, _ = np.histogram(self._img_dict[img_idx][:, :, 1], bins=self._num_bins)
-            hist_r, _ = np.histogram(self._img_dict[img_idx][:, :, 2], bins=self._num_bins)
+	    img_nxt = cv.cvtColor(self._img_dict[img_idx], cv.COLOR_BGR2HSV)
+            hist_b, _ = np.histogram(img_nxt[:, :, 0], bins=self._num_bins)
+            hist_g, _ = np.histogram(img_nxt[:, :, 1], bins=self._num_bins)
+            hist_r, _ = np.histogram(img_nxt[:, :, 2], bins=self._num_bins)
             feature = np.hstack((hist_b, hist_g, hist_r))  # Compute feature from channel histograms.
             colour_features_mat[img_idx, :] = feature  # Add feature to features matrix.
 
@@ -204,6 +207,7 @@ class RingImageProcessor:
         """
 
         # Compute channel histograms.
+	cropped_img = cv.cvtColor(cropped_img, cv.COLOR_BGR2HSV)
         hist_b, _ = np.histogram(cropped_img[:, :, 0], bins=self._num_bins)
         hist_g, _ = np.histogram(cropped_img[:, :, 1], bins=self._num_bins)
         hist_r, _ = np.histogram(cropped_img[:, :, 2], bins=self._num_bins)
@@ -294,6 +298,7 @@ class CylinderImageProcessor:
         """
 
         # Compute channel histograms.
+	cropped_img = cv.cvtColor(cropped_img, cv.COLOR_BGR2HSV)
         hist_b, _ = np.histogram(cropped_img[:, :, 0], bins=self._num_bins)
         hist_g, _ = np.histogram(cropped_img[:, :, 1], bins=self._num_bins)
         hist_r, _ = np.histogram(cropped_img[:, :, 2], bins=self._num_bins)

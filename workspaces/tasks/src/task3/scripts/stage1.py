@@ -28,6 +28,7 @@ from sound_play.msg import SoundRequest
 from sound_play.libsoundplay import SoundClient
 
 from classification.classification import UrlDataClassifier
+from detection_objective_approach.detectionObjectiveApproachHandler import DetectionObjectiveApproachHandler
 
 import time
 import pdb
@@ -101,8 +102,8 @@ def stage_one():
     ac_chkpnts = actionlib.SimpleActionClient("move_base", MoveBaseAction)
     ac_ellipses = actionlib.SimpleActionClient("move_base", MoveBaseAction)
 
-
-
+    # Initialize detection objective approach handler instance.
+    doah = DetectionObjectiveApproachHandler()
 
     ### SERVICE PROXY INITIALIZATION ###
     rospy.wait_for_service('get_checkpoints')
@@ -307,21 +308,19 @@ def stage_one():
                             qr_detected = None
                             if not classifier_built:
                                 qr_detection_serv(1)
-
-                                # TODO move left, move right, 
-                                
-                                rospy.sleep(2)
-                                qr_detected = qr_detection_serv(0)
+                                doah.approach_procedure()
+                                qr_detected = qr_detection_serv(0).res
 
                             # Try to detect digits for N sec.
                             if qr_detected == '':
                                 digit_detection_serv(1)
-                                rospy.sleep(2)
-                                found_pattern = digit_detection_serv(0)
+				doah.approach_procedure_side_scan()
+                                found_pattern = digit_detection_serv(0).result
 
                                 # IF DIGITS DETECTED, if classifier trained, classify, else save and continue search for QR code.
                                 if found_pattern:
                                     if classifier_built:
+					pdb.set_trace()
                                         return clf.predict(found_pattern)
 
                             # IF QR CODE DETECTED, train classifier and save indicator that classifier detected.

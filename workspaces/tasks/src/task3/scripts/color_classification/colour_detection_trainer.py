@@ -169,7 +169,7 @@ if __name__ == '__main__':
     os.system('clear')
    
     # Set number of bins to use
-    NUM_BINS = 50
+    NUM_BINS = 10
     
     # Initialize trainer
     trainer = ColourDetectionTrainer(num_bins=NUM_BINS)
@@ -211,7 +211,7 @@ if __name__ == '__main__':
     # Save classifier.
     print "saving classifier"
     pdb.set_trace()
-    # dump(clf, '/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/ring_colour_classifier.joblib') 
+    dump(clf, '/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/ring_colour_classifier.joblib') 
     print "saving matrices"
     sio.savemat('training_data.mat', {'data' : trainer._features_mat})
     sio.savemat('training_data_target.mat', { 'data' : trainer._target_vec})

@@ -19,8 +19,6 @@ class ColourDetector:
 
 
     def _depth_callback(self, data):
-	import pdb
-	pdb.set_trace()
 
         """
         Callback called when broadcast on topic received.
@@ -32,8 +30,8 @@ class ColourDetector:
             None
         """
 
-        center_y = data.center_y  # Get y coordinate of center of ring.
-        center_x = data.center_x  # Get x coordinate of center of ring.
+        center_y = data.center_y + 27  # Get y coordinate of center of ring.
+        center_x = data.center_x - 17  # Get x coordinate of center of ring.
         min_axis = data.minor_axis  # Get minor axis of ellipse.
         maj_axis = data.major_axis  # Get major axis of ellipse.
 
@@ -92,7 +90,7 @@ class ColourDetector:
 
 if __name__ == '__main__':
     clf = load('ring_colour_classifier.joblib')
-    NUM_BINS = 50
+    NUM_BINS = 10
     cdt = ColourDetector(clf, NUM_BINS)
     while True:
         cdt.subscribe()
