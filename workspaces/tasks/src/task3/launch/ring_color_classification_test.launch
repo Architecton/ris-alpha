@@ -1,5 +1,5 @@
 <launch>
     <node pkg="task3" type="colour_detector.py" name="colour_detector" output="screen" />
-    <node pkg="task3" type="ring_detector.py" name="ring_detector" output="screen" />
+    <node pkg="task3" type="toroid_detector.py" name="toroid_detector" output="screen" />
 </launch>
 

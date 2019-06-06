@@ -16,7 +16,9 @@ class ColourDetector:
         self._cv_bridge = CvBridge()
 
 
-    def _depth_callback(self, data):
+    def burek(self, data):
+	import pdb
+	pdb.set_trace()
 
         """
         Callback called when broadcast on topic received.
@@ -48,6 +50,8 @@ class ColourDetector:
 
 
     def _img_callback(self, data):
+	import pdb
+	pdb.set_trace()
 
         """
         Callback called when broadcast on topic received.
@@ -70,7 +74,7 @@ class ColourDetector:
 
 
     def subscribe(self):
-        self._depth_subscriber = rospy.Subscriber('toroids', ApproachImageFeedback, self._depth_callback)
+        self._depth_subscriber = rospy.Subscriber('/toroids', ApproachImageFeedback, self.burek)
         self._img_subscriber = rospy.Subscriber('/camera/rgb/image_raw', Image, self._img_callback)
 
 
@@ -92,5 +96,5 @@ if __name__ == '__main__':
     cdt = ColourDetector(clf, NUM_BINS)
     while True:
         cdt.subscribe()
-        rospy.sleep(3)
+        rospy.sleep(5)
         print cdt.get_ring_color()

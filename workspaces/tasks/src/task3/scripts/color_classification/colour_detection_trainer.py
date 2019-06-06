@@ -178,7 +178,7 @@ if __name__ == '__main__':
     for colour in trainer.colour_dict.keys():
     
         # Countdown to start of training data recording.
-        countdown_val = 120
+        countdown_val = 10
         while(countdown_val >= 1):
             print("Starting recording of {0} ring training data in:".format(trainer.colour_dict[colour]))
             print("{0}".format(countdown_val))
@@ -209,8 +209,12 @@ if __name__ == '__main__':
     clf = trainer.get_classifier()
     
     # Save classifier.
-    dump(clf, 'ring_colour_classifier.joblib') 
+    print "saving classifier"
+    pdb.set_trace()
+    dump(clf, '/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/ring_colour_classifier.joblib') 
+    print "saving matrices"
     sio.savemat('training_data.mat', {'data' : trainer._features_mat})
     sio.savemat('training_data_target.mat', { 'data' : trainer._target_vec})
-    trainer.save_obj(trainer.training_imgs, 'training_images')
+    # print "saving training images"
+    # trainer.save_obj(trainer.training_imgs, 'training_images')
 
