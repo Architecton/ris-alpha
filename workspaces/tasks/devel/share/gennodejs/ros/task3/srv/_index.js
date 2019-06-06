@@ -1,30 +1,32 @@
 
 "use strict";
 
-let DigitDetector = require('./DigitDetector.js')
-let TreasureLocator = require('./TreasureLocator.js')
-let ValidRegionsMap = require('./ValidRegionsMap.js')
-let EllipseLocator = require('./EllipseLocator.js')
-let FeatureBuilder = require('./FeatureBuilder.js')
-let CheckpointProcessor = require('./CheckpointProcessor.js')
-let RingApproachPoint = require('./RingApproachPoint.js')
 let Checkpoint_res = require('./Checkpoint_res.js')
-let ColourClassificationSrv = require('./ColourClassificationSrv.js')
-let TerminalApproach = require('./TerminalApproach.js')
-let QRDetector = require('./QRDetector.js')
+let DigitDetector = require('./DigitDetector.js')
 let CylinderLocator = require('./CylinderLocator.js')
+let TerminalApproach = require('./TerminalApproach.js')
+let CylinderLocation = require('./CylinderLocation.js')
+let RingApproachPoint = require('./RingApproachPoint.js')
+let ValidRegionsMap = require('./ValidRegionsMap.js')
+let FeatureBuilder = require('./FeatureBuilder.js')
+let TreasureLocator = require('./TreasureLocator.js')
+let ColourClassificationSrv = require('./ColourClassificationSrv.js')
+let QRDetector = require('./QRDetector.js')
+let CheckpointProcessor = require('./CheckpointProcessor.js')
+let EllipseLocator = require('./EllipseLocator.js')
 
 module.exports = {
-  DigitDetector: DigitDetector,
-  TreasureLocator: TreasureLocator,
-  ValidRegionsMap: ValidRegionsMap,
-  EllipseLocator: EllipseLocator,
-  FeatureBuilder: FeatureBuilder,
-  CheckpointProcessor: CheckpointProcessor,
-  RingApproachPoint: RingApproachPoint,
   Checkpoint_res: Checkpoint_res,
-  ColourClassificationSrv: ColourClassificationSrv,
-  TerminalApproach: TerminalApproach,
-  QRDetector: QRDetector,
+  DigitDetector: DigitDetector,
   CylinderLocator: CylinderLocator,
+  TerminalApproach: TerminalApproach,
+  CylinderLocation: CylinderLocation,
+  RingApproachPoint: RingApproachPoint,
+  ValidRegionsMap: ValidRegionsMap,
+  FeatureBuilder: FeatureBuilder,
+  TreasureLocator: TreasureLocator,
+  ColourClassificationSrv: ColourClassificationSrv,
+  QRDetector: QRDetector,
+  CheckpointProcessor: CheckpointProcessor,
+  EllipseLocator: EllipseLocator,
 };
