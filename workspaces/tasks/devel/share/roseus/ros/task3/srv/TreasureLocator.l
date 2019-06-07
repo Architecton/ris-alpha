@@ -176,6 +176,7 @@ string frame_id
 ---
 float64 treasure_x
 float64 treasure_y
+
 ")
 
 (setf (get task3::TreasureLocatorResponse :md5sum-) "f8ab16647b43984ab945118af6794cb3")
@@ -233,6 +234,7 @@ string frame_id
 ---
 float64 treasure_x
 float64 treasure_y
+
 ")
 
 

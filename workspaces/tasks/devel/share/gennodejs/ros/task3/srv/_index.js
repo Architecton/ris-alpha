@@ -1,32 +1,34 @@
 
 "use strict";
 
-let QRDetector = require('./QRDetector.js')
-let FeatureBuilder = require('./FeatureBuilder.js')
 let Checkpoint_res = require('./Checkpoint_res.js')
-let ColourClassificationSrv = require('./ColourClassificationSrv.js')
-let MapDetector = require('./MapDetector.js')
-let ValidRegionsMap = require('./ValidRegionsMap.js')
+let QRDetector2 = require('./QRDetector2.js')
 let DigitDetector = require('./DigitDetector.js')
-let EllipseLocator = require('./EllipseLocator.js')
-let CheckpointProcessor = require('./CheckpointProcessor.js')
-let TreasureLocator = require('./TreasureLocator.js')
-let RingApproachPoint = require('./RingApproachPoint.js')
 let TerminalApproach = require('./TerminalApproach.js')
 let CylinderLocation = require('./CylinderLocation.js')
+let MapDetector = require('./MapDetector.js')
+let RingApproachPoint = require('./RingApproachPoint.js')
+let ValidRegionsMap = require('./ValidRegionsMap.js')
+let FeatureBuilder = require('./FeatureBuilder.js')
+let TreasureLocator = require('./TreasureLocator.js')
+let ColourClassificationSrv = require('./ColourClassificationSrv.js')
+let QRDetector = require('./QRDetector.js')
+let CheckpointProcessor = require('./CheckpointProcessor.js')
+let EllipseLocator = require('./EllipseLocator.js')
 
 module.exports = {
-  QRDetector: QRDetector,
-  FeatureBuilder: FeatureBuilder,
   Checkpoint_res: Checkpoint_res,
-  ColourClassificationSrv: ColourClassificationSrv,
-  MapDetector: MapDetector,
-  ValidRegionsMap: ValidRegionsMap,
+  QRDetector2: QRDetector2,
   DigitDetector: DigitDetector,
-  EllipseLocator: EllipseLocator,
-  CheckpointProcessor: CheckpointProcessor,
-  TreasureLocator: TreasureLocator,
-  RingApproachPoint: RingApproachPoint,
   TerminalApproach: TerminalApproach,
   CylinderLocation: CylinderLocation,
+  MapDetector: MapDetector,
+  RingApproachPoint: RingApproachPoint,
+  ValidRegionsMap: ValidRegionsMap,
+  FeatureBuilder: FeatureBuilder,
+  TreasureLocator: TreasureLocator,
+  ColourClassificationSrv: ColourClassificationSrv,
+  QRDetector: QRDetector,
+  CheckpointProcessor: CheckpointProcessor,
+  EllipseLocator: EllipseLocator,
 };

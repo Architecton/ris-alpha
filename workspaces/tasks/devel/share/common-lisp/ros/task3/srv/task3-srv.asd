@@ -24,6 +24,8 @@
     (:file "_package_MapDetector" :depends-on ("_package"))
     (:file "QRDetector" :depends-on ("_package_QRDetector"))
     (:file "_package_QRDetector" :depends-on ("_package"))
+    (:file "QRDetector2" :depends-on ("_package_QRDetector2"))
+    (:file "_package_QRDetector2" :depends-on ("_package"))
     (:file "RingApproachPoint" :depends-on ("_package_RingApproachPoint"))
     (:file "_package_RingApproachPoint" :depends-on ("_package"))
     (:file "TerminalApproach" :depends-on ("_package_TerminalApproach"))

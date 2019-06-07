@@ -153,10 +153,10 @@
   "f8ab16647b43984ab945118af6794cb3")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<TreasureLocator-response>)))
   "Returns full string definition for message of type '<TreasureLocator-response>"
-  (cl:format cl:nil "float64 treasure_x~%float64 treasure_y~%~%~%"))
+  (cl:format cl:nil "float64 treasure_x~%float64 treasure_y~%~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'TreasureLocator-response)))
   "Returns full string definition for message of type 'TreasureLocator-response"
-  (cl:format cl:nil "float64 treasure_x~%float64 treasure_y~%~%~%"))
+  (cl:format cl:nil "float64 treasure_x~%float64 treasure_y~%~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:serialization-length ((msg <TreasureLocator-response>))
   (cl:+ 0
      8
