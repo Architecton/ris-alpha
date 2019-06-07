@@ -66,6 +66,7 @@ add_message_files(
    RingData.msg
    CylinderData.msg
    TreasureLocatorResponse.msg
+   EllipseImageFeedback.msg
 )
 
 ## Generate services in the 'srv' folder

@@ -17,6 +17,8 @@
     (:file "_package_CylinderImageFeedback" :depends-on ("_package"))
     (:file "EllipseData" :depends-on ("_package_EllipseData"))
     (:file "_package_EllipseData" :depends-on ("_package"))
+    (:file "EllipseImageFeedback" :depends-on ("_package_EllipseImageFeedback"))
+    (:file "_package_EllipseImageFeedback" :depends-on ("_package"))
     (:file "RingApproachPointResponse" :depends-on ("_package_RingApproachPointResponse"))
     (:file "_package_RingApproachPointResponse" :depends-on ("_package"))
     (:file "RingData" :depends-on ("_package_RingData"))
