@@ -47,8 +47,7 @@ class The_Cylinder:
         cif.major_axis = 50
         self.cylinders_pub.publish(cif)
 
-        cv2.rectangle(img_original,(cif.center_x - cif.minor_axis/2, cif.center_y - cif.major_axis/2),(cif.center_x + cif.minor_axis/2, cif.center_y + cif.major_axis/2),(0,255,0),3)
-
+        # cv2.rectangle(img_original,(cif.center_x - cif.minor_axis/2, cif.center_y - cif.major_axis/2),(cif.center_x + cif.minor_axis/2, cif.center_y + cif.major_axis/2),(0,255,0),3)
         # DEVONLY: Visualize camera output
         # cv2.imshow('Live feed', img_original)
         # cv2.waitKey(1)
