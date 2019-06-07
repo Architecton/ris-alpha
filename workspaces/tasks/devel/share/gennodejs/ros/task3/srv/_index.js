@@ -5,6 +5,7 @@ let Checkpoint_res = require('./Checkpoint_res.js')
 let DigitDetector = require('./DigitDetector.js')
 let CylinderLocator = require('./CylinderLocator.js')
 let TerminalApproach = require('./TerminalApproach.js')
+let CylinderLocation = require('./CylinderLocation.js')
 let RingApproachPoint = require('./RingApproachPoint.js')
 let ValidRegionsMap = require('./ValidRegionsMap.js')
 let FeatureBuilder = require('./FeatureBuilder.js')
@@ -19,6 +20,7 @@ module.exports = {
   DigitDetector: DigitDetector,
   CylinderLocator: CylinderLocator,
   TerminalApproach: TerminalApproach,
+  CylinderLocation: CylinderLocation,
   RingApproachPoint: RingApproachPoint,
   ValidRegionsMap: ValidRegionsMap,
   FeatureBuilder: FeatureBuilder,

@@ -13,22 +13,56 @@
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
+#include <pcl/visualization/cloud_viewer.h>
 #include "pcl/point_cloud.h"
 #include "tf2_ros/transform_listener.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include "geometry_msgs/PointStamped.h"
-#include <pcl/visualization/cloud_viewer.h>
-
-ros::Publisher pubx;
-ros::Publisher puby;
-ros::Publisher pubm;
+#include <task3/CylinderLocation.h>
 
 tf2_ros::Buffer tf2_buffer;
 
 typedef pcl::PointXYZ PointT;
 
+int flg = 0;
+int found = 0;
+float x = -1.0f;
+float y = -1.0f;
+float z = -1.0f;
+float x_a = -1.0f;
+float y_a = -1.0f;
+float z_a = -1.0f;
+
+const int CYLINDER_PTS_THRESHOLD = 16000;
+
+bool toggle(task3::CylinderLocation::Request  &req, task3::CylinderLocation::Response &res) {
+
+    res.found = found;
+    res.x = x;
+    res.y = y;
+    res.z = z;
+    res.x_a = x_a;
+    res.y_a = y_a;
+    res.z_a = z_a;
+
+    flg = req.flg;
+
+    if(req.flg == 0) {
+        found = 0;
+    }
+
+    return true;
+}
+
 void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
+
+    // Return if the service hasn't been activated
+    if(flg == 0) {
+        return;
+    }
   
+    std::cerr << "Started working" << std::endl;
+
     // All the objects needed
     ros::Time time_rec, time_test;
     time_rec = ros::Time::now();
@@ -36,12 +70,11 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     pcl::PassThrough<PointT> pass;
     pcl::NormalEstimation<PointT, pcl::Normal> ne;
     pcl::SACSegmentationFromNormals<PointT, pcl::Normal> seg; 
-    pcl::PCDWriter writer;
     pcl::ExtractIndices<PointT> extract;
     pcl::ExtractIndices<pcl::Normal> extract_normals;
     pcl::search::KdTree<PointT>::Ptr tree (new pcl::search::KdTree<PointT> ());
     Eigen::Vector4f centroid;
-    Eigen::Vector3f centroid_tmp
+    // Eigen::Vector3f centroid_tmp;
 
     // Datasets
     pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
@@ -51,8 +84,8 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     pcl::PointCloud<pcl::Normal>::Ptr cloud_normals2 (new pcl::PointCloud<pcl::Normal>);
     pcl::ModelCoefficients::Ptr coefficients_plane (new pcl::ModelCoefficients), coefficients_cylinder (new pcl::ModelCoefficients);
     pcl::PointIndices::Ptr inliers_plane (new pcl::PointIndices), inliers_cylinder (new pcl::PointIndices);
-    pcl::RangeImage::Ptr range_image_ptr(new pcl::RangeImage);
-    pcl::RangeImage& range_image = *range_image_ptr; 
+    // pcl::RangeImage::Ptr range_image_ptr(new pcl::RangeImage);
+    // pcl::RangeImage& range_image = *range_image_ptr; 
   
     // Read in the cloud data
     pcl::fromPCLPointCloud2 (*cloud_blob, *cloud);
@@ -93,13 +126,13 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     extract.setNegative (false);
 
     // Write the planar inliers to disk
-    pcl::PointCloud<PointT>::Ptr cloud_plane (new pcl::PointCloud<PointT> ());
-    extract.filter (*cloud_plane);
+    // pcl::PointCloud<PointT>::Ptr cloud_plane (new pcl::PointCloud<PointT> ());
+    // extract.filter (*cloud_plane);
     // std::cerr << "PointCloud representing the planar component: " << cloud_plane->points.size () << " data points." << std::endl;
   
-    pcl::PCLPointCloud2 outcloud_plane;
-    pcl::toPCLPointCloud2 (*cloud_plane, outcloud_plane);
-    pubx.publish (outcloud_plane);
+    // pcl::PCLPointCloud2 outcloud_plane;
+    // pcl::toPCLPointCloud2 (*cloud_plane, outcloud_plane);
+    // pubx.publish (outcloud_plane);
 
     // Remove the planar inliers, extract the rest
     extract.setNegative (true);
@@ -131,10 +164,14 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     pcl::PointCloud<PointT>::Ptr cloud_cylinder (new pcl::PointCloud<PointT> ());
     extract.filter (*cloud_cylinder);
 
-    if (cloud_cylinder->points.empty ()) {
+    if (cloud_cylinder->points.empty() && cloud_cylinder->points.size() <= CYLINDER_PTS_THRESHOLD) {
         std::cerr << "Can't find the cylindrical component." << std::endl;
     } else {
-        // std::cerr << "PointCloud representing the cylindrical component: " << cloud_cylinder->points.size () << " data points." << std::endl;
+
+        // Set found flag to true
+        found = 1;
+
+        std::cerr << "PointCloud representing the cylindrical component: " << cloud_cylinder->points.size () << " data points." << std::endl;
           
         pcl::compute3DCentroid (*cloud_cylinder, centroid);
         std::cerr << "centroid of the cylindrical component: " << centroid[0] << " " <<  centroid[1] << " " <<   centroid[2] << " " <<   centroid[3] << std::endl;
@@ -142,11 +179,15 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
         // Create a point in the "camera_rgb_optical_frame"
         geometry_msgs::PointStamped point_camera;
         geometry_msgs::PointStamped point_map;
+        geometry_msgs::PointStamped point_camera_approach;
+        geometry_msgs::PointStamped point_map_approach;
         visualization_msgs::Marker marker;
         geometry_msgs::TransformStamped tss;
     
         point_camera.header.frame_id = "camera_rgb_optical_frame";
         point_camera.header.stamp = ros::Time::now();
+        point_camera_approach.header.frame_id = "camera_rgb_optical_frame";
+        point_camera_approach.header.stamp = ros::Time::now();
 
         point_map.header.frame_id = "map";
         point_map.header.stamp = ros::Time::now();
@@ -154,6 +195,9 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
         point_camera.point.x = centroid[0];
         point_camera.point.y = centroid[1];
         point_camera.point.z = centroid[2];
+        point_camera_approach.point.x = centroid[0];
+        point_camera_approach.point.y = centroid[1];
+        point_camera_approach.point.z = std::max(centroid[2] - 0.3f, 0.0f);
 
         try {
             time_test = ros::Time::now();
@@ -169,70 +213,42 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
         //std::cerr << tss ;
 
         tf2::doTransform(point_camera, point_map, tss);
+        tf2::doTransform(point_camera_approach, point_map_approach, tss);
 
         // std::cerr << "point_camera: " << point_camera.point.x << " " <<  point_camera.point.y << " " <<  point_camera.point.z << std::endl;
 
-        // std::cerr << "point_map: " << point_map.point.x << " " <<  point_map.point.y << " " <<  point_map.point.z << std::endl;
+        // Set output variables
+        x = point_map.point.x;
+        y = point_map.point.y;
+        z = point_map.point.z;
+        x_a = point_map_approach.point.x;
+        y_a = point_map_approach.point.y;
+        z_a = point_map_approach.point.z;
 
-        marker.header.frame_id = "map";
+        std::cerr << "point_map: " << point_map.point.x << " " <<  point_map.point.y << " " <<  point_map.point.z << std::endl;
 
-        // Display only if recent enough
-        // marker.header.stamp = ros::Time::now();
+        std::cerr << "Flag: " << flg << std::endl;
 
-        // Always display
-        marker.header.stamp = ros::Time();
-
-        marker.ns = "cylinder";
-        marker.id = 0;
-
-        marker.type = visualization_msgs::Marker::CYLINDER;
-        marker.action = visualization_msgs::Marker::ADD;
-
-        marker.pose.position.x = point_map.point.x;
-        marker.pose.position.y = point_map.point.y;
-        marker.pose.position.z = point_map.point.z;
-        marker.pose.orientation.x = 0.0;
-        marker.pose.orientation.y = 0.0;
-        marker.pose.orientation.z = 0.0;
-        marker.pose.orientation.w = 1.0;
-
-        marker.scale.x = 0.1;
-        marker.scale.y = 0.1;
-        marker.scale.z = 0.1;
-
-        marker.color.r=0.0f;
-        marker.color.g=1.0f;
-        marker.color.b=0.0f;
-        marker.color.a=1.0f;
-
-        marker.lifetime = ros::Duration();
-
-        pubm.publish (marker);
-
-        pcl::PCLPointCloud2 outcloud_cylinder;
-        pcl::toPCLPointCloud2 (*cloud_cylinder, outcloud_cylinder);
-        puby.publish (outcloud_cylinder);
-
-
+        /*
         // TMP: Trying to convert the centroid to pixels >>
         std::cerr << "Cloud width: " << cloud_filtered->width << std::endl;
 
         float x_real, y_real, range_curr;
         int x, y;
 
-        centroid_tmp = centroid
-        range_image.createFromPointCloud (cloud_cylinder,  0.0903125, 0.0895833,
+        centroid_tmp = centroid;
+        range_image.createFromPointCloud (cloud_cylinder,  0.0903125f, 0.0895833f,
                                     pcl::deg2rad (57.8f), pcl::deg2rad (43.0f),
-                                    Eigen::Affine3f::Identity (), CAMERA_FRAME, 0.0f, 0.0f, 0);
+                                    Eigen::Affine3f::Identity (), RangeImage::CoordinateFrame.CAMERA_FRAME, 0.0f, 0.0f, 0);
 
         range_image.getImagePoint(centroid_tmp, x_real, y_real, range_curr);
         range_image.real2DToInt2D(x_real, y_real, x, y);
 
         std::cerr << "X: " << x << " Y: " << y << std::endl;
         // << TMP
-
+        */
         
-
+        /*
         // Visualization (Type might be wrong)
         pcl::visualization::CloudViewer viewer ("Simple cloud viewer");
         viewer.showCloud (cloud_cylinder);
@@ -240,15 +256,19 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
         while (c == -1) {
             c = getchar();
         }
+        */
+        
 
     }
+
+    std::cerr << "Done working" << std::endl;
   
 }
 
 int main (int argc, char** argv) {
   
     // Initialize ROS
-    ros::init (argc, argv, "cylinder_detector");
+    ros::init (argc, argv, "cylinder_detector_service");
     ros::NodeHandle nh;
 
     // For transforming between coordinate frames
@@ -257,12 +277,7 @@ int main (int argc, char** argv) {
     // Create a ROS subscriber for the input point cloud
     ros::Subscriber sub = nh.subscribe ("input", 1, cloud_cb);
 
-    // Create a ROS publisher for the output point cloud
-    pubx = nh.advertise<pcl::PCLPointCloud2> ("planes", 1);
-    puby = nh.advertise<pcl::PCLPointCloud2> ("cylinder", 1);
-
-    pubm = nh.advertise<visualization_msgs::Marker>("detected_cylinder", 1);
-
+    ros::ServiceServer service = nh.advertiseService("cylinder_detector", toggle);
     // Init service named cylinder_detector
 
     // Spin

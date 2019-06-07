@@ -8,17 +8,17 @@ find_package(PCL REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-	rospy
-	cv_bridge
-	sensor_msgs
-	visualization_msgs
-	nav_msgs
-	std_msgs
-	geometry_msgs
-	tf2
-	tf2_geometry_msgs
-	message_generation
-	map_server
+  rospy
+  cv_bridge
+  sensor_msgs
+  visualization_msgs
+  nav_msgs
+  std_msgs
+  geometry_msgs
+  tf2
+  tf2_geometry_msgs
+  message_generation
+  map_server
   dynamic_reconfigure
   genmsg
   nodelet

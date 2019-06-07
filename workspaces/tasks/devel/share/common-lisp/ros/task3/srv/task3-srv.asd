@@ -12,6 +12,8 @@
     (:file "_package_Checkpoint_res" :depends-on ("_package"))
     (:file "ColourClassificationSrv" :depends-on ("_package_ColourClassificationSrv"))
     (:file "_package_ColourClassificationSrv" :depends-on ("_package"))
+    (:file "CylinderLocation" :depends-on ("_package_CylinderLocation"))
+    (:file "_package_CylinderLocation" :depends-on ("_package"))
     (:file "CylinderLocator" :depends-on ("_package_CylinderLocator"))
     (:file "_package_CylinderLocator" :depends-on ("_package"))
     (:file "DigitDetector" :depends-on ("_package_DigitDetector"))
