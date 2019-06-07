@@ -40,16 +40,18 @@ class The_Cylinder:
         cif.timestamp = data.header.stamp
         cif.dpt = -1.0
         cif.center_x = 320
-        cif.center_y = 470
+        cif.center_y = 250
         # width
-        cif.minor_axis = 40
+        cif.minor_axis = 350
         # height
-        cif.major_axis = 40
+        cif.major_axis = 50
         self.cylinders_pub.publish(cif)
 
+        cv2.rectangle(img_original,(cif.center_x - cif.minor_axis/2, cif.center_y - cif.major_axis/2),(cif.center_x + cif.minor_axis/2, cif.center_y + cif.major_axis/2),(0,255,0),3)
+
         # DEVONLY: Visualize camera output
-        # cv2.imshow('Live feed', img_original)
-        # cv2.waitKey(1)
+        cv2.imshow('Live feed', img_original)
+        cv2.waitKey(1)
 
 def main():
 
