@@ -59,7 +59,6 @@ class ColourDetectionTrainer:
 
 
     def _depth_callback(self, data):
-	print "_depth_callback called"
 
         """
         Callback called when broadcast on topic received.
@@ -169,7 +168,7 @@ if __name__ == '__main__':
     os.system('clear')
    
     # Set number of bins to use
-    NUM_BINS = 10
+    NUM_BINS = 100
     
     # Initialize trainer
     trainer = ColourDetectionTrainer(num_bins=NUM_BINS)

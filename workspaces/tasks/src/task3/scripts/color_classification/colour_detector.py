@@ -14,6 +14,7 @@ class ColourDetector:
         self._ring_image_processor = RingImageProcessor(clf, num_bins)
         self._ring_image = np.empty(0, dtype=np.uint8)
         self._cv_bridge = CvBridge()
+    	rospy.init_node('colour_detection_test', anonymous=True)
 
 
 
@@ -88,9 +89,8 @@ class ColourDetector:
      
 
 if __name__ == '__main__':
-    rospy.init_node('colour_detection_test', anonymous=True)
     clf = load('ring_colour_classifier.joblib')
-    NUM_BINS = 10
+    NUM_BINS = 100
     cdt = ColourDetector(clf, NUM_BINS)
     while True:
         cdt.subscribe()

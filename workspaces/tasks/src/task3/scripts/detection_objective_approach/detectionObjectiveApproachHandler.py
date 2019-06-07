@@ -17,23 +17,22 @@ class DetectionObjectiveApproachHandler:
         self._dist_to_wall = 100 
 
     def _scan_callback(self, data):
-        print data.ranges[len(data.ranges)//2]
         self._dist_to_wall = data.ranges[len(data.ranges)//2]
     
     def _side_scan(self, duration):
         msg = Twist()
         scan_loop_rate = rospy.Rate(2)
-        msg.angular.z = 0.1 
+        msg.angular.z = 0.3
         start_time = time.time()
         while(time.time() - start_time < duration):
             self._vel_pub.publish(msg)
             scan_loop_rate.sleep()
-        msg.angular.z = -0.1
+        msg.angular.z = -0.3
         start_time = time.time()
         while(time.time() - start_time < duration*2):
             self._vel_pub.publish(msg)
             scan_loop_rate.sleep()
-        msg.angular.z = 0.1
+        msg.angular.z = 0.3
         start_time = time.time()
         while(time.time() - start_time < duration):
             self._vel_pub.publish(msg)
