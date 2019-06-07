@@ -49,7 +49,7 @@ stage_three(res2)
 # res2 = CORRECT_RESULT_STAGE_TWO
 
 # NOTE: no corrections here!
-# res4 = stage_four(res2)
+res4 = stage_four(res2)
 
 ################
 

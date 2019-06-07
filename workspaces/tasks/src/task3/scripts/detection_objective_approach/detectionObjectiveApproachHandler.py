@@ -65,6 +65,18 @@ class DetectionObjectiveApproachHandler:
         self._side_scan(SIDE_ROT_DURATION)
         self._reverse(REVERSE_DURATION)
 
+    # approach procedure without the reversing motion at the end
+    def approach_procedure_alt(self):
+        GOAL_DIST = 0.15
+        SIDE_ROT_DURATION = 2.0
+        REVERSE_DURATION = 0.5
+        self._approach(GOAL_DIST)
+        self._side_scan(SIDE_ROT_DURATION)
+
+    # isolated reversing motion
+    def reverse(self):
+        REVERSE_DURATION = 0.7
+        self._reverse(REVERSE_DURATION)
 
 if __name__ == '__main__':
     rospy.init_node('master')

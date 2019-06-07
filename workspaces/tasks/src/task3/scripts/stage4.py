@@ -16,9 +16,11 @@ from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from geometry_msgs.msg import Point, Vector3, PoseStamped, Twist
 
 from locators.target_marking.targetmarker import TargetMarker
+from color_classification.colour_detector_ell import ColourDetectorEll
 from task3.srv import EllipseLocator
 from task3.srv import QRDetector
 from task3.srv import DigitDetector
+from task3.srv import MapDetector
 
 from task3.srv import Checkpoint_res
 from task3.msg import Checkpoints
@@ -27,7 +29,6 @@ from task3.msg import ScanFlag
 from sound_play.msg import SoundRequest
 from sound_play.libsoundplay import SoundClient
 
-from classification.classification import UrlDataClassifier
 from detection_objective_approach.detectionObjectiveApproachHandler import DetectionObjectiveApproachHandler
 
 import time
@@ -52,7 +53,7 @@ params:
 """
 
 
-def stage_four():
+def stage_four(goal_color):
 
     ### INITIALIZATIONS ###
 
@@ -97,6 +98,11 @@ def stage_four():
 
     # Initialize TargetMarker instance.
     tm = TargetMarker()
+    
+    # Initialize colour detector.
+    clf = load('ellipse_colour_classifier.joblib')
+    NUM_BINS = 100
+    cdt = ColourDetectorEll(clf, NUM_BINS) 
 
     # Initialize action clients
     ac_chkpnts = actionlib.SimpleActionClient("move_base", MoveBaseAction)
@@ -121,6 +127,10 @@ def stage_four():
     rospy.wait_for_service('digit_detector')
     try:
         digit_detection_serv = rospy.ServiceProxy('digit_detector', DigitDetector)
+    except rospy.ServiceException, e:
+        rospy.logerr("Service error: {0}".format(e.message))
+    try:
+        map_detection_serv = rospy.ServiceProxy('map_detector', MapDetector)
     except rospy.ServiceException, e:
         rospy.logerr("Service error: {0}".format(e.message))
     ### /SERVICE PROXY INITIALIZATION ###
@@ -171,23 +181,6 @@ def stage_four():
     ellipse_locator = rospy.ServiceProxy('ellipse_locator', EllipseLocator)
 
     ### /INITIALIZATIONS ###
-
-
-
-    ### FLAGS ###
-
-    classifier_built = False
-    found_pattern = None
-    qr_detected = None
-
-    ### /FLAGS ##
-
-    ### CLASSIFIER ###
-
-    clf = UrlDataClassifier()
-
-    ### /CLASSIFIER ###
-
 
     # Loop until return hit.
     while True:
@@ -296,55 +289,58 @@ def stage_four():
 
                                 ### TODO TODO TODO ##########################################################################
 
-                                # If nor QR code nor pattern yet found...
-                                if not classifier_built and not found_pattern:
-
-                                    # Try to detect both the QR code and the pattern.
-                                    qr_detection_serv(1)
-                                    digit_detection_serv(1)
-                                    doah.approach_procedure()
-                                    qr_detected = qr_detection_serv(0).res
-                                    found_pattern = digit_detection_serv(0).result
+                                # Try to detect both the QR code and the pattern.
+                                qr_detection_serv(1)
+                                digit_detection_serv(1)
+                                doah.approach_procedure_alt()
+                                qr_detected = qr_detection_serv(0).res
+                                found_pattern = digit_detection_serv(0).result
+                                
+                                # If QR code detected, build classifier.
+                                if qr_detected != '':
+                                    pass
+                                elif found_pattern:
+                                    pass
+                                else:
+                                    # Here if map found.
+                                    # Classify color of ellipse.
+                                    cdt.subscribe()
+                                    rospy.sleep(2)
+                                    color_classification_result = cdt.get_ellipse_color()
                                     
-                                    # If QR code detected, build classifier.
-                                    if qr_detected != '':
-                                        data_url = qr_detected
-                                        clf = clf.fit(data_url)
-                                        classifier_built = True
-                                    elif found_pattern:
-                                        # If pattern found, flag is set.
-                                        print "pattern found"
-                                    else:
-                                        print "map found"
+                                    # If color correct, try to detect map.
+                                    if color_classification_result == goal_color:
+
+                                        # flag that is set to True if there was
+                                        # a failed attempt to interpret the map.
+                                        failed_attempt = False
+
+
+                                        ### MAP INTERPRETATION ###
+
+                                        # Loop in which attemps to interpret the map are made.
+                                        while True:
+
+                                            # If already failed to detect/interpret before, redo approach.
+                                            if failed_attempt:
+                                                doah.approach_procedure_alt()
+
+                                            # Try to interpret map.
+                                            map_detection_serv(1)
+                                            rospy.sleep(3)
+                                            res = map_detection_serv(0)
+
+                                            # If map successfuly interpreted, return coordinates.
+                                            if res.treasure_x != 0 or res.treasure_y != 0:
+                                                doah.reverse()  # Reverse to clear robot from wall.
+                                                return res.treasure_x, res.treasure_y
+                                            else:
+                                                # If failed to interpret map, reverse and set failed attempt flag to True.
+                                                doah.reverse()
+                                                failed_attempt = True
+
+                                        ### /MAP INTERPRETATION ###
                                
-                                # If QR not yet found...
-                                elif not classifier_built:
-                                    qr_detection_serv(1)
-                                    doah.approach_procedure()
-                                    qr_detected = qr_detection_serv(0)
-
-
-                                    # If QR code detected:..
-                                    if qr_detected:
-
-                                        # Build classifier and classify pattern.
-                                        data_url = qr_detected
-                                        clf = clf.fit(data_url)
-                                        classifier_built = True
-                                        return clf.predict(found_pattern)
-
-                                # if pattern not yet found...
-                                elif not found_pattern:
-                                    digit_detection_serv(1)
-                                    doah.approach_procedure()
-                                    found_pattern = digit_detection_serv(0)
-                                    
-                                    # If pattern detected:
-                                    if found_pattern:
-
-                                        # classify patern.
-                                        return clf.predict(found_pattern)
-
 
                                 ### TODO TODO TODO ##########################################################################
 
