@@ -55,6 +55,7 @@ add_message_files(
    FILES
    ApproachImageFeedback.msg
    TerminalApproachFeedback.msg
+   CylinderImageFeedback.msg
    ValidRegionsMapResponse.msg
    RingApproachPointResponse.msg
    SayCommand.msg
@@ -83,10 +84,10 @@ add_service_files(
   Checkpoint_res.srv
   CheckpointProcessor.srv
   EllipseLocator.srv
-  CylinderLocator.srv
   QRDetector.srv
   DigitDetector.srv
   MapDetector.srv
+  CylinderLocation.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -212,3 +213,4 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+

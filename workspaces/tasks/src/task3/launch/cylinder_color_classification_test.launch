@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="task3" type="colour_detector_cyl.py" name="colour_detector_cyl" output="screen" />
+    <node pkg="task3" type="cylinder_detector.py" name="cylinder_detector" output="screen" />
+</launch>

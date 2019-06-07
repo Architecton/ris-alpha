@@ -8,12 +8,12 @@ let ColourClassificationSrv = require('./ColourClassificationSrv.js')
 let MapDetector = require('./MapDetector.js')
 let ValidRegionsMap = require('./ValidRegionsMap.js')
 let DigitDetector = require('./DigitDetector.js')
-let CylinderLocator = require('./CylinderLocator.js')
 let EllipseLocator = require('./EllipseLocator.js')
 let CheckpointProcessor = require('./CheckpointProcessor.js')
 let TreasureLocator = require('./TreasureLocator.js')
 let RingApproachPoint = require('./RingApproachPoint.js')
 let TerminalApproach = require('./TerminalApproach.js')
+let CylinderLocation = require('./CylinderLocation.js')
 
 module.exports = {
   QRDetector: QRDetector,
@@ -23,10 +23,10 @@ module.exports = {
   MapDetector: MapDetector,
   ValidRegionsMap: ValidRegionsMap,
   DigitDetector: DigitDetector,
-  CylinderLocator: CylinderLocator,
   EllipseLocator: EllipseLocator,
   CheckpointProcessor: CheckpointProcessor,
   TreasureLocator: TreasureLocator,
   RingApproachPoint: RingApproachPoint,
   TerminalApproach: TerminalApproach,
+  CylinderLocation: CylinderLocation,
 };

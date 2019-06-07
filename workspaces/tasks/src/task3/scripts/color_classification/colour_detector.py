@@ -4,21 +4,18 @@ import numpy as np
 import rospy
 from colour_detection import RingImageProcessor
 from joblib import load
-
-from task2.msg import ApproachImageFeedback
-
+from task3.msg import ApproachImageFeedback
 from sensor_msgs.msg import Image
-
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 
 class ColourDetector:
     def __init__(self, clf, num_bins):
-        self._ring_image_processor = RingImageProcessor(clf, 100)
-        self._num_bins = num_bins  # Number of bins to use in histograms.
-
+        self._ring_image_processor = RingImageProcessor(clf, num_bins)
         self._ring_image = np.empty(0, dtype=np.uint8)
         self._cv_bridge = CvBridge()
+    	rospy.init_node('colour_detection_test', anonymous=True)
+
 
 
     def _depth_callback(self, data):
@@ -27,14 +24,14 @@ class ColourDetector:
         Callback called when broadcast on topic received.
 
         Args:
-            data -- RingData message instance
+            data -- ApproachImageFeedback message instance
 
         Returns:
             None
         """
 
-        center_y = data.center_y  # Get y coordinate of center of ring.
-        center_x = data.center_x  # Get x coordinate of center of ring.
+        center_y = data.center_y + 27  # Get y coordinate of center of ring.
+        center_x = data.center_x - 17  # Get x coordinate of center of ring.
         min_axis = data.minor_axis  # Get minor axis of ellipse.
         maj_axis = data.major_axis  # Get major axis of ellipse.
 
@@ -90,9 +87,13 @@ class ColourDetector:
         self._ring_image_processor.clear()
         return res
      
-    
+
 if __name__ == '__main__':
     clf = load('ring_colour_classifier.joblib')
-    cdt = ColourDetector(clf, 100)
-    cdt.subscribe()
-    rospy.spin()
+    NUM_BINS = 100
+    cdt = ColourDetector(clf, NUM_BINS)
+    while True:
+        cdt.subscribe()
+        rospy.sleep(5)
+        print cdt.get_ring_color()
+

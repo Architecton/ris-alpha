@@ -50,7 +50,7 @@ class The_Ring:
         # Subsribe to depth laser
         self.laser_sub = rospy.Subscriber("/scan", LaserScan, self.scan_callback)   
 
-    def image_callback(self,data):
+    def image_callback(self, data):
 
         self.in_process = 1  
 
@@ -252,6 +252,7 @@ class The_Ring:
             # self.scan_angle_increment = data.angle_increment
 
     def get_ell_face_agl(self, dpts, agls):
+	
         """
         Get angle that is perpendicular to the face of the ellipse
 

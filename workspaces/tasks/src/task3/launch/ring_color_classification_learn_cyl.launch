@@ -1,0 +1,5 @@
+<launch>
+        <node pkg="task3" type="extract_cylinders.py" name="toroid_detector" output="screen" />
+        <node pkg="task3" type="colour_detection_trainer_cyl.py" name="colour_detection_trainer" output="screen" />
+</launch>
+

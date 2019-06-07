@@ -3,7 +3,7 @@
 import numpy as np
 import rospy
 from colour_detection import ColourFeatureGenerator, ColourClassifier
-from task2.msg import ApproachImageFeedback
+from task3.msg import ApproachImageFeedback
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
@@ -59,7 +59,6 @@ class ColourDetectionTrainer:
 
 
     def _depth_callback(self, data):
-	print "tralala"
 
         """
         Callback called when broadcast on topic received.
@@ -167,15 +166,18 @@ if __name__ == '__main__':
     
     # Clear terminal.
     os.system('clear')
-
+   
+    # Set number of bins to use
+    NUM_BINS = 100
+    
     # Initialize trainer
-    trainer = ColourDetectionTrainer(num_bins=100)    
+    trainer = ColourDetectionTrainer(num_bins=NUM_BINS)
     
     # Go over ring colours.
     for colour in trainer.colour_dict.keys():
     
         # Countdown to start of training data recording.
-        countdown_val = 120
+        countdown_val = 10
         while(countdown_val >= 1):
             print("Starting recording of {0} ring training data in:".format(trainer.colour_dict[colour]))
             print("{0}".format(countdown_val))
@@ -186,7 +188,7 @@ if __name__ == '__main__':
         # Set target value, subscribe to topic and initialize recording timeout.
         trainer.set_target(colour)
         trainer.subscribe()
-        recording_timeout = 10*60
+        recording_timeout = 0.5*60
 
         # Record training data for specified duration.
         while(recording_timeout >= 1):
@@ -206,8 +208,12 @@ if __name__ == '__main__':
     clf = trainer.get_classifier()
     
     # Save classifier.
-    dump(clf, 'ring_colour_classifier.joblib') 
+    print "saving classifier"
+    pdb.set_trace()
+    dump(clf, '/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/ring_colour_classifier.joblib') 
+    print "saving matrices"
     sio.savemat('training_data.mat', {'data' : trainer._features_mat})
     sio.savemat('training_data_target.mat', { 'data' : trainer._target_vec})
-    trainer.save_obj(trainer.training_imgs, 'training_images')
+    # print "saving training images"
+    # trainer.save_obj(trainer.training_imgs, 'training_images')
 
