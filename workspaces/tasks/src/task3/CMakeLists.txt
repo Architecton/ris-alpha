@@ -86,6 +86,7 @@ add_service_files(
   CheckpointProcessor.srv
   EllipseLocator.srv
   QRDetector.srv
+  QRDetector2.srv
   DigitDetector.srv
   MapDetector.srv
   CylinderLocation.srv

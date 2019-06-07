@@ -16,7 +16,7 @@ from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from geometry_msgs.msg import Point, Vector3, PoseStamped, Twist
 
 from locators.target_marking.targetmarker import TargetMarker
-from task3.srv import QRDetector
+from task3.srv import QRDetector2
 from task3.srv import CylinderLocation
 
 from task3.srv import Checkpoint_res
@@ -51,7 +51,7 @@ params:
 """
 
 
-def stage_two(goal_color, stage1_color_dict):
+def stage_two(goal_color):
 
     ### INITIALIZATIONS ###
 
@@ -119,7 +119,7 @@ def stage_two(goal_color, stage1_color_dict):
 
     rospy.wait_for_service('qr_detector')
     try:
-        qr_detection_serv = rospy.ServiceProxy('qr_detector', QRDetector)
+        qr_detection_serv = rospy.ServiceProxy('qr_detector2', QRDetector2)
     except rospy.ServiceException, e:
         rospy.logerr("Service error: {0}".format(e.message))
 
