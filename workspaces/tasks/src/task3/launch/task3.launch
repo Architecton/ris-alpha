@@ -7,6 +7,9 @@
 	<node pkg="task3" type="extract_digits.py" name="extract_digits" output="screen" />
 	<node pkg="task3" type="master.py" name="master" output="screen" />
 	<node pkg="task3" type="sound_player.py" name="sound_player" output="screen" />
+	<node pkg="task3" type="terminal_approach.py" name="terminal_approach" output="screen" />
+	<node pkg="task3" type="map_recognition.py" name="map_recognition" output="screen" />
+	<node pkg="task3" type="treasure_locator.py" name="treasure_locator" output="screen" />
 	<node pkg="sound_play" type="soundplay_node.py" name="soundplay_node" output="screen" />
 
 </launch>

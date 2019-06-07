@@ -21,15 +21,13 @@ from task3.srv import CylinderLocation
 
 from task3.srv import Checkpoint_res
 from task3.msg import Checkpoints
-from task3.msg import ScanFlag
 
 from sound_play.msg import SoundRequest
 from sound_play.libsoundplay import SoundClient
 
-from classification.classification import UrlDataClassifier
 from detection_objective_approach.detectionObjectiveApproachHandler import DetectionObjectiveApproachHandler
 
-from color_classification.colour_detector_cyl import ColourDetectorCyl
+from color_classification.colour_detector_cyl2 import ColourDetectorCyl
 
 import time
 import pdb
@@ -64,8 +62,6 @@ def stage_two(goal_color):
     voice = 'voice_kal_diphone'
     volume = 1.0
 
-    # Notify start of initialization.
-    soundhandle.say("Starting initialization of stage two.", voice, volume)
 
     # Initialize cylinder colour detector.
     NUM_BINS = 10
@@ -76,9 +72,6 @@ def stage_two(goal_color):
     # /// publishers ///
     # Define publisher for cylinder search rotations.
     rotation_pub = rospy.Publisher('/cmd_vel_mux/input/navi', Twist, queue_size=10)
-    # Define publisher that publishes permissions to process input data.
-    scan_perm_pub = rospy.Publisher('/scan_perm', ScanFlag, queue_size=10)
-    sf = ScanFlag()
     # /// /publishers ///
 
 
@@ -109,26 +102,15 @@ def stage_two(goal_color):
     # Initialize detection objective approach handler instance.
     doah = DetectionObjectiveApproachHandler()
 
-
     ### SERVICE PROXY INITIALIZATION ###
     rospy.wait_for_service('get_checkpoints')
-    try:
-        checkpoint_gen = rospy.ServiceProxy('get_checkpoints', Checkpoint_res)
-    except rospy.ServiceException, e:
-        rospy.logerr("Service error: {0}".format(e.message))
+    checkpoint_gen = rospy.ServiceProxy('get_checkpoints', Checkpoint_res)
 
     rospy.wait_for_service('qr_detector')
-    try:
-        qr_detection_serv = rospy.ServiceProxy('qr_detector2', QRDetector2)
-    except rospy.ServiceException, e:
-        rospy.logerr("Service error: {0}".format(e.message))
+    qr_detection_serv = rospy.ServiceProxy('qr_detector2', QRDetector2)
 
     rospy.wait_for_service('cylinder_detector')
-    try:
-        cylinder_detection_serv = rospy.ServiceProxy('cylinder_detector', CylinderLocation)
-    except rospy.ServiceException, e:
-        rospy.logerr("Service error: {0}".format(e.message))
-
+    cylinder_detection_serv = rospy.ServiceProxy('cylinder_detector', CylinderLocation)
     ### /SERVICE PROXY INITIALIZATION ###
 
 
@@ -147,9 +129,6 @@ def stage_two(goal_color):
 
     # Number of checkpoints to generate.
     NUM_CHECKPOINTS = 8
-
-    # Notify that search has started.
-    soundhandle.say("Starting search.", voice, volume)
 
     # Call checkpoints generating service to get generated checkpoints.
     checkpoints_res = checkpoint_gen(NUM_CHECKPOINTS)
@@ -200,6 +179,7 @@ def stage_two(goal_color):
             goal_chkpnt_status = GoalStatus.LOST  # Set status for next checkpoint goal.
             ac_chkpnts.send_goal(goal_chkpt) # Send checkpoint goal.
 
+            # TODO play recorded speech.
             soundhandle.say("Resolving checkpoint {0}".format(checkpoint_ctr), voice, volume)
 
             # Loop for next checkpoint goal.
@@ -217,7 +197,8 @@ def stage_two(goal_color):
 
 
             ## CYLINDER LOCATING ROTATION ##
-
+            
+            # TODO play recorded speech.
             soundhandle.say("Initiating rotation sequence.", voice, volume)
             for rot_idx in np.arange(NUM_ROTATIONS):
 
@@ -266,7 +247,7 @@ def stage_two(goal_color):
                 if not np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([cylinder_data[0], cylinder_data[1]]), resolved_cyl[:, :2]) < DISTINCT_CYL_THRESH):
 
                     ### DEBUGGING VISUALIZATION ###
-                    tm.push_position(np.array(cylinder_data[:3]))
+                    # tm.push_position(np.array(cylinder_data[:3]))
                     ### /DEBUGGING VISUALIZATION ###
 
                     # Initialize goal to aproach new cylinder
@@ -296,12 +277,17 @@ def stage_two(goal_color):
                             ### TODO TODO TODO ##########################################################################
 
                             # Detect cylinder color.
+
+                            # TODO say that detecting cylinder color.
+
                             cdt.subscribe()
                             rospy.sleep(2.0)
                             detected_cylinder_color = cdt.get_cylinder_color()
                             
                             # If detected correct color:
                             if detected_cylinder_color == goal_color:
+                                # TODO say that colour is correct.
+
                                 res = ''
                                 while res == '':
 
@@ -313,27 +299,24 @@ def stage_two(goal_color):
                                     # If detected, return found color.
                                     if res != '':
                                         return res
+                            else:
+                                # TODO: say that color is not correct.
+                                pass
+
 
 
                             ### TODO TODO TODO ##########################################################################
 
-
-
-                            # Notify that cylinder has been resolved.
-                            soundhandle.say("Target number {0} resolved.".format(resolved_cyl_ctr), voice, volume)
-                            rospy.loginfo("Target number {0} resolved".format(resolved_cyl_ctr))
 
                             # Sleep
                             rospy.sleep(1.0)
 
                             # Add found cylinder to matrix of resolved cylinders.
                             resolved_cyl = np.vstack((resolved_cyl, np.array([cylinder_data[0], cylinder_data[1])))
-                            resolved_cyl_ctr += 1
 
             ## /HANDLE CYLINDER DATA COLLECTED IN BUFFER ##
 
             # Remove checkpoint from checkpoints array
-            soundhandle.say("Checkpoint number {0} resolved.".format(resolved_cyl_ctr), voice, volume)
             checkpoints = np.delete(checkpoints, (idx_nxt), axis=0)
 
             # Get robot position in map coordinates.
@@ -352,5 +335,5 @@ def stage_two(goal_color):
             checkpoints_nxt = np.array([[point.x, point.y, point.z]])
             checkpoints = np.vstack((checkpoints, checkpoints_nxt))
 
-        checkpoint_ctr = 0  # Initialize visited checkpoints counter.
+        checkpoint_ctr = 0  # Reinitialize visited checkpoints counter.
 

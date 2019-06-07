@@ -17,13 +17,11 @@ import tf2_geometry_msgs
 
 from geometry_msgs.msg import Point, Vector3, PoseStamped, Twist
 
-from task2.srv import TerminalApproach, FeatureBuilder
-from task2.msg import TerminalApproachFeedback, ApproachImageFeedback, SayCommand
+from task3.srv import TerminalApproach
+from task3.msg import TerminalApproachFeedback, ApproachImageFeedback, SayCommand
 
-from colour_detection import ColourFeatureGenerator
-
-from visualizations.targetmarker import TargetMarker
-from color_classification.colour_detector import ColourDetector
+from locators.target_marking.targetmarker import TargetMarker
+from color_classification.colour_detector2 import ColourDetector
 
 import time
 
@@ -49,11 +47,7 @@ class TerminalApproachHandler:
         # Initialize corrections message.
         self._corr = TerminalApproachFeedback()
         rospy.wait_for_service('terminal_approach')  # Wait for service to come online.
-	rospy.loginfo("terminal_approach service online")
-        try:
-            self._corrections_serv = rospy.ServiceProxy('terminal_approach', TerminalApproach)  # Initialize service proxy.
-        except rospy.ServiceException, e:
-            rospy.loginfo("Service error: {0}".format(e.message))
+        self._corrections_serv = rospy.ServiceProxy('terminal_approach', TerminalApproach)  # Initialize service proxy.
 
         self._timeout_reset = False
         self._detection_counter = 0
@@ -84,16 +78,18 @@ class TerminalApproachHandler:
         msg = Twist()
         sprint_loop_rate = rospy.Rate(2)
         msg.linear.x = 0.1 if forward else -0.5  # Set speed.
-        # msg.angular.z = 0.1
+        msg.angular.z = 0.1
         start_time = time.time()
         while(time.time() - start_time < sprint_duration):
             self._sprint_pub.publish(msg)  # Publish angular velocity.
-            # msg.angular.z = -msg.angular.z
+            msg.angular.z = -msg.angular.z
             sprint_loop_rate.sleep()
-            if self._timeout_reset:  # If _timeout_reset flag set to true, reset timeout.
-                start_time = time.time()
-                self._timeout_reset = False
-                self._detection_counter = 0
+            
+            # TODO uncomment to enable retracking feature.
+            # if self._timeout_reset:  # If _timeout_reset flag set to true, reset timeout.
+            #     start_time = time.time()
+            #     self._timeout_reset = False
+            #     self._detection_counter = 0
 
 
     def subscribe_to_feedback(self):
@@ -134,14 +130,6 @@ class Utils:
 
         # publisher of voice commands.
         self._say_pub = rospy.Publisher('say_commands', SayCommand, queue_size = 10)  # Publish on say_commands topic on which sound_player listens.
-
-        rospy.wait_for_service('feature_builder')  # Wait for service to come online.
-	rospy.loginfo("feature_builder service online")
-        try:
-            self._feature_builder_serv = rospy.ServiceProxy('feature_builder', FeatureBuilder)  # Initialize service proxy.
-        except rospy.ServiceException, e:
-            rospy.loginfo("Service error: {0}".format(e.message))
-
 
     def detect_ring(self):
         """
@@ -194,11 +182,11 @@ class Utils:
         """
 
         self._tah.subscribe_to_feedback()
-
         rospy.sleep(self._terminal_approach_duration)
         
         # Go straight to pick up ring.
-        self._tah.sprint(7, forward=True)  # Final run to pick up the ring.
+        SPRINT_DURATION = 7
+        self._tah.sprint(SPRINT_DURATION, forward=True)  # Final run to pick up the ring.
         self._tah.unsubscribe_from_feedback()
         self.say('verifying')
         self._tah.sprint(3.0, forward=False)  # Reverse (to check if ring picked up).
@@ -259,6 +247,14 @@ class Utils:
         """
         self._subs = rospy.Subscriber('toroids', ApproachImageFeedback, self._callback)
 
+"""
+Stage three handles detection, classification and collection of rings. Ring with specified
+color is collected.
+
+params:
+    goal_color : int - color of ring to collect
+"""
+
 def stage_three(goal_color):
 
     ## PARAMETERS ##
@@ -268,9 +264,6 @@ def stage_three(goal_color):
     NUM_RINGS_TO_COLLECT = 3
     NUM_ATTEMPTS = 3
     ################
-
-    # Initialize main node.
-    rospy.init_node('main')
 
     # Initialize ring colour detector instance.
     clf = load('ring_colour_classifier.joblib')
@@ -319,7 +312,7 @@ def stage_three(goal_color):
     tf2_listener = tf2_ros.TransformListener(tf2_buffer)
 
     # Wait for map cache to fill.
-    rospy.sleep(5)
+    # rospy.sleep(5)
 
     # Signal start of search.
     ut.say('starting_search')

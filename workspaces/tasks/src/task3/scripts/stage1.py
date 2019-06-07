@@ -65,9 +65,6 @@ def stage_one():
     voice = 'voice_kal_diphone'
     volume = 1.0
 
-    # Notify start of initialization.
-    soundhandle.say("Starting initialization of stage one.", voice, volume)
-
 
     # /// publishers ///
     # Define publisher for ellipse search rotations.
@@ -107,24 +104,17 @@ def stage_one():
 
     ### SERVICE PROXY INITIALIZATION ###
     rospy.wait_for_service('get_checkpoints')
-    try:
-        checkpoint_gen = rospy.ServiceProxy('get_checkpoints', Checkpoint_res)
-    except rospy.ServiceException, e:
-        rospy.logerr("Service error: {0}".format(e.message))
+    checkpoint_gen = rospy.ServiceProxy('get_checkpoints', Checkpoint_res)
 
     rospy.wait_for_service('qr_detector')
-    try:
-        qr_detection_serv = rospy.ServiceProxy('qr_detector', QRDetector)
-    except rospy.ServiceException, e:
-        rospy.logerr("Service error: {0}".format(e.message))
+    qr_detection_serv = rospy.ServiceProxy('qr_detector', QRDetector)
 
     rospy.wait_for_service('digit_detector')
-    try:
-        digit_detection_serv = rospy.ServiceProxy('digit_detector', DigitDetector)
-    except rospy.ServiceException, e:
-        rospy.logerr("Service error: {0}".format(e.message))
-    ### /SERVICE PROXY INITIALIZATION ###
+    digit_detection_serv = rospy.ServiceProxy('digit_detector', DigitDetector)
 
+    rospy.wait_for_service('ellipse_locator')
+    ellipse_locator = rospy.ServiceProxy('ellipse_locator', EllipseLocator)
+    ### /SERVICE PROXY INITIALIZATION ###
 
 
     # Initialize coordinate transforms buffer.
@@ -138,15 +128,9 @@ def stage_one():
     # Initialize found ellipses storage.
     # First two fields store the coordinates of the ellipse center. The third field stores the perpendicular angle.
     resolved_ell = np.empty((0, 6), dtype=float)
-    resolved_ell_ctr = 0  # Initialize resolved ellipses counter.
-    NUM_ELLIPSES_TO_FIND = 3
-    end_search = False  # Flag to indicate end of search.
 
     # Number of checkpoints to generate.
     NUM_CHECKPOINTS = 8
-
-    # Notify that search has started.
-    soundhandle.say("Starting search.", voice, volume)
 
     # Call checkpoints generating service to get generated checkpoints.
     checkpoints_res = checkpoint_gen(NUM_CHECKPOINTS)
@@ -166,12 +150,8 @@ def stage_one():
     trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
     robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z]) 
 
-    # Wait for ellipse data buffer query service to come online and make a proxy function.
-    rospy.wait_for_service('ellipse_locator')
-    ellipse_locator = rospy.ServiceProxy('ellipse_locator', EllipseLocator)
 
     ### /INITIALIZATIONS ###
-
 
 
     ### FLAGS ###
@@ -189,7 +169,7 @@ def stage_one():
     ### /CLASSIFIER ###
 
 
-    # Loop until return hit.
+    # Loop until return statement hit.
     while True:
 
         # While there are unresolved checkpoints left
@@ -210,6 +190,7 @@ def stage_one():
             goal_chkpnt_status = GoalStatus.LOST  # Set status for next checkpoint goal.
             ac_chkpnts.send_goal(goal_chkpt) # Send checkpoint goal.
 
+            # TODO play recorded sound.
             soundhandle.say("Resolving checkpoint {0}".format(checkpoint_ctr), voice, volume)
 
             # Loop for next checkpoint goal.
@@ -227,12 +208,13 @@ def stage_one():
 
 
             ## ELLIPSE LOCATING ROTATION ##
-
+            # TODO: play recorded speech.
             soundhandle.say("Initiating rotation sequence.", voice, volume)
+
             for rot_idx in np.arange(NUM_ROTATIONS):
 
                 # Safety sleep.
-                rospy.sleep(0.2)
+                rospy.sleep(0.5)
 
 
                 ## IMAGE PROCESSING STREAM SCAN START ###
@@ -246,7 +228,7 @@ def stage_one():
                 ## IMAGE PROCESSING STREAM SCAN END ###
 
                 # Safety sleep.
-                rospy.sleep(0.2)
+                rospy.sleep(0.5)
 
                 # ROTATE
                 start_rot_time = time.time()
@@ -266,8 +248,8 @@ def stage_one():
                     if not np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([ellipse_data[0], ellipse_data[1]]), resolved_ell[:, :2]) < DISTINCT_ELL_THRESH):
 
                         ### DEBUGGING VISUALIZATION ###
-                        tm.push_position(np.array(ellipse_data[:3]))
-                        tm.push_position(np.array(ellipse_data[3:]))
+                        # tm.push_position(np.array(ellipse_data[:3]))
+                        # tm.push_position(np.array(ellipse_data[3:]))
                         ### /DEBUGGING VISUALIZATION ###
 
                         # Initialize goal to aproach new ellipse
@@ -281,6 +263,7 @@ def stage_one():
                         goal_ell.target_pose.pose.orientation.z = ellipse_data[8]
                         goal_ell.target_pose.pose.orientation.w = ellipse_data[9]
                         goal_nxt_ell_status = GoalStatus.LOST
+
                         # Send ellipse resolution goal.
                         ac_ellipses.send_goal(goal_ell)
 
@@ -293,11 +276,12 @@ def stage_one():
                                 break
                             elif goal_nxt_ell_status == GoalStatus.SUCCEEDED:
 
-
                                 ### TODO TODO TODO ##########################################################################
 
                                 # If nor QR code nor pattern yet found...
                                 if not classifier_built and not found_pattern:
+
+                                    # TODO say that trying to detect QR code and pattern.
 
                                     # Try to detect both the QR code and the pattern.
                                     qr_detection_serv(1)
@@ -308,17 +292,24 @@ def stage_one():
                                     
                                     # If QR code detected, build classifier.
                                     if qr_detected != '':
+                                        # TODO say that qr code was detected.
+
                                         data_url = qr_detected
                                         clf = clf.fit(data_url)
                                         classifier_built = True
                                     elif found_pattern:
+                                        # TODO say that pattern was detected.
+
                                         # If pattern found, flag is set.
                                         print "pattern found"
                                     else:
+                                        # TODO say that map was detected.
                                         print "map found"
                                
                                 # If QR not yet found...
                                 elif not classifier_built:
+
+                                    # TODO say that trying to detect QR code.
                                     qr_detection_serv(1)
                                     doah.approach_procedure()
                                     qr_detected = qr_detection_serv(0)
@@ -326,6 +317,8 @@ def stage_one():
 
                                     # If QR code detected:..
                                     if qr_detected:
+
+                                        # TODO say that qr code was detected.
 
                                         # Build classifier and classify pattern.
                                         data_url = qr_detected
@@ -335,12 +328,16 @@ def stage_one():
 
                                 # if pattern not yet found...
                                 elif not found_pattern:
+
+                                    # TODO say that trying to detect pattern.
                                     digit_detection_serv(1)
                                     doah.approach_procedure()
                                     found_pattern = digit_detection_serv(0)
                                     
                                     # If pattern detected:
                                     if found_pattern:
+
+                                        # TODO say that pattern was detected.
 
                                         # classify patern.
                                         return clf.predict(found_pattern)
@@ -349,29 +346,22 @@ def stage_one():
                                 ### TODO TODO TODO ##########################################################################
 
 
-
-                                # Notify that ellipse has been resolved.
-                                soundhandle.say("Target number {0} resolved.".format(resolved_ell_ctr), voice, volume)
-                                rospy.loginfo("Target number {0} resolved".format(resolved_ell_ctr))
-
                                 # Sleep
                                 rospy.sleep(1.0)
 
                                 # Add found ellipse to matrix of resolved ellipses.
                                 resolved_ell = np.vstack((resolved_ell, np.array([ellipse_data[0], ellipse_data[1], ellipse_data[3], ellipse_data[4], ellipse_data[5], ellipse_data[6]])))
-                                resolved_ell_ctr += 1
 
                         # Get next element in service's buffer.
                         ellipse_data = ellipse_locator().target
                     else:
                         ellipse_data = ellipse_locator().target
             except rospy.ServiceException, e:
-                rospy.loginfo("Ellipse locator service call failed: {0}".format(e))
+                rospy.logerr("Ellipse locator service call failed: {0}".format(e))
 
             ## /HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
 
             # Remove checkpoint from checkpoints array
-            soundhandle.say("Checkpoint number {0} resolved.".format(resolved_ell_ctr), voice, volume)
             checkpoints = np.delete(checkpoints, (idx_nxt), axis=0)
 
             # Get robot position in map coordinates.

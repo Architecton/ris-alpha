@@ -23,13 +23,12 @@ import pdb
 """
 Description:
 
-Stage one performs search for circles. On locating a circle with the QR code it trains a classifier.
-On locating a circle with the test example, it classifies it and initializes stage two.
-
-If the circle with the classification example is located before the one with the QR code, the pattern is saved.
+Stage five navigates the robot to the final goal that was obtained from the map.
+It receives the x and y coordinates of the goal from the preceding fourth stage.
 
 params:
-    None
+    goal_x : int - x coordinate of the final goal position
+    goal_y : int - y coordinate of the final goal position
 """
 
 
@@ -43,22 +42,18 @@ def stage_five(goal_x, goal_y):
     voice = 'voice_kal_diphone'
     volume = 1.0
 
-    # Notify start of initialization.
-    soundhandle.say("Starting initialization of stage five.", voice, volume)
-
     # Initialize TargetMarker instance.
     tm = TargetMarker()
 
     # Initialize action clients
     ac_final = actionlib.SimpleActionClient("move_base", MoveBaseAction)
 
-    # Notify that search has started.
-    soundhandle.say("Starting search.", voice, volume)
-
-
     ### /INITIALIZATIONS ###
 
-    # Create final goal.
+
+
+
+    # Initialize final goal.
     goal_final = MoveBaseGoal()
     goal_final.target_pose.header.frame_id = "map"
     goal_final.target_pose.header.stamp = rospy.Time.now()
@@ -69,11 +64,13 @@ def stage_five(goal_x, goal_y):
     goal_final_status = GoalStatus.LOST  # Set status for final goal.
     ac_final.send_goal(goal_final) # Send goal.
 
+    # TODO replace with recorded speech.
     soundhandle.say("Resolving final position", voice, volume)
 
     # Loop for final  goal.
     while not goal_final_status == GoalStatus.SUCCEEDED:
 
+        # Wait before checking status.
         ac_final.wait_for_result(rospy.Duration(1.0))
 
         # Get final goal resolution goal status.
@@ -81,10 +78,12 @@ def stage_five(goal_x, goal_y):
 
         # Handle abortions - reset goal.
         if goal_final_status == GoalStatus.ABORTED or goal_final_status == GoalStatus.REJECTED:
+
+            # TODO play recorded speech.
             rospy.loginfo("Checkpoint resolution goal aborted")
             goal_final_status = GoalStatus.LOST  # Reset status for final goal.
             ac_final.send_goal(goal_final)  # Send goal.
 
-
     # HERE if goal reached
+    # TODO play recorded speeh.
     soundhandle.say("Finished", voice, volume)

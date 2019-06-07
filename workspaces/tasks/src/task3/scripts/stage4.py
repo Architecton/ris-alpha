@@ -43,13 +43,13 @@ import pdb
 """
 Description:
 
-Stage one performs search for circles. On locating a circle with the QR code it trains a classifier.
-On locating a circle with the test example, it classifies it and initializes stage two.
+Stage four performs search for circles that contain a map. On locating a map, the color
+of the circle is classified. If color as specified, map is interpreted to obtain location of final
+goal which is returned.
 
-If the circle with the classification example is located before the one with the QR code, the pattern is saved.
 
 params:
-    None
+    goal_color : int - color of ellipse containing correct map
 """
 
 
@@ -65,10 +65,6 @@ def stage_four(goal_color):
     rospy.sleep(1)
     voice = 'voice_kal_diphone'
     volume = 1.0
-
-    # Notify start of initialization.
-    soundhandle.say("Starting initialization of stage one.", voice, volume)
-
 
     # /// publishers ///
     # Define publisher for ellipse search rotations.
@@ -113,26 +109,19 @@ def stage_four(goal_color):
 
     ### SERVICE PROXY INITIALIZATION ###
     rospy.wait_for_service('get_checkpoints')
-    try:
-        checkpoint_gen = rospy.ServiceProxy('get_checkpoints', Checkpoint_res)
-    except rospy.ServiceException, e:
-        rospy.logerr("Service error: {0}".format(e.message))
+    checkpoint_gen = rospy.ServiceProxy('get_checkpoints', Checkpoint_res)
 
     rospy.wait_for_service('qr_detector')
-    try:
-        qr_detection_serv = rospy.ServiceProxy('qr_detector', QRDetector)
-    except rospy.ServiceException, e:
-        rospy.logerr("Service error: {0}".format(e.message))
+    qr_detection_serv = rospy.ServiceProxy('qr_detector', QRDetector)
 
     rospy.wait_for_service('digit_detector')
-    try:
-        digit_detection_serv = rospy.ServiceProxy('digit_detector', DigitDetector)
-    except rospy.ServiceException, e:
-        rospy.logerr("Service error: {0}".format(e.message))
-    try:
-        map_detection_serv = rospy.ServiceProxy('map_detector', MapDetector)
-    except rospy.ServiceException, e:
-        rospy.logerr("Service error: {0}".format(e.message))
+    digit_detection_serv = rospy.ServiceProxy('digit_detector', DigitDetector)
+
+    rospy.wait_for_service('map_detector')
+    map_detection_serv = rospy.ServiceProxy('map_detector', MapDetector)
+
+    rospy.wait_for_service('ellipse_locator')
+    ellipse_locator = rospy.ServiceProxy('ellipse_locator', EllipseLocator)
     ### /SERVICE PROXY INITIALIZATION ###
 
 
@@ -148,9 +137,6 @@ def stage_four(goal_color):
     # Initialize found ellipses storage.
     # First two fields store the coordinates of the ellipse center. The third field stores the perpendicular angle.
     resolved_ell = np.empty((0, 6), dtype=float)
-    resolved_ell_ctr = 0  # Initialize resolved ellipses counter.
-    NUM_ELLIPSES_TO_FIND = 3
-    end_search = False  # Flag to indicate end of search.
 
     # Number of checkpoints to generate.
     NUM_CHECKPOINTS = 8
@@ -176,21 +162,16 @@ def stage_four(goal_color):
     trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
     robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z]) 
 
-    # Wait for ellipse data buffer query service to come online and make a proxy function.
-    rospy.wait_for_service('ellipse_locator')
-    ellipse_locator = rospy.ServiceProxy('ellipse_locator', EllipseLocator)
-
     ### /INITIALIZATIONS ###
 
     # Loop until return hit.
     while True:
 
-        # While there are unresolved checkpoints left
+        # While there are unresolved checkpoints left in buffer.
         while checkpoints.shape[0] > 0:
 
             # Get index of closest checkpoint.
             idx_nxt = np.argmin((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(robot_pos, checkpoints))
-
             
             # Create goal for next checkpoint.
             goal_chkpt = MoveBaseGoal()
@@ -203,6 +184,7 @@ def stage_four(goal_color):
             goal_chkpnt_status = GoalStatus.LOST  # Set status for next checkpoint goal.
             ac_chkpnts.send_goal(goal_chkpt) # Send checkpoint goal.
 
+            # TODO replace with recorded speech.
             soundhandle.say("Resolving checkpoint {0}".format(checkpoint_ctr), voice, volume)
 
             # Loop for next checkpoint goal.
@@ -213,7 +195,7 @@ def stage_four(goal_color):
                 # Get checkpoint resolution goal status.
                 goal_chkpnt_status = ac_chkpnts.get_state()
 
-                # Handle abortions
+                # Handle abortions - start rotation procedure.
                 if goal_chkpnt_status == GoalStatus.ABORTED or goal_chkpnt_status == GoalStatus.REJECTED:
                     rospy.loginfo("Checkpoint resolution goal aborted")
                     break
@@ -221,12 +203,12 @@ def stage_four(goal_color):
 
             ## ELLIPSE LOCATING ROTATION ##
 
+            # TODO: replace with recorded speech.
             soundhandle.say("Initiating rotation sequence.", voice, volume)
             for rot_idx in np.arange(NUM_ROTATIONS):
 
                 # Safety sleep.
                 rospy.sleep(0.2)
-
 
                 ## IMAGE PROCESSING STREAM SCAN START ###
                 sf.flag = 1
@@ -259,8 +241,8 @@ def stage_four(goal_color):
                     if not np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([ellipse_data[0], ellipse_data[1]]), resolved_ell[:, :2]) < DISTINCT_ELL_THRESH):
 
                         ### DEBUGGING VISUALIZATION ###
-                        tm.push_position(np.array(ellipse_data[:3]))
-                        tm.push_position(np.array(ellipse_data[3:]))
+                        #tm.push_position(np.array(ellipse_data[:3]))
+                        #tm.push_position(np.array(ellipse_data[3:]))
                         ### /DEBUGGING VISUALIZATION ###
 
                         # Initialize goal to aproach new ellipse
@@ -290,6 +272,8 @@ def stage_four(goal_color):
                                 ### TODO TODO TODO ##########################################################################
 
                                 # Try to detect both the QR code and the pattern.
+
+                                # TODO say that map detection started.
                                 qr_detection_serv(1)
                                 digit_detection_serv(1)
                                 doah.approach_procedure_alt()
@@ -304,6 +288,10 @@ def stage_four(goal_color):
                                 else:
                                     # Here if map found.
                                     # Classify color of ellipse.
+
+                                    # TODO say that map has been detected.
+                                    # TODO say that classifying colour of ellipse. (same audio file)
+
                                     cdt.subscribe()
                                     rospy.sleep(2)
                                     color_classification_result = cdt.get_ellipse_color()
@@ -315,7 +303,6 @@ def stage_four(goal_color):
                                         # a failed attempt to interpret the map.
                                         failed_attempt = False
 
-
                                         ### MAP INTERPRETATION ###
 
                                         # Loop in which attemps to interpret the map are made.
@@ -323,39 +310,40 @@ def stage_four(goal_color):
 
                                             # If already failed to detect/interpret before, redo approach.
                                             if failed_attempt:
+                                                map_detection_serv(1)
                                                 doah.approach_procedure_alt()
-
-                                            # Try to interpret map.
-                                            map_detection_serv(1)
-                                            rospy.sleep(3)
+                                            else:
+                                                # Try to interpret map.
+                                                map_detection_serv(1)
+                                                rospy.sleep(3)
                                             res = map_detection_serv(0)
 
                                             # If map successfuly interpreted, return coordinates.
                                             if res.treasure_x != 0 or res.treasure_y != 0:
+
+                                                # TODO say that map has been found.
+
                                                 doah.reverse()  # Reverse to clear robot from wall.
                                                 return res.treasure_x, res.treasure_y
                                             else:
                                                 # If failed to interpret map, reverse and set failed attempt flag to True.
                                                 doah.reverse()
                                                 failed_attempt = True
+                                    else:
+                                        # TODO say that colour is not correct.
+                                        pass
+
 
                                         ### /MAP INTERPRETATION ###
                                
 
                                 ### TODO TODO TODO ##########################################################################
 
-
-
-                                # Notify that ellipse has been resolved.
-                                soundhandle.say("Target number {0} resolved.".format(resolved_ell_ctr), voice, volume)
-                                rospy.loginfo("Target number {0} resolved".format(resolved_ell_ctr))
-
                                 # Sleep
                                 rospy.sleep(1.0)
 
                                 # Add found ellipse to matrix of resolved ellipses.
                                 resolved_ell = np.vstack((resolved_ell, np.array([ellipse_data[0], ellipse_data[1], ellipse_data[3], ellipse_data[4], ellipse_data[5], ellipse_data[6]])))
-                                resolved_ell_ctr += 1
 
                         # Get next element in service's buffer.
                         ellipse_data = ellipse_locator().target
@@ -365,10 +353,6 @@ def stage_four(goal_color):
                 rospy.loginfo("Ellipse locator service call failed: {0}".format(e))
 
             ## /HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
-
-            # Remove checkpoint from checkpoints array
-            soundhandle.say("Checkpoint number {0} resolved.".format(resolved_ell_ctr), voice, volume)
-            checkpoints = np.delete(checkpoints, (idx_nxt), axis=0)
 
             # Get robot position in map coordinates.
             trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
@@ -386,6 +370,6 @@ def stage_four(goal_color):
             checkpoints_nxt = np.array([[point.x, point.y, point.z]])
             checkpoints = np.vstack((checkpoints, checkpoints_nxt))
 
-        checkpoint_ctr = 0  # Initialize visited checkpoints counter.
+        checkpoint_ctr = 0  # Reinitialize visited checkpoints counter.
 
 
