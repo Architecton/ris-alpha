@@ -20,6 +20,8 @@
     (:file "_package_EllipseLocator" :depends-on ("_package"))
     (:file "FeatureBuilder" :depends-on ("_package_FeatureBuilder"))
     (:file "_package_FeatureBuilder" :depends-on ("_package"))
+    (:file "MapDetector" :depends-on ("_package_MapDetector"))
+    (:file "_package_MapDetector" :depends-on ("_package"))
     (:file "QRDetector" :depends-on ("_package_QRDetector"))
     (:file "_package_QRDetector" :depends-on ("_package"))
     (:file "RingApproachPoint" :depends-on ("_package_RingApproachPoint"))

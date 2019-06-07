@@ -86,6 +86,7 @@ add_service_files(
   CylinderLocator.srv
   QRDetector.srv
   DigitDetector.srv
+  MapDetector.srv
 )
 
 ## Generate actions in the 'action' folder

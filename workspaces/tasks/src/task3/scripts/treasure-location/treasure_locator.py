@@ -53,13 +53,22 @@ def req_handler(req):
     ret_val, img_map_binary = cv2.threshold(img_map_gray,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
     img_map_binary = toMapColors(img_map_binary)
 
+
     crop = cropImage(img_map_binary)
     img_map_binary = crop['img']
     offset1 = crop['offset']
+    
+    if img_map_binary.shape[0] > img_map_binary.shape[1]:
+        img_map_binary = np.transpose(img_map_binary)
+        img_map_binary = cv2.flip(img_map_binary, 1)
 
     img_map_binary = cv2.resize(img_map_binary, (img_map_ros_cropped.shape[1], img_map_ros_cropped.shape[0]))
 
     img_map_binary = cv2.flip(img_map_binary, 1)
+    
+    #plt.figure()
+    #plt.imshow(img_map_binary, cmap="gray")
+    #plt.show()
 
     img_map_ros_cropped = removeNegative(img_map_ros_cropped)
 
@@ -132,6 +141,10 @@ def findByRotating(img1, img2):
 
     newImg = rot1.copy()
 
+    ret_val, newImg = cv2.threshold(newImg,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    kernel = np.ones((5,5),np.uint8)
+    newImg = cv2.morphologyEx(newImg, cv2.MORPH_CLOSE, kernel)
+
     connectivity = 4  
     output = cv2.connectedComponentsWithStats(newImg, connectivity, cv2.CV_32S)
     centroids = output[3]
@@ -145,6 +158,21 @@ def findByRotating(img1, img2):
         if area < min_area:
             min_area = area
             min_indeks = i
+
+    
+    """
+    f, axarr = plt.subplots(1, 2)
+
+    axarr[0].imshow(newImg, cmap="gray")
+
+    for cent in centroids:
+        axarr[0].scatter(cent[0], cent[1], s=50, c='red', marker='o')
+
+    axarr[1].imshow(img2, cmap="gray")
+    axarr[1].scatter(centroids[min_indeks][0], centroids[min_indeks][1], s=50, c='red', marker='o')
+
+    plt.show()
+    """
 
     return centroids[min_indeks]
 

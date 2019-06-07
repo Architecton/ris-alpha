@@ -5,6 +5,7 @@ let QRDetector = require('./QRDetector.js')
 let FeatureBuilder = require('./FeatureBuilder.js')
 let Checkpoint_res = require('./Checkpoint_res.js')
 let ColourClassificationSrv = require('./ColourClassificationSrv.js')
+let MapDetector = require('./MapDetector.js')
 let ValidRegionsMap = require('./ValidRegionsMap.js')
 let DigitDetector = require('./DigitDetector.js')
 let CylinderLocator = require('./CylinderLocator.js')
@@ -19,6 +20,7 @@ module.exports = {
   FeatureBuilder: FeatureBuilder,
   Checkpoint_res: Checkpoint_res,
   ColourClassificationSrv: ColourClassificationSrv,
+  MapDetector: MapDetector,
   ValidRegionsMap: ValidRegionsMap,
   DigitDetector: DigitDetector,
   CylinderLocator: CylinderLocator,

@@ -12,7 +12,8 @@ import matplotlib.pyplot as plt
 def treasure_locator_tester():
     bridge = CvBridge()
 
-    img_cv = cv2.imread('/home/miha/test_images/test2.jpg')
+    #img_cv = cv2.imread('/home/miha/test_images/test2.jpg')
+    img_cv = cv2.imread('/home/miha/test_images/test3.png')
 
     #print img_cv
 
