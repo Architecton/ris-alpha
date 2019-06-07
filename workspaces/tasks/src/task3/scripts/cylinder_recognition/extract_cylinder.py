@@ -50,8 +50,8 @@ class The_Cylinder:
         cv2.rectangle(img_original,(cif.center_x - cif.minor_axis/2, cif.center_y - cif.major_axis/2),(cif.center_x + cif.minor_axis/2, cif.center_y + cif.major_axis/2),(0,255,0),3)
 
         # DEVONLY: Visualize camera output
-        cv2.imshow('Live feed', img_original)
-        cv2.waitKey(1)
+        # cv2.imshow('Live feed', img_original)
+        # cv2.waitKey(1)
 
 def main():
 
