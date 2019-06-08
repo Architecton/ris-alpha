@@ -23,6 +23,8 @@ from task3.msg import TerminalApproachFeedback, ApproachImageFeedback, SayComman
 from locators.target_marking.targetmarker import TargetMarker
 from color_classification.colour_detector2 import ColourDetector
 
+from sound.sound_client import SoundClient
+
 import time
 
 import pdb
@@ -174,6 +176,32 @@ class Utils:
         self._subs.unregister()
         return False
 
+    def sidestep(self):
+        """
+        perform a slow rotational movement while classifying color
+        """
+
+        msg = Twist()
+        scan_loop_rate = rospy.Rate(2)
+
+        DURATION = 0.5
+
+        msg.angular.z = 0.1
+        start_time = time.time()
+        while(time.time() - start_time < DURATION):
+            self._rot_pub.publish(msg)  # Publish angular velocity.
+            scan_loop_rate.sleep()
+
+        msg.angular.z = -0.1
+        while(time.time() - start_time < DURATION*2):
+            self._rot_pub.publish(msg)  # Publish angular velocity.
+            scan_loop_rate.sleep()
+
+        msg.angular.z = 0.1
+        while(time.time() - start_time < DURATION):
+            self._rot_pub.publish(msg)  # Publish angular velocity.
+            scan_loop_rate.sleep()
+
 
     def perform_terminal_approach(self):
 
@@ -298,6 +326,10 @@ def stage_three(goal_color):
         [-0.982367777334, 0.186958685423]])
 
     checkpoint_orientations_backup = checkpoint_orientations.copy()
+
+    # Initialize sound client.
+    sound_client = SoundClient()
+
     
     # Create instance of Utils class.
     ut = Utils(window_size=WINDOW_SIZE, target_center_x=TARGET_CENTER_X, terminal_approach_duration=TERMINAL_APPROACH_DURATION)
@@ -386,7 +418,7 @@ def stage_three(goal_color):
                             ## CLASSIFY COLOR OF RING ###
 
                             cdt.subscribe()
-                            rospy.sleep(2)
+                            ut.sidestep()
                             color_classification_res == cdt.get_ring_color()
                             ut.say(color_classification_res)
 
@@ -413,7 +445,7 @@ def stage_three(goal_color):
                                 ## CLASSIFY COLOR OF RING ###
     
                                 cdt.subscribe()
-                                rospy.sleep(2)
+                                ut.sidestep()
                                 color_classification_res == cdt.get_ring_color()
                                 ut.say(color_classification_res)
 

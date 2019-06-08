@@ -16,7 +16,7 @@ from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from geometry_msgs.msg import Point, Vector3, PoseStamped, Twist
 
 from locators.target_marking.targetmarker import TargetMarker
-from color_classification.colour_detector_ell import ColourDetectorEll
+from color_classification.colour_detector_ell2 import ColourDetectorEll
 from task3.srv import EllipseLocator
 from task3.srv import QRDetector
 from task3.srv import DigitDetector
@@ -31,8 +31,9 @@ from sound_play.libsoundplay import SoundClient
 
 from detection_objective_approach.detectionObjectiveApproachHandler import DetectionObjectiveApproachHandler
 
+from sound.sound_client import SoundClient
+
 import time
-import pdb
 import sys
 
 import pdb
@@ -124,6 +125,8 @@ def stage_four(goal_color):
     ellipse_locator = rospy.ServiceProxy('ellipse_locator', EllipseLocator)
     ### /SERVICE PROXY INITIALIZATION ###
 
+    # Initialize sound client.
+    sound_client = SoundClient()
 
 
     # Initialize coordinate transforms buffer.
@@ -302,6 +305,7 @@ def stage_four(goal_color):
                                         # flag that is set to True if there was
                                         # a failed attempt to interpret the map.
                                         failed_attempt = False
+                                        failed_attempt_counter = 0
 
                                         ### MAP INTERPRETATION ###
 
@@ -329,6 +333,9 @@ def stage_four(goal_color):
                                                 # If failed to interpret map, reverse and set failed attempt flag to True.
                                                 doah.reverse()
                                                 failed_attempt = True
+                                                failed_attempt_counter += 1
+                                                if failed_attempt_counter > 5:
+                                                    break
                                     else:
                                         # TODO say that colour is not correct.
                                         pass

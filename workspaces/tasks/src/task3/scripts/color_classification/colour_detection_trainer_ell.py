@@ -27,7 +27,8 @@ class ColourDetectionTrainer:
         self._num_bins = num_bins  # Number of bins to use in histograms.
         self._target = -1  # Initialize target value.
         self._feature_gen = ColourFeatureGenerator(self._num_bins)  # Initialize feature generator instance.
-        self.colour_dict = {0 : "red", 1 : "green", 2 : "blue", 3 : "black", 4: "yellow"}  # Initialize colour dictionary.
+        # self.colour_dict = {0 : "red", 1 : "green", 2 : "blue", 3 : "black", 4: "yellow"}  # Initialize colour dictionary.
+        self.colour_dict = {0 : "yellow", 1 : "blue"}  # Initialize colour dictionary.
         self._learner = ColourClassifier(self.colour_dict)  # Initialize learner.
         self._features_mat = np.empty((0, self._num_bins*3), dtype=np.int)  # Initialize matrix of features.
         self._target_vec = np.empty(0, dtype=np.int)  # Initialize target vector.
@@ -59,7 +60,6 @@ class ColourDetectionTrainer:
 
 
     def _depth_callback(self, data):
-	print "_depth_callback called"
 
         """
         Callback called when broadcast on topic received.
@@ -87,6 +87,7 @@ class ColourDetectionTrainer:
 
         if self._ring_image.shape[0] > 0:
             # Add image and class to feature generator instance
+            print "burek"
             self._feature_gen.add_image(self._ring_image, self._target, l_u, r_d)
 
 	    # Add cropped image to array of training samples.
@@ -169,7 +170,7 @@ if __name__ == '__main__':
     os.system('clear')
    
     # Set number of bins to use
-    NUM_BINS = 10
+    NUM_BINS = 100
     
     # Initialize trainer
     trainer = ColourDetectionTrainer(num_bins=NUM_BINS)
@@ -178,7 +179,7 @@ if __name__ == '__main__':
     for colour in trainer.colour_dict.keys():
     
         # Countdown to start of training data recording.
-        countdown_val = 3
+        countdown_val = 10
         while(countdown_val >= 1):
             print("Starting recording of {0} ring training data in:".format(trainer.colour_dict[colour]))
             print("{0}".format(countdown_val))
@@ -189,7 +190,7 @@ if __name__ == '__main__':
         # Set target value, subscribe to topic and initialize recording timeout.
         trainer.set_target(colour)
         trainer.subscribe()
-        recording_timeout = 0.1*60
+        recording_timeout = 0.3*60
 
         # Record training data for specified duration.
         while(recording_timeout >= 1):
@@ -210,7 +211,6 @@ if __name__ == '__main__':
     
     # Save classifier.
     print "saving classifier"
-    pdb.set_trace()
     dump(clf, '/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/ellipse_colour_classifier.joblib') 
     print "saving matrices"
     sio.savemat('training_data_ell.mat', {'data' : trainer._features_mat})

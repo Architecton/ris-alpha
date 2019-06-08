@@ -2,20 +2,20 @@
 import numpy as np
 
 import rospy
-from colour_detection import RingImageProcessor
+from colour_detection import ColourFeatureGenerator
 from joblib import load
-from task3.msg import ApproachImageFeedback
+from task3.msg import EllipseImageFeedback
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 
-class ColourDetector:
+class ColourDetectorEll:
     def __init__(self, clf, num_bins):
-        self._ring_image_processor = RingImageProcessor(clf, num_bins)
+	self._feature_gen = ColourFeatureGenerator(num_bins)
+	self._clf = clf
         self._ring_image = np.empty(0, dtype=np.uint8)
         self._cv_bridge = CvBridge()
     	rospy.init_node('colour_detection_test', anonymous=True)
-
 
 
     def _depth_callback(self, data):
@@ -32,8 +32,8 @@ class ColourDetector:
 
         center_y = data.center_y + 27  # Get y coordinate of center of ring.
         center_x = data.center_x - 17  # Get x coordinate of center of ring.
-        min_axis = data.minor_axis  # Get minor axis of ellipse.
-        maj_axis = data.major_axis  # Get major axis of ellipse.
+        min_axis = data.minor_axis  # Get minor axis of ring.
+        maj_axis = data.major_axis  # Get major axis of ring.
 
         # Compute coordiantes of the top left corner and bottom right corners of the
         # cropped square.
@@ -45,8 +45,7 @@ class ColourDetector:
         r_d[1] = np.clip(r_d[1], 0, 640)
 
         if self._ring_image.shape[0] > 0:
-            # Add image and class to feature generator instance
-            self._ring_image_processor.img_to_feature(self._ring_image, l_u, r_d)
+	    self._feature_gen.add_image(self._ring_image, 0, l_u, r_d)
 
 
     def _img_callback(self, data):
@@ -72,7 +71,7 @@ class ColourDetector:
 
 
     def subscribe(self):
-        self._depth_subscriber = rospy.Subscriber('toroids', ApproachImageFeedback, self._depth_callback)
+        self._depth_subscriber = rospy.Subscriber('elipses', EllipseImageFeedback, self._depth_callback)
         self._img_subscriber = rospy.Subscriber('/camera/rgb/image_raw', Image, self._img_callback)
 
 
@@ -83,17 +82,19 @@ class ColourDetector:
 
     def get_ring_color(self):
         self._unsubscribe()
-        res = self._ring_image_processor.get_ring_color()
-        self._ring_image_processor.clear()
-        return res
+	features_mat_nxt, _ = self._feature_gen.compute_colour_features()  # Compute next block of the features matrix and target vector.
+	self._feature_gen.clear()
+	predictions = self._clf.predict(features_mat_nxt)
+	(vals, ct) = np.unique(predictions, return_counts=True)
+        return vals[np.argmax(ct)]
      
 
 if __name__ == '__main__':
-    clf = load('ring_colour_classifier.joblib')
+    clf = load('ellipse_colour_classifier.joblib')
     NUM_BINS = 100
-    cdt = ColourDetector(clf, NUM_BINS)
+    cdt = ColourDetectorEll(clf, NUM_BINS)
     while True:
         cdt.subscribe()
-        rospy.sleep(5)
+        rospy.sleep(3)
         print cdt.get_ring_color()
 

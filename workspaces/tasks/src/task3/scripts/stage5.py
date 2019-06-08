@@ -15,6 +15,8 @@ from locators.target_marking.targetmarker import TargetMarker
 from sound_play.msg import SoundRequest
 from sound_play.libsoundplay import SoundClient
 
+from sound.sound_client import SoundClient
+
 import pdb
 
 ### /IMPORTS ###
@@ -41,6 +43,10 @@ def stage_five(goal_x, goal_y):
     rospy.sleep(1)
     voice = 'voice_kal_diphone'
     volume = 1.0
+
+    # Initialize sound client.
+    sound_client = SoundClient()
+
 
     # Initialize TargetMarker instance.
     tm = TargetMarker()
