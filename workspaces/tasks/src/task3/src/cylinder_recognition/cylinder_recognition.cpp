@@ -145,13 +145,14 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     extract_normals.filter (*cloud_normals2);
 
     // Create the segmentation object for cylinder segmentation and set all the parameters
+    // TODO: Less iterations
     seg.setOptimizeCoefficients (true);
     seg.setModelType (pcl::SACMODEL_CYLINDER);
     seg.setMethodType (pcl::SAC_RANSAC);
     seg.setNormalDistanceWeight (0.1);
-    seg.setMaxIterations (10000);
-    seg.setDistanceThreshold (0.05);
-    seg.setRadiusLimits (0.06, 0.2);
+    seg.setMaxIterations (3000);
+    seg.setDistanceThreshold (0.25);
+    seg.setRadiusLimits (0.1, 0.18);
     seg.setInputCloud (cloud_filtered2);
     seg.setInputNormals (cloud_normals2);
 
