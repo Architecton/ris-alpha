@@ -318,7 +318,7 @@ def stage_one():
 
                                     qr_detection_serv(1)
                                     doah.approach_procedure()
-                                    qr_detected = qr_detection_serv(0)
+                                    qr_detected = qr_detection_serv(0).res
 
 
                                     # If QR code detected:..
@@ -332,7 +332,7 @@ def stage_one():
                                         clf = clf.fit(data_url)
                                         classifier_built = True
 					pdb.set_trace()
-                                        return clf.predict(found_pattern)
+                                        return clf.predict(np.array(found_pattern)[np.newaxis])[0]
 
                                 # if pattern not yet found...
                                 elif not found_pattern:
@@ -341,7 +341,7 @@ def stage_one():
             			    soundhandle.say("Detecting pattern.", voice, volume)
                                     digit_detection_serv(1)
                                     doah.approach_procedure()
-                                    found_pattern = digit_detection_serv(0)
+                                    found_pattern = digit_detection_serv(0).result
                                     
                                     # If pattern detected:
                                     if found_pattern:
@@ -352,7 +352,7 @@ def stage_one():
 					pdb.set_trace()
 
                                         # classify patern.
-                                        return clf.predict(found_pattern)
+                                        return clf.predict(np.array(found_pattern)[np.newaxis])[0]
 
 
                                 ### TODO TODO TODO ##########################################################################
