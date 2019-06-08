@@ -40,7 +40,7 @@ template<>
 struct MD5Sum< ::task3::ReconfigParams > {
   static const char* value()
   {
-    return "ca89989307a87a3268666e3ae28823bb";
+    return "64fd125ad82319180ca7fa695a94eece";
   }
 
   static const char* value(const ::task3::ReconfigParams&) { return value(); }

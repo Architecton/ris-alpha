@@ -35,7 +35,7 @@ class ReconfigParamsRequest {
         this.param_val = initObj.param_val
       }
       else {
-        this.param_val = '';
+        this.param_val = 0.0;
       }
     }
   }
@@ -45,7 +45,7 @@ class ReconfigParamsRequest {
     // Serialize message field [param_name]
     bufferOffset = _serializer.string(obj.param_name, buffer, bufferOffset);
     // Serialize message field [param_val]
-    bufferOffset = _serializer.string(obj.param_val, buffer, bufferOffset);
+    bufferOffset = _serializer.float64(obj.param_val, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -56,15 +56,14 @@ class ReconfigParamsRequest {
     // Deserialize message field [param_name]
     data.param_name = _deserializer.string(buffer, bufferOffset);
     // Deserialize message field [param_val]
-    data.param_val = _deserializer.string(buffer, bufferOffset);
+    data.param_val = _deserializer.float64(buffer, bufferOffset);
     return data;
   }
 
   static getMessageSize(object) {
     let length = 0;
     length += object.param_name.length;
-    length += object.param_val.length;
-    return length + 8;
+    return length + 12;
   }
 
   static datatype() {
@@ -74,14 +73,14 @@ class ReconfigParamsRequest {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return '95a5eb856ef3bc8708066adcb881c39b';
+    return '099e3b9abed354a4764ac4b1311c2531';
   }
 
   static messageDefinition() {
     // Returns full string definition for message
     return `
     string param_name
-    string param_val
+    float64 param_val
     
     `;
   }
@@ -103,7 +102,7 @@ class ReconfigParamsRequest {
       resolved.param_val = msg.param_val;
     }
     else {
-      resolved.param_val = ''
+      resolved.param_val = 0.0
     }
 
     return resolved;
@@ -185,6 +184,6 @@ class ReconfigParamsResponse {
 module.exports = {
   Request: ReconfigParamsRequest,
   Response: ReconfigParamsResponse,
-  md5sum() { return 'ca89989307a87a3268666e3ae28823bb'; },
+  md5sum() { return '64fd125ad82319180ca7fa695a94eece'; },
   datatype() { return 'task3/ReconfigParams'; }
 };

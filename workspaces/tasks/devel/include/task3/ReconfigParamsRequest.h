@@ -25,11 +25,11 @@ struct ReconfigParamsRequest_
 
   ReconfigParamsRequest_()
     : param_name()
-    , param_val()  {
+    , param_val(0.0)  {
     }
   ReconfigParamsRequest_(const ContainerAllocator& _alloc)
     : param_name(_alloc)
-    , param_val(_alloc)  {
+    , param_val(0.0)  {
   (void)_alloc;
     }
 
@@ -38,7 +38,7 @@ struct ReconfigParamsRequest_
    typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _param_name_type;
   _param_name_type param_name;
 
-   typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _param_val_type;
+   typedef double _param_val_type;
   _param_val_type param_val;
 
 
@@ -119,12 +119,12 @@ struct MD5Sum< ::task3::ReconfigParamsRequest_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "95a5eb856ef3bc8708066adcb881c39b";
+    return "099e3b9abed354a4764ac4b1311c2531";
   }
 
   static const char* value(const ::task3::ReconfigParamsRequest_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x95a5eb856ef3bc87ULL;
-  static const uint64_t static_value2 = 0x08066adcb881c39bULL;
+  static const uint64_t static_value1 = 0x099e3b9abed354a4ULL;
+  static const uint64_t static_value2 = 0x764ac4b1311c2531ULL;
 };
 
 template<class ContainerAllocator>
@@ -144,7 +144,7 @@ struct Definition< ::task3::ReconfigParamsRequest_<ContainerAllocator> >
   static const char* value()
   {
     return "string param_name\n\
-string param_val\n\
+float64 param_val\n\
 ";
   }
 
@@ -186,7 +186,7 @@ struct Printer< ::task3::ReconfigParamsRequest_<ContainerAllocator> >
     s << indent << "param_name: ";
     Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.param_name);
     s << indent << "param_val: ";
-    Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.param_val);
+    Printer<double>::stream(s, indent + "  ", v.param_val);
   }
 };
 

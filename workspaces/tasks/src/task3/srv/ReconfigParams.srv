@@ -1,4 +1,4 @@
 string param_name
-string param_val
+float64 param_val
 ---
 bool success
