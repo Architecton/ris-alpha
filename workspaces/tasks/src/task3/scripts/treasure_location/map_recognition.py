@@ -21,16 +21,6 @@ dictm = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
 # The object that we will pass to the markerDetect function
 params =  cv2.aruco.DetectorParameters_create()
 
-# print(params.adaptiveThreshConstant) 
-# print(params.adaptiveThreshWinSizeMax)
-# print(params.adaptiveThreshWinSizeMin)
-# print(params.minCornerDistanceRate)
-# print(params.adaptiveThreshWinSizeStep)
-
-# To see description of the parameters
-# https://docs.opencv.org/3.3.1/d1/dcd/structcv_1_1aruco_1_1DetectorParameters.html
-
-# You can set these parameters to get better marker detections
 params.adaptiveThreshConstant = 10
 adaptiveThreshWinSizeStep = 2
 
@@ -51,6 +41,9 @@ class The_Map:
 
         # Set urls dictionary
         #self.digits = defaultdict(int)
+
+        self.points = [];
+
 
         self.point = {'x': 0.0, 'y': 0.0}
 
@@ -189,8 +182,11 @@ class The_Map:
                         serv = rospy.ServiceProxy('treasure_locator', TreasureLocator) 
                         ret = serv(img)
                         #print(ret)
-                        self.point['x'] = ret.treasure_x
-                        self.point['y'] = ret.treasure_y
+                        
+                        #self.point['x'] = ret.treasure_x
+                        #self.point['y'] = ret.treasure_y
+
+                        self.points.append((ret.treasure_x, ret.treasure_y))
 
                     except rospy.ServiceException, e:
                         print("Service error: {0}".format(e.message))
@@ -198,17 +194,27 @@ class The_Map:
     def toggle_output(self, req):
         self.flg = req.flg
 
-
         if (req.flg == 1):
-            #if(len(self.digits) > 0):
-            #    text = max(self.digits, key=self.digits.get)
-            #    return np.array([int(text[0]), int(text[1])])
-            #else:
-            #resp = TreasureLocatorResponse()
-            return -1, -1    
+            self.points = [];
+
+            return -999, -999
+
         elif (req.flg == 0):
 
-            return self.point['x'], self.point['y']
+            if len(self.points) == 0:
+                return -999, -999
+
+            points_np = np.array(self.points)
+
+            ind = np.lexsort((points_np[:,1],points_np[:,0]))
+
+            points_sorted = points_np[ind]
+
+            #print(points_sorted)
+
+            self.point = points_sorted[len(points_sorted)/2]
+
+            return self.point[0], self.point[1]
                 
 
 def main():
