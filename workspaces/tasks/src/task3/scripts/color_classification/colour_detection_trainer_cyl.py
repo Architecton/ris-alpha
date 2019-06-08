@@ -210,7 +210,7 @@ if __name__ == '__main__':
     dump(clf, '/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/cylinder_colour_classifier.joblib') 
     sio.savemat('training_data_cyl.mat', {'data' : trainer._features_mat})
     sio.savemat('training_data_target_cyl.mat', { 'data' : trainer._target_vec})	
-    pdb.set_trace()
-    trainer.save_obj(trainer.training_imgs, 'training_images_cyl')
+    # pdb.set_trace()
+    # trainer.save_obj(trainer.training_imgs, 'training_images_cyl')
 
 
