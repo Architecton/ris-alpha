@@ -27,7 +27,7 @@ class ColourDetectionTrainer:
         self._num_bins = num_bins  # Number of bins to use in histograms.
         self._target = -1  # Initialize target value.
         self._feature_gen = ColourFeatureGenerator(self._num_bins)  # Initialize feature generator instance.
-        self.colour_dict = {0 : "red", 1 : "green", 2 : "blue", 3 : "black"}  # Initialize colour dictionary.
+        self.colour_dict = {0 : "red", 1 : "green", 2 : "blue", 3 : "black", 4: "yellow"}  # Initialize colour dictionary.
         self._learner = ColourClassifier(self.colour_dict)  # Initialize learner.
         self._features_mat = np.empty((0, self._num_bins*3), dtype=np.int)  # Initialize matrix of features.
         self._target_vec = np.empty(0, dtype=np.int)  # Initialize target vector.
@@ -216,6 +216,5 @@ if __name__ == '__main__':
     sio.savemat('training_data_ell.mat', {'data' : trainer._features_mat})
     sio.savemat('training_data_target_ell.mat', { 'data' : trainer._target_vec})
     # print "saving training images"
-    pdb.set_trace()
-    trainer.save_obj(trainer.training_imgs, 'training_images')
+    # trainer.save_obj(trainer.training_imgs, 'training_images')
 

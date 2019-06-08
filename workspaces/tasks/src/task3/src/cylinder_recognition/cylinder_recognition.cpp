@@ -19,11 +19,13 @@
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include "geometry_msgs/PointStamped.h"
 #include <task3/CylinderLocation.h>
+#include <time.h>
 
 tf2_ros::Buffer tf2_buffer;
 
 typedef pcl::PointXYZ PointT;
 
+int ctr = 0;
 int flg = 0;
 int found = 0;
 float x = -1.0f;
@@ -61,7 +63,7 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
         return;
     }
   
-    std::cerr << "Started working" << std::endl;
+    //// std::cerr << "Started working" << std::endl;
 
     // All the objects needed
     ros::Time time_rec, time_test;
@@ -103,7 +105,7 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     // The larger the K-search, the more distorted are the point normals on edges (cup edge), but that issue is not a problem for our case
     ne.setSearchMethod (tree);
     ne.setInputCloud (cloud_filtered);
-    ne.setKSearch (50);
+    ne.setKSearch (30);
     ne.compute (*cloud_normals);
 
     // Create the segmentation object for the planar model and set all the parameters
@@ -164,15 +166,18 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     pcl::PointCloud<PointT>::Ptr cloud_cylinder (new pcl::PointCloud<PointT> ());
     extract.filter (*cloud_cylinder);
 
-    if (cloud_cylinder->points.empty() && cloud_cylinder->points.size() <= CYLINDER_PTS_THRESHOLD) {
+    if (cloud_cylinder->points.empty() || (cloud_cylinder->points.size() <= CYLINDER_PTS_THRESHOLD)) {
         std::cerr << "Can't find the cylindrical component." << std::endl;
     } else {
+
+        // const clock_t begin_time = clock();
 
         // Set found flag to true
         found = 1;
 
+        // std::cerr << "[" << ctr << "]: " << "PointCloud representing the cylindrical component: " << cloud_cylinder->points.size () << " data points." << std::endl;
         std::cerr << "PointCloud representing the cylindrical component: " << cloud_cylinder->points.size () << " data points." << std::endl;
-          
+
         pcl::compute3DCentroid (*cloud_cylinder, centroid);
         std::cerr << "centroid of the cylindrical component: " << centroid[0] << " " <<  centroid[1] << " " <<   centroid[2] << " " <<   centroid[3] << std::endl;
 
@@ -225,9 +230,9 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
         y_a = point_map_approach.point.y;
         z_a = point_map_approach.point.z;
 
-        std::cerr << "point_map: " << point_map.point.x << " " <<  point_map.point.y << " " <<  point_map.point.z << std::endl;
+        //// std::cerr << "point_map: " << point_map.point.x << " " <<  point_map.point.y << " " <<  point_map.point.z << std::endl;
 
-        std::cerr << "Flag: " << flg << std::endl;
+        //// std::cerr << "Flag: " << flg << std::endl;
 
         /*
         // TMP: Trying to convert the centroid to pixels >>
@@ -257,11 +262,15 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
             c = getchar();
         }
         */
+
+        // ctr += 1;
+
+        // std::cerr << float( clock () - begin_time ) /  CLOCKS_PER_SEC << std::endl;
         
 
     }
 
-    std::cerr << "Done working" << std::endl;
+    //// std::cerr << "Done working" << std::endl;
   
 }
 
@@ -283,3 +292,42 @@ int main (int argc, char** argv) {
     // Spin
     ros::spin ();
 }
+
+/*
+
+    K = 50:
+        time: 
+        direct: 
+        nothing: 
+        left side: 
+        right side: 
+
+    K = 40:
+        time: 
+        direct: 
+        nothing: 
+        left side: 
+        right side: 
+
+    K = 30:
+        time: 
+        direct: 
+        nothing: 
+        left side: 
+        right side: 
+
+    K = 20:
+        time: 
+        direct: 
+        nothing: 
+        left side: 
+        right side: 
+
+    K = 10:
+        time: 
+        direct: 
+        nothing: 
+        left side: 
+        right side: 
+
+*/

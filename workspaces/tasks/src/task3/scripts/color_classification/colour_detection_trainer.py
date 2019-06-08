@@ -214,6 +214,6 @@ if __name__ == '__main__':
     sio.savemat('training_data.mat', {'data' : trainer._features_mat})
     sio.savemat('training_data_target.mat', { 'data' : trainer._target_vec})
     # print "saving training images"
-    pdb.set_trace()
-    trainer.save_obj(trainer.training_imgs, 'training_images')
+    # pdb.set_trace()
+    # trainer.save_obj(trainer.training_imgs, 'training_images')
 

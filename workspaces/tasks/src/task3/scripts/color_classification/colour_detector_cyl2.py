@@ -9,7 +9,7 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 
-class ColourDetector:
+class ColourDetectorCyl:
     def __init__(self, clf, num_bins):
 	self._feature_gen = ColourFeatureGenerator(num_bins)
 	self._clf = clf
