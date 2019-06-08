@@ -40,10 +40,11 @@ class DetectionObjectiveApproachHandler:
 
     def _approach(self, goal_dist):
         self._laser_sub = rospy.Subscriber("/scan", LaserScan, self._scan_callback)
+        DURATION_FORWARD = 3.0
         msg = Twist()
         msg.linear.x = 0.1 
         start_time = time.time()
-        while self._dist_to_wall > goal_dist:
+        while self._dist_to_wall > goal_dist && time.time() - start_time < DURATION_FORWARD:
             self._vel_pub.publish(msg)
         self._dist_to_wall = 100 
         self._laser_sub.unregister()
