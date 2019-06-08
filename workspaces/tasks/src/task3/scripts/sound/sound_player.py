@@ -43,13 +43,23 @@ class SoundPlayer:
              self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/three.wav', self._volume)
         if data.text == '1rotation':
              self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/rotation.wav', self._volume)
-        if data.text == '1next_checkpoint':
+        if data.text == '1next_teckpoint':
              self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/next_checkpoint.wav', self._volume)
 
 
 	# STAGE 2	
         if data.text == '2rotation':
              self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/rotation.wav', self._volume)
+        if data.text == '2detecting':
+             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/2detecting.wav', self._volume)
+        if data.text == '2red_cyl':
+             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/2red.wav', self._volume)
+        if data.text == '2green_cyl':
+             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/2green.wav', self._volume)
+        if data.text == '2blue_cyl':
+             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/2blue.wav', self._volume)
+        if data.text == '2yellow_cyl':
+             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/2yellow.wav', self._volume)
         if data.text == '2detecting_qr_code':
              self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/trying_qr.wav', self._volume)
         if data.text == '2red':
@@ -93,6 +103,29 @@ class SoundPlayer:
              self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/map_success.wav', self._volume)
         if data.text == '4next_checkpoint':
              self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/next_checkpoint.wav', self._volume)
+        if data.text == '4detecting':
+             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/4detecting.wav', self._volume)
+        if data.text == '4red':
+             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/4red.wav', self._volume)
+        if data.text == '4green':
+             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/4green.wav', self._volume)
+        if data.text == '4yellow':
+             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/4yellow.wav', self._volume)
+        if data.text == '4black':
+             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/4black.wav', self._volume)
+        if data.text == '4blue':
+             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/4blue.wav', self._volume)
+
+        # STAGE 5
+        if data.text == '5start':  # TODO
+             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/5start.wav', self._volume)
+        if data.text == '5finish':  # TODO
+             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/5finish.wav', self._volume)
+
+
+        # TODO detecting ellipse color
+        # TODO detecting cylinder color
+
 
 
 
