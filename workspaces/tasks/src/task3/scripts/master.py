@@ -23,7 +23,7 @@ if correction != '':
 
 ###############
 
-
+"""
 
 ## STAGE TWO ##
 
@@ -60,3 +60,5 @@ res4_x, res4_y = stage_four(res2)
 stage_five(res4_x, res4_y)
 
 ################
+
+"""
