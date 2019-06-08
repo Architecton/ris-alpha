@@ -67,8 +67,9 @@ def req_handler(req):
     points = k_means(new_img, 400, num_of_checkpoints, 4)
     means = get_means(points)
 
+
     for clas, point in means.items():
-        if new_img[point['y'], point['x']] == 0:
+        if new_img[int(point['y']), int(point['x'])] == 0:
             pointMeters = mapIndexToMeters(start, point, res, offset)
             p = Point()
             p.x = pointMeters['x']
@@ -94,8 +95,8 @@ def visualize(img, points, means):
     colors = ['red', 'blue', 'green', 'yellow', 'orange', 'olive', 'aqua', 'seagreen', 'pink', 'purple', 'plum', 'maroon', 'khaki', 'silver']
 
     for clas in means:
-        if img[means[clas]['y'], means[clas]['x']] == 0:
-            plt.scatter(means[clas]['x'], means[clas]['y'], s=50, c=colors[int(clas)], marker='o')
+        if img[int(means[clas]['y']), int(means[clas]['x'])] == 0:
+            plt.scatter(int(means[clas]['x']), int(means[clas]['y']), s=50, c=colors[int(clas)], marker='o')
 
     #for clas in points:
     #   plt.scatter(points[clas]['x'], points[clas]['y'], s=50, c=colors[int(clas)], marker='o')
@@ -103,9 +104,27 @@ def visualize(img, points, means):
 
     plt.show()
 
+def visualizePoints(img, points):
+    plt.figure()
+    plt.imshow(img, cmap="gray")
+    
+    colors = ['red', 'blue', 'green', 'yellow', 'orange', 'olive', 'aqua', 'seagreen', 'pink', 'purple', 'plum', 'maroon', 'khaki', 'silver']
+
+    #for clas in means:
+    #    if img[int(means[clas]['y']), int(means[clas]['x'])] == 0:
+    #        plt.scatter(int(means[clas]['x']), int(means[clas]['y']), s=50, c=colors[int(clas)], marker='o')
+
+    for clas in points:
+       plt.scatter(points[clas]['x'], points[clas]['y'], s=50, c=colors[int(clas)], marker='o')
+        
+
+    plt.show()
+
 def k_means(img, n, k, iterations):
     #for i in range(it):
     points = getRandomPoints(img, n, k)
+
+    #visualizePoints(img,points)
 
     for it in range(iterations):
         means = get_means(points)
@@ -136,6 +155,8 @@ def k_means(img, n, k, iterations):
                 new_points[index]['y'].append(points[clas]['y'][i])
                 new_points[index]['r'].append(index)
         points = new_points
+
+    #visualizePoints(img,points)
 
     return points
 
