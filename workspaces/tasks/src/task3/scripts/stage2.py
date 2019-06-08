@@ -183,8 +183,7 @@ def stage_two(goal_color):
             goal_chkpnt_status = GoalStatus.LOST  # Set status for next checkpoint goal.
             ac_chkpnts.send_goal(goal_chkpt) # Send checkpoint goal.
 
-            # TODO play recorded speech.
-            soundhandle.say("Resolving checkpoint {0}".format(checkpoint_ctr), voice, volume)
+            sound_client.say('2next_checkpoint')
 
             # Loop for next checkpoint goal.
             while not goal_chkpnt_status == GoalStatus.SUCCEEDED:
@@ -202,8 +201,7 @@ def stage_two(goal_color):
 
             ## CYLINDER LOCATING ROTATION ##
             
-            # TODO play recorded speech.
-            soundhandle.say("Initiating rotation sequence.", voice, volume)
+            sound_client.say('2rotation')
             for rot_idx in np.arange(NUM_ROTATIONS):
 
 
@@ -265,6 +263,7 @@ def stage_two(goal_color):
                     goal_cyl.target_pose.pose.orientation.z = cylinder_data[4]
                     goal_cyl.target_pose.pose.orientation.w = cylinder_data[5]
                     goal_nxt_cyl_status = GoalStatus.LOST
+
                     # Send cylinder resolution goal.
                     ac_cylinders.send_goal(goal_cyl)
 
@@ -282,15 +281,24 @@ def stage_two(goal_color):
 
                             # Detect cylinder color.
 
-                            # TODO say that detecting cylinder color.
+                            sound_client.say('2detecting')
 
                             cdt.subscribe()
                             cdt.approach_procedure_alt()
                             detected_cylinder_color = cdt.get_cylinder_color()
+
+                            if detected_cylinder_color == 'red':
+                                sound_client.say('2red_cyl')
+                            if detected_cylinder_color == 'green':
+                                sound_client.say('2green_cyl')
+                            if detected_cylinder_color == 'blue':
+                                sound_client.say('2blue_cyl')
+                            if detected_cylinder_color == 'yellow':
+                                sound_client.say('2yellow_cyl')
                             
                             # If detected correct color:
                             if detected_cylinder_color == goal_color:
-                                # TODO say that colour is correct.
+                                sound_client.say('2detecting_qr_code')
 
                                 res = ''
                                 while res == '':
@@ -298,13 +306,21 @@ def stage_two(goal_color):
                                     # Try to detect qr code on cylinder.
                                     qr_detection_serv(1)
                                     doah.approach_procedure()
-                                    res = qr_detection_serv(0)
+                                    res = qr_detection_serv(0).res
 
                                     # If detected, return found color.
                                     if res != '':
+                                        if res == 'red':
+                                            sound_client.say('2red')
+                                        elif res == 'green':
+                                            sound_client.say('2green')
+                                        elif res == 'blue':
+                                            sound_client.say('2blue')
+                                        elif res == 'black':
+                                            sound_client.say('2black')
+
                                         return res
                             else:
-                                # TODO: say that color is not correct.
                                 pass
 
 

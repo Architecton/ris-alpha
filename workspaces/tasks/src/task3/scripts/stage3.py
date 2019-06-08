@@ -131,7 +131,7 @@ class Utils:
         self._rot_pub = rospy.Publisher('/cmd_vel_mux/input/navi', Twist, queue_size=1)
 
         # publisher of voice commands.
-        self._say_pub = rospy.Publisher('say_commands', SayCommand, queue_size = 10)  # Publish on say_commands topic on which sound_player listens.
+        self._say_pub = SoundClient()
 
     def detect_ring(self):
         """
@@ -255,10 +255,7 @@ class Utils:
         """
         Say text. See sound_player.py for supported commands.
         """
-	rospy.sleep(1)
-        sc = SayCommand() 
-	sc.text = text 
-	self._say_pub.publish(sc) 
+	self._say_pub.say(text) 
 
     def _callback(self, data):
         """
@@ -334,8 +331,6 @@ def stage_three(goal_color):
     # Create instance of Utils class.
     ut = Utils(window_size=WINDOW_SIZE, target_center_x=TARGET_CENTER_X, terminal_approach_duration=TERMINAL_APPROACH_DURATION)
 
-    ut.say('initialization')
-
     # Initialize counter of collected rings.
     collected_rings_counter = 0
 
@@ -343,11 +338,10 @@ def stage_three(goal_color):
     tf2_buffer = tf2_ros.Buffer()
     tf2_listener = tf2_ros.TransformListener(tf2_buffer)
 
+    sound_client.say('3starting_search')
+
     # Wait for map cache to fill.
     # rospy.sleep(5)
-
-    # Signal start of search.
-    ut.say('starting_search')
 
     while True:
         # While there are unresolved checkpoints.
@@ -409,7 +403,7 @@ def stage_three(goal_color):
                         if detected_flg:
 
                             # Signal detected ring.
-                            ut.say('detected')
+                            sound_client.say('3detected')
                             
                             # Mark ring.
                             trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
@@ -420,7 +414,7 @@ def stage_three(goal_color):
                             cdt.subscribe()
                             ut.sidestep()
                             color_classification_res == cdt.get_ring_color()
-                            ut.say(color_classification_res)
+                            sound_client.say('3' + color_classification_res)
 
                             # If correct color, perform terminal approach, else break 
                             if color_classification_res == goal_color:
@@ -436,7 +430,7 @@ def stage_three(goal_color):
                             if scan_res:
 
 				# Signal detected ring.
-				ut.say('detected')
+				sound_client.say('3detected')
 
                                 # Mark ring.
                                 trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
@@ -447,7 +441,7 @@ def stage_three(goal_color):
                                 cdt.subscribe()
                                 ut.sidestep()
                                 color_classification_res == cdt.get_ring_color()
-                                ut.say(color_classification_res)
+                                sound_client.say('3' + color_classification_res)
 
                                 # If correct color, perform terminal approach, else break
                                 if color_classification_res == goal_color:
@@ -461,7 +455,6 @@ def stage_three(goal_color):
                                 if terminal_approach_performed_flg:
                                     collected_rings_counter += 1
                                     rospy.loginfo("ring collected")
-                                    ut.say('done')
                                     return
 
                     # Remove resolved checkpoint.

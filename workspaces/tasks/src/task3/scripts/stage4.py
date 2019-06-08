@@ -187,8 +187,7 @@ def stage_four(goal_color):
             goal_chkpnt_status = GoalStatus.LOST  # Set status for next checkpoint goal.
             ac_chkpnts.send_goal(goal_chkpt) # Send checkpoint goal.
 
-            # TODO replace with recorded speech.
-            soundhandle.say("Resolving checkpoint {0}".format(checkpoint_ctr), voice, volume)
+            sound_client.say('4next_checkpoint')
 
             # Loop for next checkpoint goal.
             while not goal_chkpnt_status == GoalStatus.SUCCEEDED:
@@ -206,8 +205,7 @@ def stage_four(goal_color):
 
             ## ELLIPSE LOCATING ROTATION ##
 
-            # TODO: replace with recorded speech.
-            soundhandle.say("Initiating rotation sequence.", voice, volume)
+            sound_client.say("4rotation")
             for rot_idx in np.arange(NUM_ROTATIONS):
 
                 # Safety sleep.
@@ -276,7 +274,6 @@ def stage_four(goal_color):
 
                                 # Try to detect both the QR code and the pattern.
 
-                                # TODO say that map detection started.
                                 qr_detection_serv(1)
                                 digit_detection_serv(1)
                                 doah.approach_procedure_alt()
@@ -294,13 +291,26 @@ def stage_four(goal_color):
 
                                     # TODO say that map has been detected.
                                     # TODO say that classifying colour of ellipse. (same audio file)
+                                    sound_client.say('4detecting')
 
                                     cdt.subscribe()
                                     rospy.sleep(2)
                                     color_classification_result = cdt.get_ellipse_color()
+
+                                    if color_classification_result == 'red':
+                                        sound_client.say("4red")
+                                    if color_classification_result == 'green':
+                                        sound_client.say("4green")
+                                    if color_classification_result == 'blue':
+                                        sound_client.say("4blue")
+                                    if color_classification_result == 'yellow':
+                                        sound_client.say("4yellow")
+                                    if color_classification_result == 'black':
+                                        sound_client.say("4black")
                                     
                                     # If color correct, try to detect map.
                                     if color_classification_result == goal_color:
+                                    sound_client.say('4map_interpretation')
 
                                         # flag that is set to True if there was
                                         # a failed attempt to interpret the map.
@@ -325,7 +335,7 @@ def stage_four(goal_color):
                                             # If map successfuly interpreted, return coordinates.
                                             if res.treasure_x != -999 or res.treasure_y != -999:
 
-                                                # TODO say that map has been found.
+                                                sound_client.say('4map_success')
 
                                                 doah.reverse()  # Reverse to clear robot from wall.
                                                 return res.treasure_x, res.treasure_y

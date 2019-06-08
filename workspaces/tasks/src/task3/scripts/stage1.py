@@ -154,6 +154,7 @@ def stage_one():
     trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
     robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z]) 
 
+    sound_client.say('1intro')
 
     ### /INITIALIZATIONS ###
 
@@ -194,8 +195,7 @@ def stage_one():
             goal_chkpnt_status = GoalStatus.LOST  # Set status for next checkpoint goal.
             ac_chkpnts.send_goal(goal_chkpt) # Send checkpoint goal.
 
-            # TODO play recorded sound.
-            soundhandle.say("Resolving checkpoint {0}".format(checkpoint_ctr), voice, volume)
+            sound_client.say('1next_checkpoint')
 
             # Loop for next checkpoint goal.
             while not goal_chkpnt_status == GoalStatus.SUCCEEDED:
@@ -212,8 +212,7 @@ def stage_one():
 
 
             ## ELLIPSE LOCATING ROTATION ##
-            # TODO: play recorded speech.
-            soundhandle.say("Initiating rotation sequence.", voice, volume)
+            sound_client('1rotation')
 
             for rot_idx in np.arange(NUM_ROTATIONS):
 
@@ -285,8 +284,7 @@ def stage_one():
                                 # If nor QR code nor pattern yet found...
                                 if not classifier_built and not found_pattern:
 
-                                    # TODO say that trying to detect QR code and pattern.
-            			    soundhandle.say("Detecting QR code and pattern.", voice, volume)
+                                    sound_client.say('1detecting_qr_code_and_pattern')
 
                                     # Try to detect both the QR code and the pattern.
                                     qr_detection_serv(1)
@@ -297,21 +295,19 @@ def stage_one():
                                     
                                     # If QR code detected, build classifier.
                                     if qr_detected != '':
-                                        # TODO say that qr code was detected.
-            			    	soundhandle.say("QR code detected.", voice, volume)
+                                        sound_client.say('1qr_code_detected')
 
                                         data_url = qr_detected
                                         clf = clf.fit(data_url)
                                         classifier_built = True
                                     elif found_pattern:
-                                        # TODO say that pattern was detected.
             			    	soundhandle.say("Pattern detected.", voice, volume)
+                                        sound_client.say('1pattern_detected')
 
                                         # If pattern found, flag is set.
                                         print "pattern found"
                                     else:
                                         # TODO say that map was detected.
-            			    	soundhandle.say("Map detected.", voice, volume)
                                         print "map found"
                                
                                 # If QR not yet found...
@@ -319,6 +315,7 @@ def stage_one():
 
                                     # TODO say that trying to detect QR code.
             			    soundhandle.say("Detecting QR code.", voice, volume)
+                                    sound_client.say('1detecting_qr_code')
 
                                     qr_detection_serv(1)
                                     doah.approach_procedure()
@@ -328,8 +325,7 @@ def stage_one():
                                     # If QR code detected:..
                                     if qr_detected != '':
 
-                                        # TODO say that qr code was detected.
-            			    	soundhandle.say("QR code detected.", voice, volume)
+                                        sound_client.say('1qr_code_detected')
 
                                         # Build classifier and classify pattern.
                                         data_url = qr_detected
@@ -341,8 +337,8 @@ def stage_one():
                                 # if pattern not yet found...
                                 elif not found_pattern:
 
-                                    # TODO say that trying to detect pattern.
-            			    soundhandle.say("Detecting pattern.", voice, volume)
+                                    sound_client.say('1detecting_pattern')
+
                                     digit_detection_serv(1)
                                     doah.approach_procedure()
                                     found_pattern = digit_detection_serv(0).result
@@ -350,13 +346,20 @@ def stage_one():
                                     # If pattern detected:
                                     if found_pattern:
 
-                                        # TODO say that pattern was detected.
-            			    	soundhandle.say("Pattern detected.", voice, volume)
-
-					pdb.set_trace()
+                                        sound_client.say('1pattern_detected')
 
                                         # classify patern.
-                                        return clf.predict(np.array(found_pattern)[np.newaxis])[0]
+                                        res = int(clf.predict(np.array(found_pattern)[np.newaxis])[0])
+                                        if res == 0:
+                                            sound_client.say('1zero')
+                                        elif res == 1:
+                                            sound_client.say('1one')
+                                        elif res == 2:
+                                            sound_client.say('1two')
+                                        elif res == 3:
+                                            sound_client.say('1three')
+
+                                        return res
 
 
                                 ### TODO TODO TODO ##########################################################################

@@ -70,8 +70,7 @@ def stage_five(goal_x, goal_y):
     goal_final_status = GoalStatus.LOST  # Set status for final goal.
     ac_final.send_goal(goal_final) # Send goal.
 
-    # TODO replace with recorded speech.
-    soundhandle.say("Resolving final position", voice, volume)
+    sound_client.say("5start")
 
     # Loop for final  goal.
     while not goal_final_status == GoalStatus.SUCCEEDED:
@@ -85,11 +84,10 @@ def stage_five(goal_x, goal_y):
         # Handle abortions - reset goal.
         if goal_final_status == GoalStatus.ABORTED or goal_final_status == GoalStatus.REJECTED:
 
-            # TODO play recorded speech.
             rospy.loginfo("Checkpoint resolution goal aborted")
             goal_final_status = GoalStatus.LOST  # Reset status for final goal.
             ac_final.send_goal(goal_final)  # Send goal.
 
     # HERE if goal reached
-    # TODO play recorded speeh.
-    soundhandle.say("Finished", voice, volume)
+    sound_client.say("5finish")
+
