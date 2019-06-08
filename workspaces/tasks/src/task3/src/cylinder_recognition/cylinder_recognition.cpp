@@ -19,6 +19,7 @@
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include "geometry_msgs/PointStamped.h"
 #include <task3/CylinderLocation.h>
+#include <time.h>
 
 tf2_ros::Buffer tf2_buffer;
 
@@ -165,9 +166,12 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     pcl::PointCloud<PointT>::Ptr cloud_cylinder (new pcl::PointCloud<PointT> ());
     extract.filter (*cloud_cylinder);
 
-    if (cloud_cylinder->points.empty() && cloud_cylinder->points.size() <= CYLINDER_PTS_THRESHOLD) {
+    // if (cloud_cylinder->points.empty() || (cloud_cylinder->points.size() <= CYLINDER_PTS_THRESHOLD)) {
+    if (cloud_cylinder->points.empty() && (cloud_cylinder->points.size() <= CYLINDER_PTS_THRESHOLD)) {
         //// std::cerr << "Can't find the cylindrical component." << std::endl;
     } else {
+
+        const clock_t begin_time = clock();
 
         // Set found flag to true
         found = 1;
@@ -260,6 +264,8 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
         */
 
         ctr += 1;
+
+        std::cerr << float( clock () - begin_time ) /  CLOCKS_PER_SEC << std::endl;
         
 
     }
