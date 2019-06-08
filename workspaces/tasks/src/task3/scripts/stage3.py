@@ -18,6 +18,7 @@ import tf2_geometry_msgs
 from geometry_msgs.msg import Point, Vector3, PoseStamped, Twist
 
 from task3.srv import TerminalApproach
+from task3.srv import ReconfigParams
 from task3.msg import TerminalApproachFeedback, ApproachImageFeedback, SayCommand
 
 from locators.target_marking.targetmarker import TargetMarker
@@ -124,6 +125,17 @@ class Utils:
         self.offset_px = 0  # offset from center accumulator. After successful detection of ring, holds mean offset of detected rings.
         self.depth = 0  # Depth to ring. After successful detection of ring, holds mean depth of detected rings.
 
+        # Initialize parameter setting service.
+        rospy.wait_for_service('reconfig_params')  # Wait for service to come online.
+        self._params_serv = rospy.ServiceProxy('reconfig_params', ReconfigParams)  # Initialize service proxy.
+
+        self._MIN_TRANS_VEL_DEF_VAL = 0.1
+        self._TRANS_STOPPED_VEL_DEF_VAL = 0.1
+        self._MIN_ROT_VEL_DEF_VAL = 0.4
+        self._ROT_STOPPED_VEL_DEF_VAL = 0.4
+
+
+
         self._OFFSET_AGL_INCREMENT = 0.0017098772515631948
         self._DEPTH_COEFF = 1347.0/1.1
 
@@ -132,6 +144,19 @@ class Utils:
 
         # publisher of voice commands.
         self._say_pub = SoundClient()
+
+    def _set_params_for_approach(self):
+        self._params_serv('min_trans_vel', 0.01)
+        self._params_serv('min_rot_vel', 0.01)
+        self._params_serv('trans_stopped_vel', 0.01)
+        self._params_serv('rot_stopped_vel', 0.01)
+
+    def _reset_params(self):
+        self._params_serv('min_trans_vel', self._MIN_TRANS_VEL_DEF_VAL)
+        self._params_serv('min_rot_vel', self._MIN_ROT_VEL_DEF_VAL)
+        self._params_serv('trans_stopped_vel', self._TRANS_STOPPED_VEL_DEF_VAL)
+        self._params_serv('rot_stopped_vel', self._ROT_STOPPED_VEL_DEF_VAL)
+
 
     def detect_ring(self):
         """
@@ -209,6 +234,8 @@ class Utils:
         perform terminal approach to the ring.
         """
 
+        self._set_params_for_approach()
+
         self._tah.subscribe_to_feedback()
         rospy.sleep(self._terminal_approach_duration)
         
@@ -220,6 +247,7 @@ class Utils:
         self._tah.sprint(3.0, forward=False)  # Reverse (to check if ring picked up).
         self.offset_px = 0  # Reset mean offset and depth values.
         self.depth = 0
+        self._reset_params()
 
 
     def mark_ring(self, trans, depth, offset_px):
@@ -323,6 +351,7 @@ def stage_three(goal_color):
         [-0.982367777334, 0.186958685423]])
 
     checkpoint_orientations_backup = checkpoint_orientations.copy()
+
 
     # Initialize sound client.
     sound_client = SoundClient()
