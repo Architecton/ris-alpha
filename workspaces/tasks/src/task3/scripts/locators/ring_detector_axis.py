@@ -245,7 +245,7 @@ class The_Ring:
                     ed.minor_axis = w
                     ed.major_axis = h
                     ed.center_x = int(np.round(outer_elp[0][0]))
-                    ed.center_y = int(np.round(outer_elp[0][1]))
+                    ed.center_y = int(np.round(outer_elp[0][1])) + self.upp_bnd_elps
 
         if (found == 1):
             self.rings_pub.publish(ed)
