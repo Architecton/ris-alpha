@@ -26,6 +26,8 @@
     (:file "_package_QRDetector" :depends-on ("_package"))
     (:file "QRDetector2" :depends-on ("_package_QRDetector2"))
     (:file "_package_QRDetector2" :depends-on ("_package"))
+    (:file "ReconfigParams" :depends-on ("_package_ReconfigParams"))
+    (:file "_package_ReconfigParams" :depends-on ("_package"))
     (:file "RingApproachPoint" :depends-on ("_package_RingApproachPoint"))
     (:file "_package_RingApproachPoint" :depends-on ("_package"))
     (:file "TerminalApproach" :depends-on ("_package_TerminalApproach"))

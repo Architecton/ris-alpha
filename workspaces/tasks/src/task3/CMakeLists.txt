@@ -66,6 +66,7 @@ add_service_files(
   TreasureLocator.srv
   MapDetector.srv
   CylinderLocation.srv
+  ReconfigParams.srv
 )
 
 generate_messages(
