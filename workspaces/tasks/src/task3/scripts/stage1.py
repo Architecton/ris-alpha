@@ -382,4 +382,3 @@ def stage_one():
 
         checkpoint_ctr = 0  # Initialize visited checkpoints counter.
 
-
