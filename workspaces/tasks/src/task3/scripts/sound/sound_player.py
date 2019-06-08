@@ -53,13 +53,15 @@ class SoundPlayer:
         if data.text == '2detecting_qr_code':
              self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/trying_qr.wav', self._volume)
         if data.text == '2red':
-             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/.wav', self._volume)  # TODO
+             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/qr_red.wav', self._volume)
         if data.text == '2green':
-             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/starting_search.wav', self._volume)  # TODO
+             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/qr_green.wav', self._volume)
         if data.text == '2blue':
-             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/starting_search.wav', self._volume)  # TODO
+             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/qr_blue.wav', self._volume)
         if data.text == '2black':
-             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/starting_search.wav', self._volume)  # TODO
+             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/qr_black.wav', self._volume)
+        if data.text == '2next_checkpoint':
+             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/next_checkpoint.wav', self._volume)
 
 	# STAGE 3
         if data.text == '3initialization':
@@ -83,12 +85,14 @@ class SoundPlayer:
 
      
         # STAGE 4
-        if data.text == '2rotation':
+        if data.text == '4rotation':
              self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/rotation.wav', self._volume)
-        if data.text == '2map_interpretation':
+        if data.text == '4map_interpretation':
              self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/trying_map.wav', self._volume)
-        if data.text == '2map_success':
+        if data.text == '4map_success':
              self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/map_success.wav', self._volume)
+        if data.text == '4next_checkpoint':
+             self._soundhandle.playWave('/home/jernej/ris-alpha/workspaces/tasks/src/task3/scripts/sound/next_checkpoint.wav', self._volume)
 
 
 

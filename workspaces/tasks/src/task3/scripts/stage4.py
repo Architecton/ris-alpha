@@ -31,6 +31,8 @@ from sound_play.libsoundplay import SoundClient
 
 from detection_objective_approach.detectionObjectiveApproachHandler import DetectionObjectiveApproachHandler
 
+from sound.sound_client import SoundClient
+
 import time
 import sys
 
@@ -123,6 +125,8 @@ def stage_four(goal_color):
     ellipse_locator = rospy.ServiceProxy('ellipse_locator', EllipseLocator)
     ### /SERVICE PROXY INITIALIZATION ###
 
+    # Initialize sound client.
+    sound_client = SoundClient()
 
 
     # Initialize coordinate transforms buffer.

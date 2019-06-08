@@ -23,6 +23,8 @@ from task3.msg import TerminalApproachFeedback, ApproachImageFeedback, SayComman
 from locators.target_marking.targetmarker import TargetMarker
 from color_classification.colour_detector2 import ColourDetector
 
+from sound.sound_client import SoundClient
+
 import time
 
 import pdb
@@ -324,6 +326,10 @@ def stage_three(goal_color):
         [-0.982367777334, 0.186958685423]])
 
     checkpoint_orientations_backup = checkpoint_orientations.copy()
+
+    # Initialize sound client.
+    sound_client = SoundClient()
+
     
     # Create instance of Utils class.
     ut = Utils(window_size=WINDOW_SIZE, target_center_x=TARGET_CENTER_X, terminal_approach_duration=TERMINAL_APPROACH_DURATION)

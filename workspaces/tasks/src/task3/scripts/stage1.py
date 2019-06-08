@@ -30,8 +30,9 @@ from sound_play.libsoundplay import SoundClient
 from classification.classification import UrlDataClassifier
 from detection_objective_approach.detectionObjectiveApproachHandler import DetectionObjectiveApproachHandler
 
+from sound.sound_client import SoundClient
+
 import time
-import pdb
 import sys
 
 import pdb
@@ -115,6 +116,9 @@ def stage_one():
     rospy.wait_for_service('ellipse_locator')
     ellipse_locator = rospy.ServiceProxy('ellipse_locator', EllipseLocator)
     ### /SERVICE PROXY INITIALIZATION ###
+
+    # Initialize sound client.
+    sound_client = SoundClient()
 
 
     # Initialize coordinate transforms buffer.

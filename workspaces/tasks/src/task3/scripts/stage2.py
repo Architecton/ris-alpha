@@ -29,8 +29,9 @@ from detection_objective_approach.detectionObjectiveApproachHandler import Detec
 
 from color_classification.colour_detector_cyl2 import ColourDetectorCyl
 
+from sound.sound_client import SoundClient
+
 import time
-import pdb
 import sys
 
 import pdb
@@ -112,6 +113,9 @@ def stage_two(goal_color):
     rospy.wait_for_service('cylinder_detector')
     cylinder_detection_serv = rospy.ServiceProxy('cylinder_detector', CylinderLocation)
     ### /SERVICE PROXY INITIALIZATION ###
+
+    # Initialize sound client.
+    sound_client = SoundClient()
 
 
     # Initialize coordinate transforms buffer.
