@@ -105,7 +105,7 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     // The larger the K-search, the more distorted are the point normals on edges (cup edge), but that issue is not a problem for our case
     ne.setSearchMethod (tree);
     ne.setInputCloud (cloud_filtered);
-    ne.setKSearch (50);
+    ne.setKSearch (30);
     ne.compute (*cloud_normals);
 
     // Create the segmentation object for the planar model and set all the parameters
@@ -166,20 +166,20 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     pcl::PointCloud<PointT>::Ptr cloud_cylinder (new pcl::PointCloud<PointT> ());
     extract.filter (*cloud_cylinder);
 
-    // if (cloud_cylinder->points.empty() || (cloud_cylinder->points.size() <= CYLINDER_PTS_THRESHOLD)) {
-    if (cloud_cylinder->points.empty() && (cloud_cylinder->points.size() <= CYLINDER_PTS_THRESHOLD)) {
-        //// std::cerr << "Can't find the cylindrical component." << std::endl;
+    if (cloud_cylinder->points.empty() || (cloud_cylinder->points.size() <= CYLINDER_PTS_THRESHOLD)) {
+        std::cerr << "Can't find the cylindrical component." << std::endl;
     } else {
 
-        const clock_t begin_time = clock();
+        // const clock_t begin_time = clock();
 
         // Set found flag to true
         found = 1;
 
-        std::cerr << "[" << ctr << "]: " << "PointCloud representing the cylindrical component: " << cloud_cylinder->points.size () << " data points." << std::endl;
-          
+        // std::cerr << "[" << ctr << "]: " << "PointCloud representing the cylindrical component: " << cloud_cylinder->points.size () << " data points." << std::endl;
+        std::cerr << "PointCloud representing the cylindrical component: " << cloud_cylinder->points.size () << " data points." << std::endl;
+
         pcl::compute3DCentroid (*cloud_cylinder, centroid);
-        //// std::cerr << "centroid of the cylindrical component: " << centroid[0] << " " <<  centroid[1] << " " <<   centroid[2] << " " <<   centroid[3] << std::endl;
+        std::cerr << "centroid of the cylindrical component: " << centroid[0] << " " <<  centroid[1] << " " <<   centroid[2] << " " <<   centroid[3] << std::endl;
 
         // Create a point in the "camera_rgb_optical_frame"
         geometry_msgs::PointStamped point_camera;
@@ -263,9 +263,9 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
         }
         */
 
-        ctr += 1;
+        // ctr += 1;
 
-        std::cerr << float( clock () - begin_time ) /  CLOCKS_PER_SEC << std::endl;
+        // std::cerr << float( clock () - begin_time ) /  CLOCKS_PER_SEC << std::endl;
         
 
     }
