@@ -174,6 +174,32 @@ class Utils:
         self._subs.unregister()
         return False
 
+    def sidestep(self):
+        """
+        perform a slow rotational movement while classifying color
+        """
+
+        msg = Twist()
+        scan_loop_rate = rospy.Rate(2)
+
+        DURATION = 0.5
+
+        msg.angular.z = 0.1
+        start_time = time.time()
+        while(time.time() - start_time < DURATION):
+            self._rot_pub.publish(msg)  # Publish angular velocity.
+            scan_loop_rate.sleep()
+
+        msg.angular.z = -0.1
+        while(time.time() - start_time < DURATION*2):
+            self._rot_pub.publish(msg)  # Publish angular velocity.
+            scan_loop_rate.sleep()
+
+        msg.angular.z = 0.1
+        while(time.time() - start_time < DURATION):
+            self._rot_pub.publish(msg)  # Publish angular velocity.
+            scan_loop_rate.sleep()
+
 
     def perform_terminal_approach(self):
 
@@ -386,7 +412,7 @@ def stage_three(goal_color):
                             ## CLASSIFY COLOR OF RING ###
 
                             cdt.subscribe()
-                            rospy.sleep(2)
+                            ut.sidestep()
                             color_classification_res == cdt.get_ring_color()
                             ut.say(color_classification_res)
 
@@ -413,7 +439,7 @@ def stage_three(goal_color):
                                 ## CLASSIFY COLOR OF RING ###
     
                                 cdt.subscribe()
-                                rospy.sleep(2)
+                                ut.sidestep()
                                 color_classification_res == cdt.get_ring_color()
                                 ut.say(color_classification_res)
 

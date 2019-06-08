@@ -92,7 +92,7 @@ class ColourDetectorCyl:
 if __name__ == '__main__':
     clf = load('cylinder_colour_classifier.joblib')
     NUM_BINS = 100
-    cdt = ColourDetector(clf, NUM_BINS)
+    cdt = ColourDetectorCyl(clf, NUM_BINS)
     while True:
         cdt.subscribe()
         rospy.sleep(5)

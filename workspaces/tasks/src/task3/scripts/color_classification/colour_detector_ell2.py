@@ -9,7 +9,7 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 
-class ColourDetector:
+class ColourDetectorEll:
     def __init__(self, clf, num_bins):
 	self._feature_gen = ColourFeatureGenerator(num_bins)
 	self._clf = clf
@@ -92,7 +92,7 @@ class ColourDetector:
 if __name__ == '__main__':
     clf = load('ellipse_colour_classifier.joblib')
     NUM_BINS = 100
-    cdt = ColourDetector(clf, NUM_BINS)
+    cdt = ColourDetectorEll(clf, NUM_BINS)
     while True:
         cdt.subscribe()
         rospy.sleep(3)

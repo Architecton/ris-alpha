@@ -281,7 +281,7 @@ def stage_two(goal_color):
                             # TODO say that detecting cylinder color.
 
                             cdt.subscribe()
-                            rospy.sleep(2.0)
+                            cdt.approach_procedure_alt()
                             detected_cylinder_color = cdt.get_cylinder_color()
                             
                             # If detected correct color:
