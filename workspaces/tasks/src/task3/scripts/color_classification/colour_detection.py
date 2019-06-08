@@ -336,8 +336,6 @@ class CylinderImageProcessor:
             The name of colour with most "votes"
         """
 
-	import pdb
-	pdb.set_trace()
         if (self._colour_features_mat.shape[0] > 0):
             predictions = self._clf.predict(self._colour_features_mat)
             (vals, ct) = np.unique(predictions, return_counts=True)

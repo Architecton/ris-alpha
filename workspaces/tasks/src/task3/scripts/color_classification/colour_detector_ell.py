@@ -89,8 +89,8 @@ class ColourDetector:
 
 if __name__ == '__main__':
     rospy.init_node('colour_detection_test', anonymous=True)
-    clf = load('ring_colour_classifier.joblib')
-    NUM_BINS = 10
+    clf = load('ellipse_colour_classifier.joblib')
+    NUM_BINS = 100
     cdt = ColourDetector(clf, NUM_BINS)
     while True:
         cdt.subscribe()
