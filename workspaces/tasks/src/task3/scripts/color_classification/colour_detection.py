@@ -30,7 +30,7 @@ class ColourClassifier:
 
         # Initialize learner.
         # learner = RandomForestClassifier(n_estimators=100, random_state=0, max_depth=5)
-        # learner = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
+        # learner = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(7, 2), random_state=1)
         learner = SVC(gamma='auto')
         # learner = RandomForestClassifier(n_estimators=100, random_state=0, max_depth=5)
         self.clf = learner.fit(self.scaler.transform(data), target)  # Train classifier.
@@ -244,8 +244,6 @@ class RingImageProcessor:
         Returns:
             The name of colour with most "votes"
         """
-	import pdb
-	pdb.set_trace()
         if (self._colour_features_mat.shape[0] > 0):
             predictions = self._clf.predict(self._colour_features_mat)
             (vals, ct) = np.unique(predictions, return_counts=True)

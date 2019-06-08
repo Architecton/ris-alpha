@@ -71,7 +71,7 @@ class ColourDetector:
 
 
     def subscribe(self):
-        self._depth_subscriber = rospy.Subscriber('toroids', ApproachImageFeedback, self._depth_callback)
+        self._depth_subscriber = rospy.Subscriber('elipses', ApproachImageFeedback, self._depth_callback)
         self._img_subscriber = rospy.Subscriber('/camera/rgb/image_raw', Image, self._img_callback)
 
 
