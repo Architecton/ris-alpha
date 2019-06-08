@@ -99,7 +99,7 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     pass.setFilterFieldName ("z");
     pass.setFilterLimits (0, 1.5);
     pass.filter (*cloud_filtered);
-    // std::cerr << "PointCloud after filtering has: " << cloud_filtered->points.size () << " data points." << std::endl;
+    std::cerr << "PointCloud after filtering has: " << cloud_filtered->points.size () << " data points." << std::endl;
 
     // Estimate point normals
     // The larger the K-search, the more distorted are the point normals on edges (cup edge), but that issue is not a problem for our case
@@ -143,6 +143,7 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     extract_normals.setInputCloud (cloud_normals);
     extract_normals.setIndices (inliers_plane);
     extract_normals.filter (*cloud_normals2);
+    std::cerr << "PointCloud after planer emoval has: " << cloud_filtered2->points.size () << " data points." << std::endl;
 
     // Create the segmentation object for cylinder segmentation and set all the parameters
     // TODO: Less iterations
@@ -150,7 +151,11 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     seg.setModelType (pcl::SACMODEL_CYLINDER);
     seg.setMethodType (pcl::SAC_RANSAC);
     seg.setNormalDistanceWeight (0.1);
-    seg.setMaxIterations (3000);
+    // p = 0.99
+    // n = 3
+    // w = 0.21
+    // 99% chance of finding a cylinder even if approx 81% of all points are outliers
+    seg.setMaxIterations (500);
     seg.setDistanceThreshold (0.25);
     seg.setRadiusLimits (0.1, 0.18);
     seg.setInputCloud (cloud_filtered2);
@@ -289,6 +294,8 @@ int main (int argc, char** argv) {
 
     ros::ServiceServer service = nh.advertiseService("cylinder_detector", toggle);
     // Init service named cylinder_detector
+
+    std::cerr << "Inited cylinder detector" << std::endl;
 
     // Spin
     ros::spin ();
