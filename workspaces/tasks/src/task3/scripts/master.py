@@ -6,7 +6,7 @@ from stage2 import stage_two
 from stage3 import stage_three
 
 rospy.init_node('master')
-stage1_color_dict = {0: 'red', 1: 'green', 2: 'blue': 3: 'yellow'}
+stage1_color_dict = {0: 'red', 1: 'green', 2: 'blue', 3: 'yellow'}
 
 # CORRECT RESULTS FOR VARIOUS STAGES
 CORRECT_RESULT_STAGE_ONE = 0  # TODO
@@ -23,7 +23,7 @@ if correction != '':
 
 ###############
 
-
+"""
 
 ## STAGE TWO ##
 
@@ -60,3 +60,5 @@ res4_x, res4_y = stage_four(res2)
 stage_five(res4_x, res4_y)
 
 ################
+
+"""

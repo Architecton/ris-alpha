@@ -9,7 +9,7 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 
-class ColourDetectorEll:
+class ColourDetector:
     def __init__(self, clf, num_bins):
         self._ring_image_processor = RingImageProcessor(clf, num_bins)
         self._ring_image = np.empty(0, dtype=np.uint8)

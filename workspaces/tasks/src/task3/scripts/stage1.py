@@ -282,6 +282,7 @@ def stage_one():
                                 if not classifier_built and not found_pattern:
 
                                     # TODO say that trying to detect QR code and pattern.
+            			    soundhandle.say("Detecting QR code and pattern.", voice, volume)
 
                                     # Try to detect both the QR code and the pattern.
                                     qr_detection_serv(1)
@@ -293,54 +294,65 @@ def stage_one():
                                     # If QR code detected, build classifier.
                                     if qr_detected != '':
                                         # TODO say that qr code was detected.
+            			    	soundhandle.say("QR code detected.", voice, volume)
 
                                         data_url = qr_detected
                                         clf = clf.fit(data_url)
                                         classifier_built = True
                                     elif found_pattern:
                                         # TODO say that pattern was detected.
+            			    	soundhandle.say("Pattern detected.", voice, volume)
 
                                         # If pattern found, flag is set.
                                         print "pattern found"
                                     else:
                                         # TODO say that map was detected.
+            			    	soundhandle.say("Map detected.", voice, volume)
                                         print "map found"
                                
                                 # If QR not yet found...
                                 elif not classifier_built:
 
                                     # TODO say that trying to detect QR code.
+            			    soundhandle.say("Detecting QR code.", voice, volume)
+
                                     qr_detection_serv(1)
                                     doah.approach_procedure()
-                                    qr_detected = qr_detection_serv(0)
+                                    qr_detected = qr_detection_serv(0).res
 
 
                                     # If QR code detected:..
-                                    if qr_detected:
+                                    if qr_detected != '':
 
                                         # TODO say that qr code was detected.
+            			    	soundhandle.say("QR code detected.", voice, volume)
 
                                         # Build classifier and classify pattern.
                                         data_url = qr_detected
                                         clf = clf.fit(data_url)
                                         classifier_built = True
-                                        return clf.predict(found_pattern)
+					pdb.set_trace()
+                                        return clf.predict(np.array(found_pattern)[np.newaxis])[0]
 
                                 # if pattern not yet found...
                                 elif not found_pattern:
 
                                     # TODO say that trying to detect pattern.
+            			    soundhandle.say("Detecting pattern.", voice, volume)
                                     digit_detection_serv(1)
                                     doah.approach_procedure()
-                                    found_pattern = digit_detection_serv(0)
+                                    found_pattern = digit_detection_serv(0).result
                                     
                                     # If pattern detected:
                                     if found_pattern:
 
                                         # TODO say that pattern was detected.
+            			    	soundhandle.say("Pattern detected.", voice, volume)
+
+					pdb.set_trace()
 
                                         # classify patern.
-                                        return clf.predict(found_pattern)
+                                        return clf.predict(np.array(found_pattern)[np.newaxis])[0]
 
 
                                 ### TODO TODO TODO ##########################################################################
@@ -381,5 +393,4 @@ def stage_one():
             checkpoints = np.vstack((checkpoints, checkpoints_nxt))
 
         checkpoint_ctr = 0  # Initialize visited checkpoints counter.
-
 

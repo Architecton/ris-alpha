@@ -59,7 +59,7 @@ class DetectionObjectiveApproachHandler:
 
     def approach_procedure(self):
         GOAL_DIST = 0.15
-        SIDE_ROT_DURATION = 2.0
+        SIDE_ROT_DURATION = 3.0
         REVERSE_DURATION = 0.5
         self._approach(GOAL_DIST)
         self._side_scan(SIDE_ROT_DURATION)
@@ -68,7 +68,7 @@ class DetectionObjectiveApproachHandler:
     # approach procedure without the reversing motion at the end
     def approach_procedure_alt(self):
         GOAL_DIST = 0.15
-        SIDE_ROT_DURATION = 2.0
+        SIDE_ROT_DURATION = 3.0
         REVERSE_DURATION = 0.5
         self._approach(GOAL_DIST)
         self._side_scan(SIDE_ROT_DURATION)

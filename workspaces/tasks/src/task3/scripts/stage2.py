@@ -312,7 +312,7 @@ def stage_two(goal_color):
                             rospy.sleep(1.0)
 
                             # Add found cylinder to matrix of resolved cylinders.
-                            resolved_cyl = np.vstack((resolved_cyl, np.array([cylinder_data[0], cylinder_data[1])))
+                            resolved_cyl = np.vstack((resolved_cyl, np.array([cylinder_data[0], cylinder_data[1]])))
 
             ## /HANDLE CYLINDER DATA COLLECTED IN BUFFER ##
 

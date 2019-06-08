@@ -1,8 +1,10 @@
 #!/usr/bin/env python
+
 import numpy as np
 
 import rospy
 from colour_detection import CylinderImageProcessor
+from colour_detection import RingImageProcessor
 from joblib import load
 from task3.msg import CylinderImageFeedback
 from sensor_msgs.msg import Image
@@ -11,9 +13,10 @@ import cv2
 
 class ColourDetectorCyl:
     def __init__(self, clf, num_bins):
-        self._cylinder_image_processor = CylinderImageProcessor(clf, num_bins)
+        self._cylinder_image_processor = RingImageProcessor(clf, num_bins)
         self._cylinder_image = np.empty(0, dtype=np.uint8)
         self._cv_bridge = CvBridge()
+    	rospy.init_node('colour_detection_cyl_test', anonymous=True)
 
 
     def _depth_callback(self, data):
@@ -28,8 +31,8 @@ class ColourDetectorCyl:
             None
         """
 
-        center_y = data.center_y  # Get y coordinate of center of ring.
-        center_x = data.center_x  # Get x coordinate of center of ring.
+        center_y = data.center_y + 27  # Get y coordinate of center of ring.
+        center_x = data.center_x - 17  # Get x coordinate of center of ring.
         min_axis = data.minor_axis  # Get minor axis of ellipse.
         maj_axis = data.major_axis  # Get major axis of ellipse.
 
@@ -81,16 +84,14 @@ class ColourDetectorCyl:
 
     def get_cylinder_color(self):
         self._unsubscribe()
-        res = self._cylinder_image_processor.get_cylinder_color()
+        res = self._cylinder_image_processor.get_ring_color()
         self._cylinder_image_processor.clear()
         return res
      
 
 if __name__ == '__main__':
-    rospy.init_node('colour_detection_cyl_test', anonymous=True)
-
     clf = load('cylinder_colour_classifier.joblib')
-    NUM_BINS = 10
+    NUM_BINS = 100
     cdt = ColourDetectorCyl(clf, NUM_BINS)
     while True:
         cdt.subscribe()

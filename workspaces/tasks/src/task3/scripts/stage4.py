@@ -319,7 +319,7 @@ def stage_four(goal_color):
                                             res = map_detection_serv(0)
 
                                             # If map successfuly interpreted, return coordinates.
-                                            if res.treasure_x != 0 or res.treasure_y != 0:
+                                            if res.treasure_x != -999 or res.treasure_y != -999:
 
                                                 # TODO say that map has been found.
 

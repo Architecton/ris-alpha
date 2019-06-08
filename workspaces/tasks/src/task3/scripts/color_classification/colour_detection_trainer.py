@@ -209,11 +209,11 @@ if __name__ == '__main__':
     
     # Save classifier.
     print "saving classifier"
-    pdb.set_trace()
     dump(clf, '/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/ring_colour_classifier.joblib') 
     print "saving matrices"
     sio.savemat('training_data.mat', {'data' : trainer._features_mat})
     sio.savemat('training_data_target.mat', { 'data' : trainer._target_vec})
     # print "saving training images"
-    # trainer.save_obj(trainer.training_imgs, 'training_images')
+    pdb.set_trace()
+    trainer.save_obj(trainer.training_imgs, 'training_images')
 
