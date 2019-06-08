@@ -322,7 +322,7 @@ def stage_one():
 
 
                                     # If QR code detected:..
-                                    if qr_detected:
+                                    if qr_detected != '':
 
                                         # TODO say that qr code was detected.
             			    	soundhandle.say("QR code detected.", voice, volume)
