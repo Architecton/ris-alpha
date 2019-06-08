@@ -335,9 +335,15 @@ class CylinderImageProcessor:
         Returns:
             The name of colour with most "votes"
         """
-        predictions = self._clf.predict(self._colour_features_mat)
-        (vals, ct) = np.unique(predictions, return_counts=True)
-        return vals[np.argmax(ct)]
+
+	import pdb
+	pdb.set_trace()
+        if (self._colour_features_mat.shape[0] > 0):
+            predictions = self._clf.predict(self._colour_features_mat)
+            (vals, ct) = np.unique(predictions, return_counts=True)
+            return vals[np.argmax(ct)]
+        else:
+            return -1
 
     def clear(self):
         self._colour_features_mat = np.empty((0, self._num_bins*3), dtype=np.int)  # Matrix for storing features

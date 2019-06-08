@@ -3,7 +3,7 @@
 import numpy as np
 import rospy
 from colour_detection import ColourFeatureGenerator, ColourClassifier
-from task3.msg import ApproachImageFeedback
+from task3.msg import EllipseImageFeedback
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
@@ -146,7 +146,7 @@ class ColourDetectionTrainer:
 
     def subscribe(self):
         # subscribe to topic
-        self._depth_subscriber = rospy.Subscriber('toroids', ApproachImageFeedback, self._depth_callback)
+        self._depth_subscriber = rospy.Subscriber('elipses', EllipseImageFeedback, self._depth_callback)
         self._img_subscriber = rospy.Subscriber('/camera/rgb/image_raw', Image, self._img_callback)
 
     def unsubscribe(self):
@@ -178,7 +178,7 @@ if __name__ == '__main__':
     for colour in trainer.colour_dict.keys():
     
         # Countdown to start of training data recording.
-        countdown_val = 10
+        countdown_val = 3
         while(countdown_val >= 1):
             print("Starting recording of {0} ring training data in:".format(trainer.colour_dict[colour]))
             print("{0}".format(countdown_val))
@@ -189,7 +189,7 @@ if __name__ == '__main__':
         # Set target value, subscribe to topic and initialize recording timeout.
         trainer.set_target(colour)
         trainer.subscribe()
-        recording_timeout = 0.5*60
+        recording_timeout = 0.1*60
 
         # Record training data for specified duration.
         while(recording_timeout >= 1):
@@ -211,10 +211,11 @@ if __name__ == '__main__':
     # Save classifier.
     print "saving classifier"
     pdb.set_trace()
-    dump(clf, '/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/ring_colour_classifier.joblib') 
+    dump(clf, '/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/ellipse_colour_classifier.joblib') 
     print "saving matrices"
-    sio.savemat('training_data.mat', {'data' : trainer._features_mat})
-    sio.savemat('training_data_target.mat', { 'data' : trainer._target_vec})
+    sio.savemat('training_data_ell.mat', {'data' : trainer._features_mat})
+    sio.savemat('training_data_target_ell.mat', { 'data' : trainer._target_vec})
     # print "saving training images"
-    # trainer.save_obj(trainer.training_imgs, 'training_images')
+    pdb.set_trace()
+    trainer.save_obj(trainer.training_imgs, 'training_images')
 

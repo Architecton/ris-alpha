@@ -59,7 +59,6 @@ class ColourDetectionTrainerCyl:
 
 
     def _depth_callback(self, data):
-	print "_depth_callback called"
 
         """
         Callback called when broadcast on topic received.
@@ -168,7 +167,7 @@ if __name__ == '__main__':
     os.system('clear')
    
     # Set number of bins to use
-    NUM_BINS = 10
+    NUM_BINS = 100
     
     # Initialize trainer
     trainer = ColourDetectionTrainerCyl(num_bins=NUM_BINS)
@@ -210,6 +209,8 @@ if __name__ == '__main__':
     # Save classifier.
     dump(clf, '/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/cylinder_colour_classifier.joblib') 
     sio.savemat('training_data_cyl.mat', {'data' : trainer._features_mat})
-    sio.savemat('training_data_target_cyl.mat', { 'data' : trainer._target_vec})
+    sio.savemat('training_data_target_cyl.mat', { 'data' : trainer._target_vec})	
+    pdb.set_trace()
     trainer.save_obj(trainer.training_imgs, 'training_images_cyl')
+
 
