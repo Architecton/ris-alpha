@@ -26,11 +26,11 @@
   (:init
    (&key
     ((:param_name __param_name) "")
-    ((:param_val __param_val) "")
+    ((:param_val __param_val) 0.0)
     )
    (send-super :init)
    (setq _param_name (string __param_name))
-   (setq _param_val (string __param_val))
+   (setq _param_val (float __param_val))
    self)
   (:param_name
    (&optional __param_name)
@@ -43,8 +43,8 @@
    (+
     ;; string _param_name
     4 (length _param_name)
-    ;; string _param_val
-    4 (length _param_val)
+    ;; float64 _param_val
+    8
     ))
   (:serialize
    (&optional strm)
@@ -52,16 +52,16 @@
               (make-string-output-stream (send self :serialization-length)))))
      ;; string _param_name
        (write-long (length _param_name) s) (princ _param_name s)
-     ;; string _param_val
-       (write-long (length _param_val) s) (princ _param_val s)
+     ;; float64 _param_val
+       (sys::poke _param_val (send s :buffer) (send s :count) :double) (incf (stream-count s) 8)
      ;;
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
    (buf &optional (ptr- 0))
    ;; string _param_name
      (let (n) (setq n (sys::peek buf ptr- :integer)) (incf ptr- 4) (setq _param_name (subseq buf ptr- (+ ptr- n))) (incf ptr- n))
-   ;; string _param_val
-     (let (n) (setq n (sys::peek buf ptr- :integer)) (incf ptr- 4) (setq _param_val (subseq buf ptr- (+ ptr- n))) (incf ptr- n))
+   ;; float64 _param_val
+     (setq _param_val (sys::peek buf ptr- :double)) (incf ptr- 8)
    ;;
    self)
   )
@@ -107,7 +107,7 @@
   :super ros::object
   :slots ())
 
-(setf (get task3::ReconfigParams :md5sum-) "ca89989307a87a3268666e3ae28823bb")
+(setf (get task3::ReconfigParams :md5sum-) "64fd125ad82319180ca7fa695a94eece")
 (setf (get task3::ReconfigParams :datatype-) "task3/ReconfigParams")
 (setf (get task3::ReconfigParams :request) task3::ReconfigParamsRequest)
 (setf (get task3::ReconfigParams :response) task3::ReconfigParamsResponse)
@@ -115,21 +115,21 @@
 (defmethod task3::ReconfigParamsRequest
   (:response () (instance task3::ReconfigParamsResponse :init)))
 
-(setf (get task3::ReconfigParamsRequest :md5sum-) "ca89989307a87a3268666e3ae28823bb")
+(setf (get task3::ReconfigParamsRequest :md5sum-) "64fd125ad82319180ca7fa695a94eece")
 (setf (get task3::ReconfigParamsRequest :datatype-) "task3/ReconfigParamsRequest")
 (setf (get task3::ReconfigParamsRequest :definition-)
       "string param_name
-string param_val
+float64 param_val
 ---
 bool success
 
 ")
 
-(setf (get task3::ReconfigParamsResponse :md5sum-) "ca89989307a87a3268666e3ae28823bb")
+(setf (get task3::ReconfigParamsResponse :md5sum-) "64fd125ad82319180ca7fa695a94eece")
 (setf (get task3::ReconfigParamsResponse :datatype-) "task3/ReconfigParamsResponse")
 (setf (get task3::ReconfigParamsResponse :definition-)
       "string param_name
-string param_val
+float64 param_val
 ---
 bool success
 
@@ -137,6 +137,6 @@ bool success
 
 
 
-(provide :task3/ReconfigParams "ca89989307a87a3268666e3ae28823bb")
+(provide :task3/ReconfigParams "64fd125ad82319180ca7fa695a94eece")
 
 

@@ -15,8 +15,8 @@
    (param_val
     :reader param_val
     :initarg :param_val
-    :type cl:string
-    :initform ""))
+    :type cl:float
+    :initform 0.0))
 )
 
 (cl:defclass ReconfigParams-request (<ReconfigParams-request>)
@@ -44,12 +44,15 @@
     (cl:write-byte (cl:ldb (cl:byte 8 16) __ros_str_len) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 24) __ros_str_len) ostream))
   (cl:map cl:nil #'(cl:lambda (c) (cl:write-byte (cl:char-code c) ostream)) (cl:slot-value msg 'param_name))
-  (cl:let ((__ros_str_len (cl:length (cl:slot-value msg 'param_val))))
-    (cl:write-byte (cl:ldb (cl:byte 8 0) __ros_str_len) ostream)
-    (cl:write-byte (cl:ldb (cl:byte 8 8) __ros_str_len) ostream)
-    (cl:write-byte (cl:ldb (cl:byte 8 16) __ros_str_len) ostream)
-    (cl:write-byte (cl:ldb (cl:byte 8 24) __ros_str_len) ostream))
-  (cl:map cl:nil #'(cl:lambda (c) (cl:write-byte (cl:char-code c) ostream)) (cl:slot-value msg 'param_val))
+  (cl:let ((bits (roslisp-utils:encode-double-float-bits (cl:slot-value msg 'param_val))))
+    (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 24) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 32) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 40) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 48) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 56) bits) ostream))
 )
 (cl:defmethod roslisp-msg-protocol:deserialize ((msg <ReconfigParams-request>) istream)
   "Deserializes a message object of type '<ReconfigParams-request>"
@@ -61,14 +64,16 @@
       (cl:setf (cl:slot-value msg 'param_name) (cl:make-string __ros_str_len))
       (cl:dotimes (__ros_str_idx __ros_str_len msg)
         (cl:setf (cl:char (cl:slot-value msg 'param_name) __ros_str_idx) (cl:code-char (cl:read-byte istream)))))
-    (cl:let ((__ros_str_len 0))
-      (cl:setf (cl:ldb (cl:byte 8 0) __ros_str_len) (cl:read-byte istream))
-      (cl:setf (cl:ldb (cl:byte 8 8) __ros_str_len) (cl:read-byte istream))
-      (cl:setf (cl:ldb (cl:byte 8 16) __ros_str_len) (cl:read-byte istream))
-      (cl:setf (cl:ldb (cl:byte 8 24) __ros_str_len) (cl:read-byte istream))
-      (cl:setf (cl:slot-value msg 'param_val) (cl:make-string __ros_str_len))
-      (cl:dotimes (__ros_str_idx __ros_str_len msg)
-        (cl:setf (cl:char (cl:slot-value msg 'param_val) __ros_str_idx) (cl:code-char (cl:read-byte istream)))))
+    (cl:let ((bits 0))
+      (cl:setf (cl:ldb (cl:byte 8 0) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 8) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 32) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 40) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 48) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 56) bits) (cl:read-byte istream))
+    (cl:setf (cl:slot-value msg 'param_val) (roslisp-utils:decode-double-float-bits bits)))
   msg
 )
 (cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<ReconfigParams-request>)))
@@ -79,20 +84,20 @@
   "task3/ReconfigParamsRequest")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<ReconfigParams-request>)))
   "Returns md5sum for a message object of type '<ReconfigParams-request>"
-  "ca89989307a87a3268666e3ae28823bb")
+  "64fd125ad82319180ca7fa695a94eece")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'ReconfigParams-request)))
   "Returns md5sum for a message object of type 'ReconfigParams-request"
-  "ca89989307a87a3268666e3ae28823bb")
+  "64fd125ad82319180ca7fa695a94eece")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<ReconfigParams-request>)))
   "Returns full string definition for message of type '<ReconfigParams-request>"
-  (cl:format cl:nil "string param_name~%string param_val~%~%~%"))
+  (cl:format cl:nil "string param_name~%float64 param_val~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'ReconfigParams-request)))
   "Returns full string definition for message of type 'ReconfigParams-request"
-  (cl:format cl:nil "string param_name~%string param_val~%~%~%"))
+  (cl:format cl:nil "string param_name~%float64 param_val~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:serialization-length ((msg <ReconfigParams-request>))
   (cl:+ 0
      4 (cl:length (cl:slot-value msg 'param_name))
-     4 (cl:length (cl:slot-value msg 'param_val))
+     8
 ))
 (cl:defmethod roslisp-msg-protocol:ros-message-to-list ((msg <ReconfigParams-request>))
   "Converts a ROS message object to a list"
@@ -139,10 +144,10 @@
   "task3/ReconfigParamsResponse")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<ReconfigParams-response>)))
   "Returns md5sum for a message object of type '<ReconfigParams-response>"
-  "ca89989307a87a3268666e3ae28823bb")
+  "64fd125ad82319180ca7fa695a94eece")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'ReconfigParams-response)))
   "Returns md5sum for a message object of type 'ReconfigParams-response"
-  "ca89989307a87a3268666e3ae28823bb")
+  "64fd125ad82319180ca7fa695a94eece")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<ReconfigParams-response>)))
   "Returns full string definition for message of type '<ReconfigParams-response>"
   (cl:format cl:nil "bool success~%~%~%~%"))
