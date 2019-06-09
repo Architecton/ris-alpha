@@ -24,7 +24,6 @@ if correction != '':
    res1 = int(correction)
 
 ###############
-"""
 
 
 ## STAGE TWO ##
@@ -40,12 +39,12 @@ if correction != '':
 
 
 ## STAGE THREE ##
-
 res2 = CORRECT_RESULT_STAGE_TWO
 stage_three(res2)
 
 ################
 
+"""
 
 ## STAGE FOUR ##
 

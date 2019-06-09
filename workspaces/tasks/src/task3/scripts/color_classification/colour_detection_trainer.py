@@ -177,7 +177,7 @@ if __name__ == '__main__':
     for colour in trainer.colour_dict.keys():
     
         # Countdown to start of training data recording.
-        countdown_val = 10
+        countdown_val = 5
         while(countdown_val >= 1):
             print("Starting recording of {0} ring training data in:".format(trainer.colour_dict[colour]))
             print("{0}".format(countdown_val))
@@ -188,7 +188,7 @@ if __name__ == '__main__':
         # Set target value, subscribe to topic and initialize recording timeout.
         trainer.set_target(colour)
         trainer.subscribe()
-        recording_timeout = 0.5*60
+        recording_timeout = 0.1*60
 
         # Record training data for specified duration.
         while(recording_timeout >= 1):
