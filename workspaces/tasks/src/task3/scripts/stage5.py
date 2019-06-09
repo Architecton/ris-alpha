@@ -35,15 +35,6 @@ params:
 
 
 def stage_five(goal_x, goal_y):
-
-    ### INITIALIZATIONS ###
-
-    # Initialize sound node.
-    soundhandle = SoundClient()
-    rospy.sleep(1)
-    voice = 'voice_kal_diphone'
-    volume = 1.0
-
     # Initialize sound client.
     sound_client = SoundClient()
 
@@ -56,8 +47,7 @@ def stage_five(goal_x, goal_y):
 
     ### /INITIALIZATIONS ###
 
-
-
+    rospy.sleep(5)
 
     # Initialize final goal.
     goal_final = MoveBaseGoal()

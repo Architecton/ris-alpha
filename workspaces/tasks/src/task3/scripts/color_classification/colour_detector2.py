@@ -2,7 +2,7 @@
 import numpy as np
 
 import rospy
-from colour_detection import ColourFeatureGenerator
+from colour_detection2 import ColourFeatureGenerator
 from joblib import load
 from task3.msg import ApproachImageFeedback
 from sensor_msgs.msg import Image
@@ -14,8 +14,8 @@ class ColourDetector:
 	self._feature_gen = ColourFeatureGenerator(num_bins)
 	self._clf = clf
         self._ring_image = np.empty(0, dtype=np.uint8)
-        self._cv_bridge = CvBridge()
-
+        self._cv_bridge = CvBridge()	
+        rospy.init_node('test', anonymous=True)
 
     def _depth_callback(self, data):
 
@@ -83,9 +83,12 @@ class ColourDetector:
         self._unsubscribe()
 	features_mat_nxt, _ = self._feature_gen.compute_colour_features()  # Compute next block of the features matrix and target vector.
 	self._feature_gen.clear()
-	predictions = self._clf.predict(features_mat_nxt)
-	(vals, ct) = np.unique(predictions, return_counts=True)
-        return vals[np.argmax(ct)]
+        if features_mat_nxt.size > 0:
+            predictions = self._clf.predict(features_mat_nxt)
+            (vals, ct) = np.unique(predictions, return_counts=True)
+            return vals[np.argmax(ct)]
+        else:
+            return 'fail'
      
 
 if __name__ == '__main__':

@@ -302,7 +302,7 @@ def stage_four(goal_color):
                                         sound_client.say("4black")
                                     
                                     # If color correct, try to detect map.
-                                    if color_classification_result == goal_color:
+                                    if True: #color_classification_result == goal_color:
                                     	sound_client.say('4map_interpretation')
 
                                         # flag that is set to True if there was
@@ -327,6 +327,8 @@ def stage_four(goal_color):
 
                                             # If map successfuly interpreted, return coordinates.
                                             if res.treasure_x != -999 or res.treasure_y != -999:
+                                                import pdb
+                                                pdb.set_trace()
 
                                                 sound_client.say('4map_success')
 
@@ -337,7 +339,7 @@ def stage_four(goal_color):
                                                 doah.reverse()
                                                 failed_attempt = True
                                                 failed_attempt_counter += 1
-                                                if failed_attempt_counter > 5:
+                                                if failed_attempt_counter > 2:
                                                     break
                                     else:
                                         # TODO say that colour is not correct.

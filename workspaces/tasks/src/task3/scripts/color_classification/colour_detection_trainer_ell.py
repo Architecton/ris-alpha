@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 import numpy as np
 import rospy
-from color_classification.colour_detection import ColourFeatureGenerator, ColourClassifier
+from colour_detection2 import ColourFeatureGenerator, ColourClassifier
 from task3.msg import EllipseImageFeedback
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
@@ -31,7 +31,7 @@ class ColourDetectionTrainer:
         self._target = -1  # Initialize target value.
         self._feature_gen = ColourFeatureGenerator(self._num_bins)  # Initialize feature generator instance.
         # self.colour_dict = {0 : "red", 1 : "green", 2 : "blue", 3 : "black", 4: "yellow"}  # Initialize colour dictionary.
-        self.colour_dict = {0 : "yellow", 1 : "blue"}  # Initialize colour dictionary.
+        self.colour_dict = {0 : "red", 1 : "green", 2 : "blue", 3 : "black", 4 : "yellow"}  # Initialize colour dictionary.
         self._learner = ColourClassifier(self.colour_dict)  # Initialize learner.
         self._features_mat = np.empty((0, self._num_bins*3), dtype=np.int)  # Initialize matrix of features.
         self._target_vec = np.empty(0, dtype=np.int)  # Initialize target vector.
@@ -170,7 +170,6 @@ if __name__ == '__main__':
     ###
     
     # Clear terminal.
-    os.system('clear')
    
     # Set number of bins to use
     NUM_BINS = 100
@@ -182,26 +181,24 @@ if __name__ == '__main__':
     for colour in trainer.colour_dict.keys():
     
         # Countdown to start of training data recording.
-        countdown_val = 5
+        countdown_val = 20
         while(countdown_val >= 1):
-            print("Starting recording of {0} ring training data in:".format(trainer.colour_dict[colour]))
+            print("Starting recording of {0} ellipse training data in:".format(trainer.colour_dict[colour]))
             print("{0}".format(countdown_val))
             countdown_val -= 1
             rospy.sleep(1)
-            os.system('clear')
 
         # Set target value, subscribe to topic and initialize recording timeout.
         trainer.set_target(colour)
         trainer.subscribe()
-        recording_timeout = 0.1*60
+        recording_timeout = 0.5*60
 
         # Record training data for specified duration.
         while(recording_timeout >= 1):
-            print("Recording {0} ring training data:".format(trainer.colour_dict[colour]))
+            print("Recording {0} ellipse training data:".format(trainer.colour_dict[colour]))
             print("{0}".format(recording_timeout))
             recording_timeout -= 1
             rospy.sleep(1)
-            os.system('clear')
 
         # Unsubscribe from training data flow topic and get next blocks of
         # features vectors and target vector.
