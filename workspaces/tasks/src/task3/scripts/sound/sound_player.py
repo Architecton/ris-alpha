@@ -72,6 +72,8 @@ class SoundPlayer:
              self._soundhandle.playWave('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/sound/qr_black.wav', self._volume)
         if data.text == '2next_checkpoint':
              self._soundhandle.playWave('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/sound/next_checkpoint.wav', self._volume)
+        if data.text == '2elevator':
+             self._soundhandle.playWave('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/sound/elevator.wav', self._volume)
 
 	# STAGE 3
         if data.text == '3initialization':

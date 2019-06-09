@@ -216,6 +216,7 @@ def stage_two(goal_color):
             ## CYLINDER LOCATING ROTATION ##
             
             sound_client.say('2rotation')
+            sound_client.say('2elevator')
             for rot_idx in np.arange(NUM_ROTATIONS):
 
 
