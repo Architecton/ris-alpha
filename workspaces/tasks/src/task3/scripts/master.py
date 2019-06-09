@@ -10,7 +10,7 @@ rospy.init_node('master')
 stage1_color_dict = {0: 'red', 1: 'green', 2: 'blue', 3: 'yellow'}
 
 # CORRECT RESULTS FOR VARIOUS STAGES
-CORRECT_RESULT_STAGE_ONE = 0  # TODO
+CORRECT_RESULT_STAGE_ONE = 2  # TODO
 CORRECT_RESULT_STAGE_TWO = "blue"  # TODO
 
 """
