@@ -166,6 +166,12 @@ def stage_two(goal_color):
     cyl_buff = np.empty((100, 6), dtype=float)
     ### /CYLINDER LOCATION BUFFER ###
 
+    cylinders = np.array([
+                    [-0.9631, 1.6747, 0.0, 0.0, 0.6751, 0.7377],
+                    [0.9946, 0.4093, 0.0, 0.0, -0.7097, 0.7045],
+                    [2.4220, 0.9757, 0.0, 0.0, -0.2740, 0.9617]
+                ])
+
 
     ### /INITIALIZATIONS ###
 
@@ -252,11 +258,6 @@ def stage_two(goal_color):
 
             ## HANDLE CYLINDER DATA COLLECTED IN BUFFER ##
 
-            cylinders = np.array([
-                            [-0.9631, 1.6747, 0.0, 0.0, 0.6751, 0.7377],
-                            [0.9946, 0.4093, 0.0, 0.0, -0.7097, 0.7045],
-                            [2.4220, 0.9757, 0.0, 0.0, -0.2740, 0.9617]
-                        ])
 
 
             cylinders_xy = cylinders[:, 0:2]
@@ -269,7 +270,8 @@ def stage_two(goal_color):
             cyl_buff[cyl_buff_ptr+1, :] = cylinders[idx_nxt_cyl, :]
             cyl_buff_ptr += 1
              
-
+            import pdb
+            pdb.set_trace()
             # Query into cylinder buffer
             while cyl_buff_ptr >= 0 :  # If data in buffer...
                 cylinder_data = cyl_buff[cyl_buff_ptr, :]
