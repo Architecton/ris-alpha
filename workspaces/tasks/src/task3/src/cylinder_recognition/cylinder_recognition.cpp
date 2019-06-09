@@ -105,7 +105,7 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     // The larger the K-search, the more distorted are the point normals on edges (cup edge), but that issue is not a problem for our case
     ne.setSearchMethod (tree);
     ne.setInputCloud (cloud_filtered);
-    ne.setKSearch (20);
+    ne.setKSearch (200);
     ne.compute (*cloud_normals);
 
     // Create the segmentation object for the planar model and set all the parameters
