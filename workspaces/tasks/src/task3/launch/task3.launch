@@ -14,6 +14,7 @@
 	<node pkg="task3" type="map_recognition.py" name="map_recognition" output="screen" />
 	<node pkg="task3" type="treasure_locator.py" name="treasure_locator" output="screen" />
 	<node pkg="task3" type="reconfig_demo.py" name="reconfig_demo" output="screen" />
+	<node pkg="task3" type="ring_detector_axis.py" name="ring_detector_axis" output="screen" />
 	<node pkg="sound_play" type="soundplay_node.py" name="soundplay_node" output="screen" />
 
 	<node pkg="task3" type="cylinder_recognition" name="cylinder_recognition">

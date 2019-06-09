@@ -4,6 +4,7 @@ import rospy
 from stage1 import stage_one
 from stage2 import stage_two
 from stage3 import stage_three
+from stage4 import stage_four
 import color_classification.colour_detection
 
 rospy.init_node('master')
@@ -26,7 +27,6 @@ if correction != '':
 ###############
 
 
-"""
 ## STAGE TWO ##
 
 res1 = CORRECT_RESULT_STAGE_ONE
@@ -37,7 +37,6 @@ if correction != '':
 
 ###############
 
-"""
 
 ## STAGE THREE ##
 res2 = CORRECT_RESULT_STAGE_TWO
@@ -45,10 +44,11 @@ stage_three(res2)
 
 ################
 
+"""
 
 ## STAGE FOUR ##
 
-# res2 = CORRECT_RESULT_STAGE_TWO
+res2 = CORRECT_RESULT_STAGE_TWO
 
 # NOTE: no corrections here!
 res4_x, res4_y = stage_four(res2)
@@ -56,6 +56,7 @@ res4_x, res4_y = stage_four(res2)
 ################
 
 
+"""
 
 ## STAGE FIVE ##
 

@@ -33,6 +33,8 @@ from detection_objective_approach.detectionObjectiveApproachHandler import Detec
 
 from sound.sound_client import SoundClient
 
+from joblib import load
+
 import time
 import sys
 
@@ -60,12 +62,6 @@ def stage_four(goal_color):
 
     # Initialize main node.
     # rospy.init_node('main')
-
-    # Initialize sound node.
-    soundhandle = SoundClient()
-    rospy.sleep(1)
-    voice = 'voice_kal_diphone'
-    volume = 1.0
 
     # /// publishers ///
     # Define publisher for ellipse search rotations.
@@ -97,7 +93,7 @@ def stage_four(goal_color):
     tm = TargetMarker()
     
     # Initialize colour detector.
-    clf = load('ellipse_colour_classifier.joblib')
+    clf = load('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/ellipse_colour_classifier.joblib')
     NUM_BINS = 100
     cdt = ColourDetectorEll(clf, NUM_BINS) 
 
@@ -143,9 +139,6 @@ def stage_four(goal_color):
 
     # Number of checkpoints to generate.
     NUM_CHECKPOINTS = 8
-
-    # Notify that search has started.
-    soundhandle.say("Starting search.", voice, volume)
 
     # Call checkpoints generating service to get generated checkpoints.
     checkpoints_res = checkpoint_gen(NUM_CHECKPOINTS)
@@ -310,7 +303,7 @@ def stage_four(goal_color):
                                     
                                     # If color correct, try to detect map.
                                     if color_classification_result == goal_color:
-                                    sound_client.say('4map_interpretation')
+                                    	sound_client.say('4map_interpretation')
 
                                         # flag that is set to True if there was
                                         # a failed attempt to interpret the map.

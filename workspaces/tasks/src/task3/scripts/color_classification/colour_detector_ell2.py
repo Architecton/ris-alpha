@@ -15,7 +15,7 @@ class ColourDetectorEll:
 	self._clf = clf
         self._ring_image = np.empty(0, dtype=np.uint8)
         self._cv_bridge = CvBridge()
-    	rospy.init_node('colour_detection_test', anonymous=True)
+    	#rospy.init_node('colour_detection_test', anonymous=True)
 
 
     def _depth_callback(self, data):
@@ -80,7 +80,7 @@ class ColourDetectorEll:
         self._img_subscriber.unregister()
 
 
-    def get_ring_color(self):
+    def get_ellipse_color(self):
         self._unsubscribe()
 	features_mat_nxt, _ = self._feature_gen.compute_colour_features()  # Compute next block of the features matrix and target vector.
 	self._feature_gen.clear()

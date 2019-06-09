@@ -242,11 +242,11 @@ class Utils:
         rospy.sleep(self._terminal_approach_duration)
         
         # Go straight to pick up ring.
-        SPRINT_DURATION = 7
+        SPRINT_DURATION = 15
         self._tah.sprint(SPRINT_DURATION, forward=True)  # Final run to pick up the ring.
         self._tah.unsubscribe_from_feedback()
         self.say('verifying')
-        self._tah.sprint(3.0, forward=False)  # Reverse (to check if ring picked up).
+        self._tah.sprint(4.0, forward=False)  # Reverse (to check if ring picked up).
         self.offset_px = 0  # Reset mean offset and depth values.
         self.depth = 0
         self._reset_params()
@@ -272,14 +272,14 @@ class Utils:
         # Transform approach goal position to map coordinate system.
         pos_ring_transformed = tf2_geometry_msgs.do_transform_pose(pos_ring, trans)
 
-        self._tm.push_position(np.array([pos_ring_transformed.pose.position.x, pos_ring_transformed.pose.position.y]), 'green')
+        # self._tm.push_position(np.array([pos_ring_transformed.pose.position.x, pos_ring_transformed.pose.position.y]), 'green')
 
 
     def mark_trail(self, trans):
         """
         Mark trail of robot.
         """
-        self._tm.push_position(np.array([trans.transform.translation.x, trans.transform.translation.y]), 'blue')
+        # self._tm.push_position(np.array([trans.transform.translation.x, trans.transform.translation.y]), 'blue')
 
     def say(self, text):
         """
@@ -322,7 +322,7 @@ def stage_three(goal_color):
 
     # Initialize ring colour detector instance.
     clf = load('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/ring_colour_classifier.joblib')
-    NUM_BINS = 10
+    NUM_BINS = 100
     cdt = ColourDetector(clf, NUM_BINS)
 
     # Initialize action client
@@ -444,7 +444,7 @@ def stage_three(goal_color):
 
                             cdt.subscribe()
                             ut.sidestep()
-                            color_classification_res == cdt.get_ring_color()
+                            color_classification_res = cdt.get_ring_color()
                             sound_client.say('3' + color_classification_res)
 
                             # If correct color, perform terminal approach, else break 
