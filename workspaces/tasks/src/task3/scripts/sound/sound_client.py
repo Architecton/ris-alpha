@@ -10,5 +10,6 @@ class SoundClient:
     def say(self, data):
         msg = SayCommand()
         msg.text = data
+        rospy.sleep(0.8)
         self._say_pub.publish(msg)
 
