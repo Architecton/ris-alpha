@@ -44,7 +44,7 @@ class DetectionObjectiveApproachHandler:
         msg = Twist()
         msg.linear.x = 0.1 
         start_time = time.time()
-        while self._dist_to_wall > goal_dist && time.time() - start_time < DURATION_FORWARD:
+        while self._dist_to_wall > goal_dist and time.time() - start_time < DURATION_FORWARD:
             self._vel_pub.publish(msg)
         self._dist_to_wall = 100 
         self._laser_sub.unregister()

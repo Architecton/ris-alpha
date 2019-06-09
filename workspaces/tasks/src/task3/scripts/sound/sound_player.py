@@ -2,7 +2,7 @@
 
 import rospy
 from sound_play.libsoundplay import SoundClient
-from task2.msg import SayCommand
+from task3.msg import SayCommand
 
 class SoundPlayer:
 

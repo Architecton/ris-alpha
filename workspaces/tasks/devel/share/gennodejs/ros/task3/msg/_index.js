@@ -1,34 +1,34 @@
 
 "use strict";
 
-let ValidRegionsMapResponse = require('./ValidRegionsMapResponse.js');
-let Checkpoints = require('./Checkpoints.js');
-let TreasureLocatorResponse = require('./TreasureLocatorResponse.js');
-let CheckpointProcessorResponse = require('./CheckpointProcessorResponse.js');
-let RingData = require('./RingData.js');
-let ApproachImageFeedback = require('./ApproachImageFeedback.js');
-let EllipseImageFeedback = require('./EllipseImageFeedback.js');
 let CylinderImageFeedback = require('./CylinderImageFeedback.js');
-let TerminalApproachFeedback = require('./TerminalApproachFeedback.js');
-let EllipseData = require('./EllipseData.js');
+let TreasureLocatorResponse = require('./TreasureLocatorResponse.js');
 let SayCommand = require('./SayCommand.js');
 let RingApproachPointResponse = require('./RingApproachPointResponse.js');
-let ScanFlag = require('./ScanFlag.js');
+let CheckpointProcessorResponse = require('./CheckpointProcessorResponse.js');
+let TerminalApproachFeedback = require('./TerminalApproachFeedback.js');
 let CylinderData = require('./CylinderData.js');
+let RingData = require('./RingData.js');
+let EllipseImageFeedback = require('./EllipseImageFeedback.js');
+let ApproachImageFeedback = require('./ApproachImageFeedback.js');
+let ScanFlag = require('./ScanFlag.js');
+let EllipseData = require('./EllipseData.js');
+let Checkpoints = require('./Checkpoints.js');
+let ValidRegionsMapResponse = require('./ValidRegionsMapResponse.js');
 
 module.exports = {
-  ValidRegionsMapResponse: ValidRegionsMapResponse,
-  Checkpoints: Checkpoints,
-  TreasureLocatorResponse: TreasureLocatorResponse,
-  CheckpointProcessorResponse: CheckpointProcessorResponse,
-  RingData: RingData,
-  ApproachImageFeedback: ApproachImageFeedback,
-  EllipseImageFeedback: EllipseImageFeedback,
   CylinderImageFeedback: CylinderImageFeedback,
-  TerminalApproachFeedback: TerminalApproachFeedback,
-  EllipseData: EllipseData,
+  TreasureLocatorResponse: TreasureLocatorResponse,
   SayCommand: SayCommand,
   RingApproachPointResponse: RingApproachPointResponse,
-  ScanFlag: ScanFlag,
+  CheckpointProcessorResponse: CheckpointProcessorResponse,
+  TerminalApproachFeedback: TerminalApproachFeedback,
   CylinderData: CylinderData,
+  RingData: RingData,
+  EllipseImageFeedback: EllipseImageFeedback,
+  ApproachImageFeedback: ApproachImageFeedback,
+  ScanFlag: ScanFlag,
+  EllipseData: EllipseData,
+  Checkpoints: Checkpoints,
+  ValidRegionsMapResponse: ValidRegionsMapResponse,
 };
