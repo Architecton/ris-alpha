@@ -15,4 +15,9 @@
 	<node pkg="task3" type="reconfig_demo.py" name="reconfig_demo" output="screen" />
 	<node pkg="sound_play" type="soundplay_node.py" name="soundplay_node" output="screen" />
 
+	<node pkg="task3" type="cylinder_recognition" name="cylinder_recognition">
+            <remap from="input" to="/camera/depth_registered/points"/>
+	</node>
+
+
 </launch>
