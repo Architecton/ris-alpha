@@ -105,7 +105,7 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     // The larger the K-search, the more distorted are the point normals on edges (cup edge), but that issue is not a problem for our case
     ne.setSearchMethod (tree);
     ne.setInputCloud (cloud_filtered);
-    ne.setKSearch (30);
+    ne.setKSearch (20);
     ne.compute (*cloud_normals);
 
     // Create the segmentation object for the planar model and set all the parameters
@@ -157,7 +157,7 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     // 99% chance of finding a cylinder even if approx 81% of all points are outliers
     seg.setMaxIterations (1500);
     seg.setDistanceThreshold (0.25);
-    seg.setRadiusLimits (0.1, 0.18);
+    seg.setRadiusLimits (0.11, 0.15);
     seg.setInputCloud (cloud_filtered2);
     seg.setInputNormals (cloud_normals2);
 
@@ -268,7 +268,7 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
         while (c == -1) {
             c = getchar();
         }
-        */
+       */ 
 
         // ctr += 1;
 
