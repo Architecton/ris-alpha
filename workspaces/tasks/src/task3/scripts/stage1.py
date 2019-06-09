@@ -142,6 +142,9 @@ def stage_one():
     # Allocate array for storing checkpoints.
     checkpoints = np.empty((0, 3), dtype=float)
 
+    # Dictionary for mapping target values to colors.
+    color_dict = None
+
     # Add checkpoints to matrix.
     for point in checkpoints_res.points.points:
         checkpoints_nxt = np.array([[point.x, point.y, point.z]])
@@ -298,7 +301,7 @@ def stage_one():
                                         sound_client.say('1qr_code_detected')
 
                                         data_url = qr_detected
-                                        clf = clf.fit(data_url)
+                                        clf, color_dict = clf.fit(data_url)
                                         classifier_built = True
                                     elif found_pattern:
             			    	soundhandle.say("Pattern detected.", voice, volume)
@@ -329,10 +332,9 @@ def stage_one():
 
                                         # Build classifier and classify pattern.
                                         data_url = qr_detected
-                                        clf = clf.fit(data_url)
+                                        clf, color_dict = clf.fit(data_url)
                                         classifier_built = True
-					pdb.set_trace()
-                                        return clf.predict(np.array(found_pattern)[np.newaxis])[0]
+                                        return color_dict[int(clf.predict(np.array(found_pattern)[np.newaxis])[0])]
 
                                 # if pattern not yet found...
                                 elif not found_pattern:
@@ -349,7 +351,7 @@ def stage_one():
                                         sound_client.say('1pattern_detected')
 
                                         # classify patern.
-                                        res = int(clf.predict(np.array(found_pattern)[np.newaxis])[0])
+                                        res = color_dict[int(clf.predict(np.array(found_pattern)[np.newaxis])[0])]
                                         if res == 0:
                                             sound_client.say('1zero')
                                         elif res == 1:
