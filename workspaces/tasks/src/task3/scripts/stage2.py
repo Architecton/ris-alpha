@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 
 ### IMPORTS ###
+
+import sys
+
+sys.path.append('..')
+
 import numpy as np
 import roslib
 roslib.load_manifest('task3')
@@ -9,6 +14,10 @@ import sensor_msgs.msg
 import actionlib
 from actionlib_msgs.msg import GoalStatus
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
+
+from joblib import load
+
+import color_classification.colour_detection
 
 import tf2_ros
 import tf2_geometry_msgs
@@ -31,8 +40,9 @@ from color_classification.colour_detector_cyl2 import ColourDetectorCyl
 
 from sound.sound_client import SoundClient
 
+from joblib import load
+
 import time
-import sys
 
 import pdb
 
@@ -54,8 +64,6 @@ def stage_two(goal_color):
 
     ### INITIALIZATIONS ###
 
-    # Initialize main node.
-    # rospy.init_node('main')
 
     # Initialize sound node.
     soundhandle = SoundClient()
@@ -66,7 +74,8 @@ def stage_two(goal_color):
 
     # Initialize cylinder colour detector.
     NUM_BINS = 10
-    clf = load('cylinder_colour_classifier.joblib')
+    pdb.set_trace()
+    clf = load('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/cylinder_colour_classifier.joblib')
     cdt = ColourDetectorCyl(clf, NUM_BINS)
 
 

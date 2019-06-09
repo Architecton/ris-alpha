@@ -31,6 +31,8 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_ros
 )
 
+catkin_python_setup()
+
 ## Find catkin packages
 add_message_files(
    FILES
@@ -121,5 +123,6 @@ catkin_package(
     Eigen
     PCL
 )
+
 
 add_executable (cylinder_recognition src/cylinder_recognition/cylinder_recognition.cpp)

@@ -2,7 +2,7 @@
 
 import numpy as np
 import rospy
-from colour_detection import ColourFeatureGenerator, ColourClassifier
+from color_classification.colour_detection import ColourFeatureGenerator, ColourClassifier
 from task3.msg import ApproachImageFeedback
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError

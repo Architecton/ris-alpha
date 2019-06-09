@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
+
 import numpy as np
 import rospy
-from colour_detection import ColourFeatureGenerator, ColourClassifier
+from color_classification.colour_detection import ColourFeatureGenerator, ColourClassifier
 from task3.msg import EllipseImageFeedback
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
+
 
 import pickle
 
@@ -190,7 +193,7 @@ if __name__ == '__main__':
         # Set target value, subscribe to topic and initialize recording timeout.
         trainer.set_target(colour)
         trainer.subscribe()
-        recording_timeout = 0.3*60
+        recording_timeout = 0.1*60
 
         # Record training data for specified duration.
         while(recording_timeout >= 1):

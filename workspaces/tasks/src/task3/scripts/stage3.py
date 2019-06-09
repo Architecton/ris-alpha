@@ -26,6 +26,8 @@ from color_classification.colour_detector2 import ColourDetector
 
 from sound.sound_client import SoundClient
 
+from joblib import load
+
 import time
 
 import pdb
@@ -319,7 +321,7 @@ def stage_three(goal_color):
     ################
 
     # Initialize ring colour detector instance.
-    clf = load('ring_colour_classifier.joblib')
+    clf = load('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/ring_colour_classifier.joblib')
     NUM_BINS = 10
     cdt = ColourDetector(clf, NUM_BINS)
 

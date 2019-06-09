@@ -4,13 +4,14 @@ import rospy
 from stage1 import stage_one
 from stage2 import stage_two
 from stage3 import stage_three
+import color_classification.colour_detection
 
 rospy.init_node('master')
 stage1_color_dict = {0: 'red', 1: 'green', 2: 'blue', 3: 'yellow'}
 
 # CORRECT RESULTS FOR VARIOUS STAGES
 CORRECT_RESULT_STAGE_ONE = 0  # TODO
-CORRECT_RESULT_STAGE_TWO = 0  # TODO
+CORRECT_RESULT_STAGE_TWO = "blue"  # TODO
 
 """
 ## STAGE ONE ##
@@ -34,13 +35,13 @@ correction = raw_input("Press enter if output of Stage 2 is OK, else enter corre
 if correction != '':
     res2 = correction
 
+"""
 ###############
 
-"""
 
 ## STAGE THREE ##
 
-# res2 = CORRECT_RESULT_STAGE_TWO
+res2 = CORRECT_RESULT_STAGE_TWO
 stage_three(res2)
 
 ################
