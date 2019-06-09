@@ -232,8 +232,8 @@ class The_Ring:
                     ed.found = 1
   
         if (ed.found == 1):
-            #self.rings_pub.publish(ed)
-            pass
+            self.rings_pub.publish(ed)
+            # pass
 
         self.in_process = 0
 
@@ -242,8 +242,8 @@ class The_Ring:
         # print(endTime - timestamp)
 
         # DEVONLY: Visualize camera output
-        cv2.imshow('Live feed', img_original)
-        cv2.waitKey(1)
+        # cv2.imshow('Live feed', img_original)
+        # cv2.waitKey(1)
 
     def scan_callback(self, data):
         if(self.in_process == 0):
