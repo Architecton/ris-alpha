@@ -35,7 +35,7 @@ float x_a = -1.0f;
 float y_a = -1.0f;
 float z_a = -1.0f;
 
-const int CYLINDER_PTS_THRESHOLD = 16000;
+// const int CYLINDER_PTS_THRESHOLD = 16000;
 
 bool toggle(task3::CylinderLocation::Request  &req, task3::CylinderLocation::Response &res) {
 
