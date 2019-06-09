@@ -270,84 +270,82 @@ def stage_two(goal_color):
 
             # Query into cylinder buffer
             while cyl_buff_ptr >= 0 :  # If data in buffer...
-                cylinder_data = cyl_buff[cyl_buff_ptr]
+                cylinder_data = cyl_buff[cyl_buff_ptr, :]
                 cyl_buff_ptr -= 1
-                if not np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([cylinder_data[0], cylinder_data[1]]), resolved_cyl[:, :2]) < DISTINCT_CYL_THRESH):
+                cyl_buff = np.delete(cyl_buff, (idx_nxt_cyl), axis=0)
 
-                    ### DEBUGGING VISUALIZATION ###
-                    # tm.push_position(np.array(cylinder_data[:3]))
-                    ### /DEBUGGING VISUALIZATION ###
+                ### DEBUGGING VISUALIZATION ###
+                # tm.push_position(np.array(cylinder_data[:3]))
+                ### /DEBUGGING VISUALIZATION ###
 
-                    # Initialize goal to aproach new cylinder
-                    goal_cyl = MoveBaseGoal()
-                    goal_cyl.target_pose.header.frame_id = "map"
-                    goal_cyl.target_pose.header.stamp = rospy.Time.now()
-                    goal_cyl.target_pose.pose.position.x = cylinder_data[0]
-                    goal_cyl.target_pose.pose.position.y = cylinder_data[1]
-                    goal_cyl.target_pose.pose.orientation.x = cylinder_data[2]
-                    goal_cyl.target_pose.pose.orientation.y = cylinder_data[3]
-                    goal_cyl.target_pose.pose.orientation.z = cylinder_data[4]
-                    goal_cyl.target_pose.pose.orientation.w = cylinder_data[5]
-                    goal_nxt_cyl_status = GoalStatus.LOST
+                # Initialize goal to aproach new cylinder
+                goal_cyl = MoveBaseGoal()
+                goal_cyl.target_pose.header.frame_id = "map"
+                goal_cyl.target_pose.header.stamp = rospy.Time.now()
+                goal_cyl.target_pose.pose.position.x = cylinder_data[0]
+                goal_cyl.target_pose.pose.position.y = cylinder_data[1]
+                goal_cyl.target_pose.pose.orientation.x = cylinder_data[2]
+                goal_cyl.target_pose.pose.orientation.y = cylinder_data[3]
+                goal_cyl.target_pose.pose.orientation.z = cylinder_data[4]
+                goal_cyl.target_pose.pose.orientation.w = cylinder_data[5]
+                goal_nxt_cyl_status = GoalStatus.LOST
 
-                    # Send cylinder resolution goal.
-                    ac_cylinders.send_goal(goal_cyl)
+                # Send cylinder resolution goal.
+                ac_cylinders.send_goal(goal_cyl)
 
-                    while not goal_nxt_cyl_status == GoalStatus.SUCCEEDED:
-                        ac_cylinders.wait_for_result(rospy.Duration(0.5))
-                        goal_nxt_cyl_status = ac_cylinders.get_state()
+                while not goal_nxt_cyl_status == GoalStatus.SUCCEEDED:
+                    ac_cylinders.wait_for_result(rospy.Duration(0.5))
+                    goal_nxt_cyl_status = ac_cylinders.get_state()
 
-                        if goal_nxt_cyl_status == GoalStatus.ABORTED or goal_nxt_cyl_status == GoalStatus.REJECTED:
-                            rospy.loginfo("Cylinder resolution goal aborted")
-                            break
-                        elif goal_nxt_cyl_status == GoalStatus.SUCCEEDED:
+                    if goal_nxt_cyl_status == GoalStatus.ABORTED or goal_nxt_cyl_status == GoalStatus.REJECTED:
+                        rospy.loginfo("Cylinder resolution goal aborted")
+                        break
+                    elif goal_nxt_cyl_status == GoalStatus.SUCCEEDED:
 
 
-                            ### TODO TODO TODO ##########################################################################
+                        ### TODO TODO TODO ##########################################################################
 
-                            # Detect cylinder color.
+                        # Detect cylinder color.
 
-                            sound_client.say('2detecting')
+                        sound_client.say('2detecting')
 
-                            cdt.subscribe()
-                            doah.approach_procedure_alt()
-                            detected_cylinder_color = cdt.get_cylinder_color()
+                        cdt.subscribe()
+                        doah.approach_procedure_alt()
+                        detected_cylinder_color = cdt.get_cylinder_color()
 
-                            if detected_cylinder_color == 'red':
-                                sound_client.say('2red_cyl')
-                            if detected_cylinder_color == 'green':
-                                sound_client.say('2green_cyl')
-                            if detected_cylinder_color == 'blue':
-                                sound_client.say('2blue_cyl')
-                            if detected_cylinder_color == 'yellow':
-                                sound_client.say('2yellow_cyl')
-                            
-                            # If detected correct color:
-                            if detected_cylinder_color == goal_color:
-                                sound_client.say('2detecting_qr_code')
+                        if detected_cylinder_color == 'red':
+                            sound_client.say('2red_cyl')
+                        if detected_cylinder_color == 'green':
+                            sound_client.say('2green_cyl')
+                        if detected_cylinder_color == 'blue':
+                            sound_client.say('2blue_cyl')
+                        if detected_cylinder_color == 'yellow':
+                            sound_client.say('2yellow_cyl')
+                        
+                        # If detected correct color:
+                        if detected_cylinder_color == goal_color:
+                            sound_client.say('2detecting_qr_code')
 
-                                res = ''
-                                while res == '':
+                            res = ''
+                            while res == '':
 
-                                    # Try to detect qr code on cylinder.
-                                    qr_detection_serv(1)
-                                    doah.approach_procedure()
-                                    res = qr_detection_serv(0).res
+                                # Try to detect qr code on cylinder.
+                                qr_detection_serv(1)
+                                doah.approach_procedure()
+                                res = qr_detection_serv(0).res
 
-                                    # If detected, return found color.
-                                    if res != '':
-                                        if res == 'red':
-                                            sound_client.say('2red')
-                                        elif res == 'green':
-                                            sound_client.say('2green')
-                                        elif res == 'blue':
-                                            sound_client.say('2blue')
-                                        elif res == 'black':
-                                            sound_client.say('2black')
+                                # If detected, return found color.
+                                if res != '':
+                                    if res == 'red':
+                                        sound_client.say('2red')
+                                    elif res == 'green':
+                                        sound_client.say('2green')
+                                    elif res == 'blue':
+                                        sound_client.say('2blue')
+                                    elif res == 'black':
+                                        sound_client.say('2black')
 
-                                        return res
-                            else:
-                                pass
+                                    return res
 
 
 

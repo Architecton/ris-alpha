@@ -26,6 +26,7 @@ if correction != '':
 ###############
 
 
+"""
 ## STAGE TWO ##
 
 res1 = CORRECT_RESULT_STAGE_ONE
@@ -34,9 +35,9 @@ correction = raw_input("Press enter if output of Stage 2 is OK, else enter corre
 if correction != '':
     res2 = correction
 
-"""
 ###############
 
+"""
 
 ## STAGE THREE ##
 res2 = CORRECT_RESULT_STAGE_TWO
@@ -44,7 +45,6 @@ stage_three(res2)
 
 ################
 
-"""
 
 ## STAGE FOUR ##
 
