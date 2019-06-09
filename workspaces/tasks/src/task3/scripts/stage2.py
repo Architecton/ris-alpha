@@ -74,7 +74,6 @@ def stage_two(goal_color):
 
     # Initialize cylinder colour detector.
     NUM_BINS = 10
-    pdb.set_trace()
     clf = load('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/cylinder_colour_classifier.joblib')
     cdt = ColourDetectorCyl(clf, NUM_BINS)
 
