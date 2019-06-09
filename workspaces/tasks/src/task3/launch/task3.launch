@@ -7,6 +7,7 @@
 	<node pkg="task3" type="extract_qr.py" name="extract_qr" output="screen" />
 	<node pkg="task3" type="extract_qr2.py" name="extract_qr2" output="screen" />
 	<node pkg="task3" type="extract_digits.py" name="extract_digits" output="screen" />
+	<node pkg="task3" type="extract_cylinder.py" name="extract_cylinder" output="screen" />
 	<node pkg="task3" type="master.py" name="master" output="screen" />
 	<node pkg="task3" type="sound_player.py" name="sound_player" output="screen" />
 	<node pkg="task3" type="terminal_approach.py" name="terminal_approach" output="screen" />

@@ -93,7 +93,7 @@ def stage_two(goal_color):
     rotation_dur_callib = 0.3 # Constant used to calibrate rotation duration.
     # Duration for which to publish specified rotation velocity to get rotation_agl angle.
     rotation_dur = (rotation_agl/ROTATION_SPEED_X)*rotation_dur_callib 
-    ROTATION_SLEEP_DURATION = 1.0
+    ROTATION_SLEEP_DURATION = 2.0
     rot = Twist()
     rot.angular.x = ROTATION_SPEED_X
     rot.angular.y = ROTATION_SPEED_Y
