@@ -73,7 +73,7 @@ def stage_two(goal_color):
 
 
     # Initialize cylinder colour detector.
-    NUM_BINS = 10
+    NUM_BINS = 100
     clf = load('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/cylinder_colour_classifier.joblib')
     cdt = ColourDetectorCyl(clf, NUM_BINS)
 
@@ -222,7 +222,7 @@ def stage_two(goal_color):
                 # Sleep and wait for service to scan robot's image processing stream for cylinders.
                 rospy.sleep(ROTATION_SLEEP_DURATION)
                 cylinder_detection_res = cylinder_detection_serv(0)
-                if cylinder_detection_res.flg == 1:
+                if cylinder_detection_res.found == 1:
                     trans_scan_pos = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
                     cyl_approach_goal_nxt = np.array([cylinder_detection_res.x_a, 
                                                       cylinder_detection_res.y_a, 
@@ -231,7 +231,7 @@ def stage_two(goal_color):
                                                       trans_scan_pos.transform.rotation.z, 
                                                       trans_scan_pos.transform.rotation.w])
                     cyl_buff[cyl_buff_ptr+1, :] = cyl_approach_goal_nxt
-                    cyl_buff += 1
+                    cyl_buff_ptr += 1
             
                 ## IMAGE PROCESSING STREAM SCAN END ###
 
@@ -249,6 +249,8 @@ def stage_two(goal_color):
 
 
             ## HANDLE CYLINDER DATA COLLECTED IN BUFFER ##
+            
+             
 
             # Query into cylinder buffer
             while cyl_buff_ptr >= 0 :  # If data in buffer...
@@ -292,7 +294,7 @@ def stage_two(goal_color):
                             sound_client.say('2detecting')
 
                             cdt.subscribe()
-                            cdt.approach_procedure_alt()
+                            doah.approach_procedure_alt()
                             detected_cylinder_color = cdt.get_cylinder_color()
 
                             if detected_cylinder_color == 'red':

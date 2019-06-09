@@ -372,7 +372,7 @@ def stage_three(goal_color):
     sound_client.say('3starting_search')
 
     # Wait for map cache to fill.
-    # rospy.sleep(5)
+    rospy.sleep(5)
 
     while True:
         # While there are unresolved checkpoints.
