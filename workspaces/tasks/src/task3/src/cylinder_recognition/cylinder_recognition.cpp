@@ -155,9 +155,9 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     // n = 3
     // w = 0.21
     // 99% chance of finding a cylinder even if approx 81% of all points are outliers
-    seg.setMaxIterations (1000);
+    seg.setMaxIterations (800);
     seg.setDistanceThreshold (0.25);
-    seg.setRadiusLimits (0.1, 0.18);
+    seg.setRadiusLimits (0.1, 0.16);
     seg.setInputCloud (cloud_filtered2);
     seg.setInputNormals (cloud_normals2);
 
