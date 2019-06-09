@@ -124,6 +124,7 @@ class ColourFeatureGenerator:
             hist_g, _ = np.histogram(img_nxt[:, :, 1], bins=self._num_bins)
             hist_r, _ = np.histogram(img_nxt[:, :, 2], bins=self._num_bins)
             feature = np.hstack((hist_b, hist_g, hist_r))  # Compute feature from channel histograms.
+            feature = feature/np.sum(feature)
             colour_features_mat[img_idx, :] = feature  # Add feature to features matrix.
             target[img_idx] = self._target_dict[img_idx]  # Add target value to vector of target values.
 
@@ -148,6 +149,7 @@ class ColourFeatureGenerator:
             hist_g, _ = np.histogram(img_nxt[:, :, 1], bins=self._num_bins)
             hist_r, _ = np.histogram(img_nxt[:, :, 2], bins=self._num_bins)
             feature = np.hstack((hist_b, hist_g, hist_r))  # Compute feature from channel histograms.
+            feature = feature/np.sum(feature)
             colour_features_mat[img_idx, :] = feature  # Add feature to features matrix.
 
         return colour_features_mat  # Return matrix of feature vectors and target values
@@ -211,7 +213,8 @@ class RingImageProcessor:
         hist_b, _ = np.histogram(cropped_img[:, :, 0], bins=self._num_bins)
         hist_g, _ = np.histogram(cropped_img[:, :, 1], bins=self._num_bins)
         hist_r, _ = np.histogram(cropped_img[:, :, 2], bins=self._num_bins)
-        return np.hstack((hist_r, hist_g, hist_b))  # Return computed colour feature.
+        feature = np.hstack((hist_r, hist_g, hist_b))  # Return computed colour feature.
+        return feature/np.sum(feature)
 
     def img_to_feature(self, img, l_u, r_d):
         """
@@ -300,7 +303,8 @@ class CylinderImageProcessor:
         hist_b, _ = np.histogram(cropped_img_hsv[:, :, 0], bins=self._num_bins)
         hist_g, _ = np.histogram(cropped_img_hsv[:, :, 1], bins=self._num_bins)
         hist_r, _ = np.histogram(cropped_img_hsv[:, :, 2], bins=self._num_bins)
-        return np.hstack((hist_r, hist_g, hist_b))  # Return computed colour feature.
+        feature = np.hstack((hist_r, hist_g, hist_b))  # Return computed colour feature.
+        return feature/np.sum(feature)
 
     def img_to_feature(self, img, l_u, r_d):
         """
