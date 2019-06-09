@@ -93,7 +93,7 @@ def stage_two(goal_color):
     rotation_dur_callib = 0.3 # Constant used to calibrate rotation duration.
     # Duration for which to publish specified rotation velocity to get rotation_agl angle.
     rotation_dur = (rotation_agl/ROTATION_SPEED_X)*rotation_dur_callib 
-    ROTATION_SLEEP_DURATION = 2.0
+    ROTATION_SLEEP_DURATION = 1.0
     rot = Twist()
     rot.angular.x = ROTATION_SPEED_X
     rot.angular.y = ROTATION_SPEED_Y
@@ -222,6 +222,7 @@ def stage_two(goal_color):
                 # Sleep and wait for service to scan robot's image processing stream for cylinders.
                 rospy.sleep(ROTATION_SLEEP_DURATION)
                 cylinder_detection_res = cylinder_detection_serv(0)
+                """
                 if cylinder_detection_res.found == 1:
                     trans_scan_pos = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
                     cyl_approach_goal_nxt = np.array([cylinder_detection_res.x_a, 
@@ -232,6 +233,7 @@ def stage_two(goal_color):
                                                       trans_scan_pos.transform.rotation.w])
                     cyl_buff[cyl_buff_ptr+1, :] = cyl_approach_goal_nxt
                     cyl_buff_ptr += 1
+                """
             
                 ## IMAGE PROCESSING STREAM SCAN END ###
 
@@ -249,7 +251,21 @@ def stage_two(goal_color):
 
 
             ## HANDLE CYLINDER DATA COLLECTED IN BUFFER ##
-            
+
+            cylinders = np.array([
+                 [-0.9631, 1.6747, 0.0, 0.0, 0.6751, 0.7377],
+                 [0.9946, 0.4093, 0.0, 0.0, -0.7097, 0.7045],
+                 [2.4220, 0.9757, 0.0, 0.0, -0.6853, 0.7282]])
+
+            cylinders_xy = cylinders[:, 0:2]
+
+            RAD = 5.0
+            trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
+            robot_pos_ref = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z])
+            idx_nxt_cyl = np.argmin((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(robot_pos_ref[0:2], cylinders_xy))
+
+            cyl_buff[cyl_buff_ptr+1, :] = cylinders[idx_nxt_cyl, :]
+            cyl_buff_ptr += 1
              
 
             # Query into cylinder buffer
