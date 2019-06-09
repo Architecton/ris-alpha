@@ -172,7 +172,8 @@ void cloud_cb (const pcl::PCLPointCloud2ConstPtr& cloud_blob) {
     pcl::PointCloud<PointT>::Ptr cloud_cylinder (new pcl::PointCloud<PointT> ());
     extract.filter (*cloud_cylinder);
 
-    if (cloud_cylinder->points.empty() || (cloud_cylinder->points.size() <= CYLINDER_PTS_THRESHOLD)) {
+    // if (cloud_cylinder->points.empty() || (cloud_cylinder->points.size() <= CYLINDER_PTS_THRESHOLD)) {
+    if(cloud_cylinder->points.empty()) {
         std::cerr << "Can't find the cylindrical component." << std::endl;
     } else {
 

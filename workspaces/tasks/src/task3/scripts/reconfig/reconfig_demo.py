@@ -17,7 +17,7 @@ class Reconfig:
         rospy.init_node('reconfig_service', anonymous=True)
 
         # Init reconfiguration client
-        self.client = dynamic_reconfigure.client.Client('/cmd_vel_mux')
+        self.client = dynamic_reconfigure.client.Client('/move_base/DWAPlannerROS')
         # self.client = dynamic_reconfigure.client.Client('/dwa_local_planner_params') 
 
         # Init service callback
