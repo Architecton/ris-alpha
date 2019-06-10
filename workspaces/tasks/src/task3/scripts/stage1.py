@@ -79,13 +79,13 @@ def stage_one():
     ### ROTATION PARAMETERS ###
     NUM_ROTATIONS = 8
     rotation_agl = 2*np.pi/float(NUM_ROTATIONS)
-    ROTATION_SPEED_X = 1.0
-    ROTATION_SPEED_Y = 1.0
-    ROTATION_SPEED_Z = 1.0
+    ROTATION_SPEED_X = 1.5
+    ROTATION_SPEED_Y = 1.5
+    ROTATION_SPEED_Z = 1.5
     rotation_dur_callib = 0.3 # Constant used to calibrate rotation duration.
     # Duration for which to publish specified rotation velocity to get rotation_agl angle.
     rotation_dur = (rotation_agl/ROTATION_SPEED_X)*rotation_dur_callib 
-    ROTATION_SLEEP_DURATION = 1.0
+    ROTATION_SLEEP_DURATION = 0.5
     rot = Twist()
     rot.angular.x = ROTATION_SPEED_X
     rot.angular.y = ROTATION_SPEED_Y

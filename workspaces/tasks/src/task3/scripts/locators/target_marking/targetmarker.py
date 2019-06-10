@@ -16,7 +16,7 @@ from geometry_msgs.msg import Point, Vector3, PoseStamped
 
 class TargetMarker():
     def __init__(self):  
-        self.target_pub = rospy.Publisher('robot_trail', MarkerArray, queue_size=100)  # Initialize target publisher that publishes to /robot_trail topic.
+        self.target_pub = rospy.Publisher('ellipse_markers', MarkerArray, queue_size=100)  # Initialize target publisher that publishes to /robot_trail topic.
 
         # Initialize buffer for storing targets to mark.
         self.target_buff = np.zeros((0, 3), dtype=float)
@@ -24,7 +24,7 @@ class TargetMarker():
         # Define and initialize message counter.
         self.message_counter = 0
 
-    def push_position(self, pos):
+    def push_position(self, pos, color):
         try:
             self.target_buff = np.vstack((self.target_buff, pos))  # pos should be a numpy 1x3 array.
         except Exception as e:
@@ -44,7 +44,14 @@ class TargetMarker():
                 marker.lifetime = rospy.Time(0)
                 marker.id = id_ctr  # Set marker's id.
                 marker.scale = Vector3(0.1, 0.1, 0.1)  # Set scale of marker.
-                marker.color = ColorRGBA(1, 1, 0, 1)  # Set color of marker.
+                if color == 'yellow':
+                    marker.color = ColorRGBA(1, 1, 0, 1)  # Set color of marker.
+                elif color == 'green':
+                    marker.color = ColorRGBA(0, 1, 0, 1)  # Set color of marker.
+                elif color == 'blue':
+                    marker.color = ColorRGBA(0, 0, 1, 1)  # Set color of marker.
+                elif color == 'red':
+                    marker.color = ColorRGBA(1, 0, 0, 1)  # Set color of marker.
                 markers.markers.append(marker)  # Append marker to array of markers.
                 id_ctr = id_ctr + 1  # Increment id counter.
 
