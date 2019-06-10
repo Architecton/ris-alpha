@@ -13,7 +13,7 @@ stage1_color_dict = {0: 'red', 1: 'green', 2: 'blue', 3: 'yellow'}
 
 # CORRECT RESULTS FOR VARIOUS STAGES
 CORRECT_RESULT_STAGE_ONE = 2  # TODO
-CORRECT_RESULT_STAGE_TWO = "blue"  # TODO
+CORRECT_RESULT_STAGE_TWO = "green"  # TODO
 
 ## STAGE ONE ##
 
@@ -36,16 +36,17 @@ if correction != '':
 
 ###############
 
+
 ## STAGE THREE ##
-#res2 = CORRECT_RESULT_STAGE_TWO
+# res2 = CORRECT_RESULT_STAGE_TWO
 stage_three(res2)
 
 ################
 
-
 ## STAGE FOUR ##
 
 # NOTE: no corrections here!
+# res2 = CORRECT_RESULT_STAGE_TWO
 res4_x, res4_y = stage_four(res2)
 
 ################
