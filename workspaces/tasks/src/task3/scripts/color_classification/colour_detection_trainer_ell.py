@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 import numpy as np
 import rospy
-from colour_detection2 import ColourFeatureGenerator, ColourClassifier
+from color_classification.colour_detection2 import ColourFeatureGenerator, ColourClassifier
 from task3.msg import EllipseImageFeedback
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError

@@ -22,7 +22,7 @@ from task3.srv import ReconfigParams
 from task3.msg import TerminalApproachFeedback, ApproachImageFeedback, SayCommand
 
 from locators.target_marking.targetmarker import TargetMarker
-from color_classification.colour_detector2 import ColourDetector
+from color_classification.colour_detector_ring2 import ColourDetectorRing
 
 from sound.sound_client import SoundClient
 
@@ -322,7 +322,7 @@ def stage_three(goal_color):
 
     # Initialize ring colour detector instance.
     clf = load('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/ring_colour_classifier.joblib')
-    NUM_BINS = 100
+    NUM_BINS = 50
     cdt = ColourDetector(clf, NUM_BINS)
 
     # Initialize action client

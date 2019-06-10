@@ -94,7 +94,7 @@ def stage_four(goal_color):
     
     # Initialize colour detector.
     clf = load('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/ellipse_colour_classifier.joblib')
-    NUM_BINS = 100
+    NUM_BINS = 50
     cdt = ColourDetectorEll(clf, NUM_BINS) 
 
     # Initialize action clients

@@ -9,13 +9,13 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 
-class ColourDetector:
+class ColourDetectorRing:
     def __init__(self, clf, num_bins):
 	self._feature_gen = ColourFeatureGenerator(num_bins)
 	self._clf = clf
         self._ring_image = np.empty(0, dtype=np.uint8)
         self._cv_bridge = CvBridge()	
-        #rospy.init_node('test', anonymous=True)
+        rospy.init_node('test', anonymous=True)
 
     def _depth_callback(self, data):
 
@@ -93,10 +93,10 @@ class ColourDetector:
 
 if __name__ == '__main__':
     clf = load('ring_colour_classifier.joblib')
-    NUM_BINS = 100
-    cdt = ColourDetector(clf, NUM_BINS)
+    NUM_BINS = 50
+    cdt = ColourDetectorRing(clf, NUM_BINS)
     while True:
         cdt.subscribe()
-        rospy.sleep(3)
+        rospy.sleep(2)
         print cdt.get_ring_color()
 
