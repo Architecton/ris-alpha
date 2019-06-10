@@ -12,5 +12,5 @@ class SoundClient:
         msg.text = data
         rospy.sleep(0.8)
         self._say_pub.publish(msg)
-        rospy.sleep(3)
+        rospy.sleep(1)
 

@@ -1,36 +1,36 @@
 
 "use strict";
 
-let CheckpointProcessor = require('./CheckpointProcessor.js')
+let ColourClassificationSrv = require('./ColourClassificationSrv.js')
+let DigitDetector = require('./DigitDetector.js')
+let Checkpoint_res = require('./Checkpoint_res.js')
+let ReconfigParams = require('./ReconfigParams.js')
 let QRDetector2 = require('./QRDetector2.js')
 let TerminalApproach = require('./TerminalApproach.js')
-let FeatureBuilder = require('./FeatureBuilder.js')
-let EllipseLocator = require('./EllipseLocator.js')
-let QRDetector = require('./QRDetector.js')
-let Checkpoint_res = require('./Checkpoint_res.js')
+let CheckpointProcessor = require('./CheckpointProcessor.js')
 let TreasureLocator = require('./TreasureLocator.js')
-let CylinderLocation = require('./CylinderLocation.js')
-let RingApproachPoint = require('./RingApproachPoint.js')
-let DigitDetector = require('./DigitDetector.js')
 let MapDetector = require('./MapDetector.js')
-let ReconfigParams = require('./ReconfigParams.js')
-let ColourClassificationSrv = require('./ColourClassificationSrv.js')
 let ValidRegionsMap = require('./ValidRegionsMap.js')
+let FeatureBuilder = require('./FeatureBuilder.js')
+let CylinderLocation = require('./CylinderLocation.js')
+let EllipseLocator = require('./EllipseLocator.js')
+let RingApproachPoint = require('./RingApproachPoint.js')
+let QRDetector = require('./QRDetector.js')
 
 module.exports = {
-  CheckpointProcessor: CheckpointProcessor,
+  ColourClassificationSrv: ColourClassificationSrv,
+  DigitDetector: DigitDetector,
+  Checkpoint_res: Checkpoint_res,
+  ReconfigParams: ReconfigParams,
   QRDetector2: QRDetector2,
   TerminalApproach: TerminalApproach,
-  FeatureBuilder: FeatureBuilder,
-  EllipseLocator: EllipseLocator,
-  QRDetector: QRDetector,
-  Checkpoint_res: Checkpoint_res,
+  CheckpointProcessor: CheckpointProcessor,
   TreasureLocator: TreasureLocator,
-  CylinderLocation: CylinderLocation,
-  RingApproachPoint: RingApproachPoint,
-  DigitDetector: DigitDetector,
   MapDetector: MapDetector,
-  ReconfigParams: ReconfigParams,
-  ColourClassificationSrv: ColourClassificationSrv,
   ValidRegionsMap: ValidRegionsMap,
+  FeatureBuilder: FeatureBuilder,
+  CylinderLocation: CylinderLocation,
+  EllipseLocator: EllipseLocator,
+  RingApproachPoint: RingApproachPoint,
+  QRDetector: QRDetector,
 };
