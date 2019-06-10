@@ -334,7 +334,7 @@ def stage_one():
                                         data_url = qr_detected
                                         clf, color_dict = clf.fit(data_url)
                                         classifier_built = True
-                                        return color_dict[int(clf.predict(np.array(found_pattern)[np.newaxis])[0])]
+                                        return int(clf.predict(np.array(found_pattern)[np.newaxis])[0])
 
                                 # if pattern not yet found...
                                 elif not found_pattern:
@@ -351,7 +351,7 @@ def stage_one():
                                         sound_client.say('1pattern_detected')
 
                                         # classify patern.
-                                        res = color_dict[int(clf.predict(np.array(found_pattern)[np.newaxis])[0])]
+                                        res = int(clf.predict(np.array(found_pattern)[np.newaxis])[0])
                                         if res == 0:
                                             sound_client.say('1zero')
                                         elif res == 1:
