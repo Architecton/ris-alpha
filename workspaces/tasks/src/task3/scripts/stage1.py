@@ -60,13 +60,6 @@ def stage_one():
     # Initialize main node.
     # rospy.init_node('main')
 
-    # Initialize sound node.
-    soundhandle = SoundClient()
-    rospy.sleep(1)
-    voice = 'voice_kal_diphone'
-    volume = 1.0
-
-
     # /// publishers ///
     # Define publisher for ellipse search rotations.
     rotation_pub = rospy.Publisher('/cmd_vel_mux/input/navi', Twist, queue_size=10)
@@ -215,7 +208,7 @@ def stage_one():
 
 
             ## ELLIPSE LOCATING ROTATION ##
-            sound_client('1rotation')
+            sound_client.say('1rotation')
 
             for rot_idx in np.arange(NUM_ROTATIONS):
 
@@ -304,7 +297,6 @@ def stage_one():
                                         clf, color_dict = clf.fit(data_url)
                                         classifier_built = True
                                     elif found_pattern:
-            			    	soundhandle.say("Pattern detected.", voice, volume)
                                         sound_client.say('1pattern_detected')
 
                                         # If pattern found, flag is set.
@@ -317,7 +309,6 @@ def stage_one():
                                 elif not classifier_built:
 
                                     # TODO say that trying to detect QR code.
-            			    soundhandle.say("Detecting QR code.", voice, volume)
                                     sound_client.say('1detecting_qr_code')
 
                                     qr_detection_serv(1)
@@ -368,7 +359,7 @@ def stage_one():
 
 
                                 # Sleep
-                                rospy.sleep(1.0)
+                                rospy.sleep(0.5)
 
                                 # Add found ellipse to matrix of resolved ellipses.
                                 resolved_ell = np.vstack((resolved_ell, np.array([ellipse_data[0], ellipse_data[1], ellipse_data[3], ellipse_data[4], ellipse_data[5], ellipse_data[6]])))
