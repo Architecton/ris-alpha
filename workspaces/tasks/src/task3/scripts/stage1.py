@@ -93,6 +93,9 @@ def stage_one():
     ac_chkpnts = actionlib.SimpleActionClient("move_base", MoveBaseAction)
     ac_ellipses = actionlib.SimpleActionClient("move_base", MoveBaseAction)
 
+    # Initialize list of detected ellipses (hints for stage 4)
+    detected_ellipses_list = np.empty(0, dtype=object)
+
     # Initialize detection objective approach handler instance.
     doah = DetectionObjectiveApproachHandler()
 
@@ -144,7 +147,7 @@ def stage_one():
         checkpoints = np.vstack((checkpoints, checkpoints_nxt))
 
     checkpoint_ctr = 0  # Initialize visited checkpoints counter.
-
+Add goal to list of goals and 
     # Get robot position in map coordinates.
     rospy.sleep(5)  # Wait for cache to fill.
     trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
@@ -263,7 +266,8 @@ def stage_one():
                         goal_ell.target_pose.pose.orientation.w = ellipse_data[9]
                         goal_nxt_ell_status = GoalStatus.LOST
 
-                        # Send ellipse resolution goal.
+                        # Add goal to list of goals and send ellipse resolution goal.
+                        np.append(detected_ellipses_list, goal_ell)
                         ac_ellipses.send_goal(goal_ell)
 
                         while not goal_nxt_ell_status == GoalStatus.SUCCEEDED:
@@ -325,7 +329,7 @@ def stage_one():
                                         data_url = qr_detected
                                         clf, color_dict = clf.fit(data_url)
                                         classifier_built = True
-                                        return int(clf.predict(np.array(found_pattern)[np.newaxis])[0])
+                                        return int(clf.predict(np.array(found_pattern)[np.newaxis])[0]), detected_ellipses_list
 
                                 # if pattern not yet found...
                                 elif not found_pattern:
@@ -352,7 +356,7 @@ def stage_one():
                                         elif res == 3:
                                             sound_client.say('1three')
 
-                                        return res
+                                        return res, detected_ellipses_list
 
 
                                 ### TODO TODO TODO ##########################################################################

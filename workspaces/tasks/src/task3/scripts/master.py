@@ -12,12 +12,13 @@ rospy.init_node('master')
 stage1_color_dict = {0: 'red', 1: 'green', 2: 'blue', 3: 'yellow'}
 
 # CORRECT RESULTS FOR VARIOUS STAGES
-CORRECT_RESULT_STAGE_ONE = 2  # TODO
-CORRECT_RESULT_STAGE_TWO = "green"  # TODO
+CORRECT_RESULT_STAGE_ONE = 2
+CORRECT_RESULT_STAGE_TWO = "green"
+
 
 ## STAGE ONE ##
 
-res1 = stage_one()
+res1, hint_stage4 = stage_one()
 print("Output of stage_one is {0} ({1}).".format(res1, stage1_color_dict[res1]))
 print("Press enter if output of Stage 1 is OK, else enter correct color:")
 correction = raw_input("0: 'red', 1: 'green', 2: 'blue', 3: 'yellow'")
@@ -25,6 +26,9 @@ if correction != '':
    res1 = int(correction)
 
 ###############
+
+
+
 
 ## STAGE TWO ##
 
@@ -37,23 +41,27 @@ if correction != '':
 ###############
 
 
+
+
+
 ## STAGE THREE ##
 # res2 = CORRECT_RESULT_STAGE_TWO
 stage_three(res2)
 
 ################
 
+
+
+
+
+
 ## STAGE FOUR ##
 
-# NOTE: no corrections here!
 # res2 = CORRECT_RESULT_STAGE_TWO
-res4_x, res4_y = stage_four(res2)
+res4_x, res4_y = stage_four(res2, hint_stage4)
 
 ################
 
-
-# res4_x = -1.0
-# res4_y = 1.5
 
 ## STAGE FIVE ##
 
