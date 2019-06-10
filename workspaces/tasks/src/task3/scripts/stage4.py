@@ -162,6 +162,8 @@ def stage_four(goal_color, hints_list):
 
     ## HINTS RESOLUTION ###################################################
 
+    sound_client.say('4resolving_hints')
+
     for goal_ell in hints_list:
 
         # Add ellipse to matrix of resolved ellipse data.

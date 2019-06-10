@@ -279,8 +279,6 @@ Add goal to list of goals and
                                 break
                             elif goal_nxt_ell_status == GoalStatus.SUCCEEDED:
 
-                                ### TODO TODO TODO ##########################################################################
-
                                 # If nor QR code nor pattern yet found...
                                 if not classifier_built and not found_pattern:
 
@@ -300,6 +298,7 @@ Add goal to list of goals and
                                         data_url = qr_detected
                                         clf, color_dict = clf.fit(data_url)
                                         classifier_built = True
+
                                     elif found_pattern:
                                         sound_client.say('1pattern_detected')
 
