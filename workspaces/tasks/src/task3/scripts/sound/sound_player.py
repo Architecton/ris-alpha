@@ -43,7 +43,7 @@ class SoundPlayer:
              self._soundhandle.playWave('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/sound/three.wav', self._volume)
         if data.text == '1rotation':
              self._soundhandle.playWave('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/sound/rotation.wav', self._volume)
-        if data.text == '1next_teckpoint':
+        if data.text == '1next_checkpoint':
              self._soundhandle.playWave('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/sound/next_checkpoint.wav', self._volume)
 
 
