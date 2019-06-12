@@ -179,7 +179,7 @@ def callback(data):
             
             c = 0.83
             # alternative: b = a*k + m
-            #k = np.tan(data.perp_agl[ell_idx])
+            # k = np.tan(data.perp_agl[ell_idx])
             #m = pos_nxt.pose.position.y - k*pos_nxt.pose.position.y 
             # m = data.perp_y_itrcpt[ell_idx]
 

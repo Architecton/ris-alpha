@@ -40,7 +40,7 @@ class DetectionObjectiveApproachHandler:
 
     def _approach(self, goal_dist):
         self._laser_sub = rospy.Subscriber("/scan", LaserScan, self._scan_callback)
-        DURATION_FORWARD = 3.0
+        DURATION_FORWARD = 6.0
         msg = Twist()
         msg.linear.x = 0.1 
         start_time = time.time()

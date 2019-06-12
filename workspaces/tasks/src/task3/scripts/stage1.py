@@ -70,12 +70,12 @@ def stage_one():
 
 
     ### ROTATION PARAMETERS ###
-    NUM_ROTATIONS = 10
+    NUM_ROTATIONS = 8
     rotation_agl = 2*np.pi/float(NUM_ROTATIONS)
-    ROTATION_SPEED_X = 1.5
-    ROTATION_SPEED_Y = 1.5
-    ROTATION_SPEED_Z = 1.5
-    rotation_dur_callib = 0.1 # Constant used to calibrate rotation duration.
+    ROTATION_SPEED_X = 1.0
+    ROTATION_SPEED_Y = 1.0
+    ROTATION_SPEED_Z = 1.0
+    rotation_dur_callib = 0.01 # Constant used to calibrate rotation duration.
     # Duration for which to publish specified rotation velocity to get rotation_agl angle.
     rotation_dur = (rotation_agl/ROTATION_SPEED_X)*rotation_dur_callib 
     ROTATION_SLEEP_DURATION = 0.8
@@ -263,7 +263,7 @@ def stage_one():
                         goal_nxt_ell_status = GoalStatus.LOST
 
                         # Add goal to list of goals and send ellipse resolution goal.
-                        np.append(detected_ellipses_list, goal_ell)
+                        detected_ellipses_list = np.append(detected_ellipses_list, goal_ell)
                         ac_ellipses.send_goal(goal_ell)
 
                         while not goal_nxt_ell_status == GoalStatus.SUCCEEDED:
@@ -291,9 +291,6 @@ def stage_one():
                                     if qr_detected != '':
                                         sound_client.say('1qr_code_detected')
                                         
-                                        import pdb
-                                        pdb.set_trace()
-
                                         data_url = qr_detected
                                         clf = clf.fit(data_url)
                                         classifier_built = True
