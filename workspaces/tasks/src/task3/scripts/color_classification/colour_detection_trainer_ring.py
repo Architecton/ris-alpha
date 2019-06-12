@@ -92,6 +92,7 @@ class ColourDetectionTrainer:
    	    self.training_imgs[self._training_img_counter] = self._ring_image[center_y-min_axis/2:center_y+min_axis/2, center_x-maj_axis/2:center_x+maj_axis/2]
 	    self._training_img_counter += 1
 
+
     def _img_callback(self, data):
 
         """
@@ -168,7 +169,7 @@ if __name__ == '__main__':
     os.system('clear')
    
     # Set number of bins to use
-    NUM_BINS = 100
+    NUM_BINS = 50
     
     # Initialize trainer
     trainer = ColourDetectionTrainer(num_bins=NUM_BINS)

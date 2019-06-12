@@ -391,7 +391,7 @@ def stage_four(goal_color, hints_list):
                                         sound_client.say("4black")
                                     
                                     # If color correct, try to detect map.
-                                    if color_classification_result == goal_color:
+                                    if True: #color_classification_result == goal_color:
                                     	sound_client.say('4map_interpretation')
 
                                         # flag that is set to True if there was
