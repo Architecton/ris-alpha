@@ -198,7 +198,7 @@ class The_Ring:
             cv2.ellipse(img_original[self.upp_bnd_elps:self.low_bnd_elps, 0:len(img_original)], e1, (0, 255, 0), 2)
             cv2.ellipse(img_original[self.upp_bnd_elps:self.low_bnd_elps, 0:len(img_original)], e2, (0, 255, 0), 2)
 
-            center = (e1[0][0], e1[0][1] + self.upp_bnd_elps)
+            center = (np.max(e1[0][0]-20, 0), e1[0][1] + self.upp_bnd_elps)
 
             # DEVONLY: Drawing center
             # cv2.line(img_original, (int(center[0]), int(center[1])), (int(center[0]), int(center[1])), (0, 0, 255), 10)
