@@ -208,7 +208,7 @@ class The_Ring:
             if (self.scan_ranges != None and center[0] >= 0.0 and center[0] <= len(self.scan_ranges)):
                 x = np.int64(round(center[0]))
                 agl = self.scan_angle_min + center[0] * self.scan_angle_increment
-                dpt = self.scan_ranges[x-15] if (x-15 >= 0.0 and (x-15) < len(self.scan_ranges)) else np.nan
+                dpt = self.scan_ranges[x] if (x >= 0.0 and x < len(self.scan_ranges)) else np.nan
                 if not(np.isnan(dpt)):
 
                     # Calculate angle that is perpendicular to the detected ellipse face
