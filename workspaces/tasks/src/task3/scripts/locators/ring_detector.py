@@ -198,7 +198,7 @@ class The_Ring:
             cv2.ellipse(img_original[self.upp_bnd_elps:self.low_bnd_elps, 0:len(img_original)], e1, (0, 255, 0), 2)
             cv2.ellipse(img_original[self.upp_bnd_elps:self.low_bnd_elps, 0:len(img_original)], e2, (0, 255, 0), 2)
 
-            center = (np.max(e1[0][0]-20, 0), e1[0][1] + self.upp_bnd_elps)
+            center = (e1[0][0], e1[0][1] + self.upp_bnd_elps)
 
             # DEVONLY: Drawing center
             # cv2.line(img_original, (int(center[0]), int(center[1])), (int(center[0]), int(center[1])), (0, 0, 255), 10)
@@ -206,7 +206,7 @@ class The_Ring:
             # Add a detected ring to the array
             # Check if detected center is out of bounds
             if (self.scan_ranges != None and center[0] >= 0.0 and center[0] <= len(self.scan_ranges)):
-                x = int(round(center[0]))
+                x = np.int64(round(center[0]-15))
                 agl = self.scan_angle_min + center[0] * self.scan_angle_increment
                 dpt = self.scan_ranges[x] if (x >= 0.0 and x < len(self.scan_ranges)) else np.nan
                 if not(np.isnan(dpt)):
