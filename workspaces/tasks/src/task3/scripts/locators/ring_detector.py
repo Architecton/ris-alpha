@@ -206,7 +206,7 @@ class The_Ring:
             # Add a detected ring to the array
             # Check if detected center is out of bounds
             if (self.scan_ranges != None and center[0] >= 0.0 and center[0] <= len(self.scan_ranges)):
-                x = np.max(0, np.int64(round(center[0])-15))
+                x = np.int64(round(center[0])-15)
                 agl = self.scan_angle_min + center[0] * self.scan_angle_increment
                 dpt = self.scan_ranges[x] if (x >= 0.0 and x < len(self.scan_ranges)) else np.nan
                 if not(np.isnan(dpt)):
