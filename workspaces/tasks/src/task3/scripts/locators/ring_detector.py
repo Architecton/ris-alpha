@@ -38,6 +38,9 @@ class The_Ring:
         self.upp_bnd_ctr = 85 # CENTRE BOUNDARY: Offset from the the upp_bnd_elps
         self.low_bnd_ctr = 135 # CENTRE BOUNDARY: Offset from the the upp_bnd_elps
 
+        # Displacement of depth sensor in pixels
+        self.displacement = 7
+
         # An object we use for converting images between ROS format and OpenCV format
         self.bridge = CvBridge()
 
@@ -208,7 +211,7 @@ class The_Ring:
             if (self.scan_ranges != None and center[0] >= 0.0 and center[0] <= len(self.scan_ranges)):
                 x = np.int64(round(center[0]))
                 agl = self.scan_angle_min + center[0] * self.scan_angle_increment
-                dpt = self.scan_ranges[x] if (x >= 0.0 and x < len(self.scan_ranges)) else np.nan
+                dpt = self.scan_ranges[x-self.displacement] if ((x-self.displacement) >= 0.0 and (x-self.displacement) < len(self.scan_ranges)) else np.nan
                 if not(np.isnan(dpt)):
 
                     # Calculate angle that is perpendicular to the detected ellipse face
@@ -220,15 +223,15 @@ class The_Ring:
                         min(self.scan_angle_min + max_bnd * self.scan_angle_increment, self.scan_angle_max),
                         max_bnd-min_bnd,
                         endpoint=False)
-                    filt = np.isnan(dpts_arg)
-                    perp_agl, perp_y_itrcpt = self.get_ell_face_agl(dpts_arg[~filt], agls_arg[~filt])
+                    # filt = np.isnan(dpts_arg)
+                    # perp_agl, perp_y_itrcpt = self.get_ell_face_agl(dpts_arg[~filt], agls_arg[~filt])
 
                     # Set values
                     ed.dpt.append(dpt)
                     ed.agl.append(agl)
                     ed.timestamp.append(timestamp)
-                    ed.perp_agl.append(perp_agl)
-                    ed.perp_y_itrcpt.append(perp_y_itrcpt)
+                    ed.perp_agl.append(0.0)
+                    ed.perp_y_itrcpt.append(0.0)
                     ed.found = 1
   
         if (ed.found == 1):
