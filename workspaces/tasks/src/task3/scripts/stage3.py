@@ -323,7 +323,7 @@ def stage_three(goal_color):
     # Initialize ring colour detector instance.
     clf = load('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/ring_colour_classifier.joblib')
     NUM_BINS = 50
-    cdt = ColourDetector(clf, NUM_BINS)
+    cdt = ColourDetectorRing(clf, NUM_BINS)
 
     # Initialize action client
     ac_chkpnts = actionlib.SimpleActionClient("move_base", MoveBaseAction)

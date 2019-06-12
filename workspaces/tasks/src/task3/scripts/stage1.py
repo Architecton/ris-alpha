@@ -70,15 +70,15 @@ def stage_one():
 
 
     ### ROTATION PARAMETERS ###
-    NUM_ROTATIONS = 8
+    NUM_ROTATIONS = 10
     rotation_agl = 2*np.pi/float(NUM_ROTATIONS)
     ROTATION_SPEED_X = 1.5
     ROTATION_SPEED_Y = 1.5
     ROTATION_SPEED_Z = 1.5
-    rotation_dur_callib = 0.3 # Constant used to calibrate rotation duration.
+    rotation_dur_callib = 0.1 # Constant used to calibrate rotation duration.
     # Duration for which to publish specified rotation velocity to get rotation_agl angle.
     rotation_dur = (rotation_agl/ROTATION_SPEED_X)*rotation_dur_callib 
-    ROTATION_SLEEP_DURATION = 0.5
+    ROTATION_SLEEP_DURATION = 0.8
     rot = Twist()
     rot.angular.x = ROTATION_SPEED_X
     rot.angular.y = ROTATION_SPEED_Y
@@ -138,16 +138,13 @@ def stage_one():
     # Allocate array for storing checkpoints.
     checkpoints = np.empty((0, 3), dtype=float)
 
-    # Dictionary for mapping target values to colors.
-    color_dict = None
-
     # Add checkpoints to matrix.
     for point in checkpoints_res.points.points:
         checkpoints_nxt = np.array([[point.x, point.y, point.z]])
         checkpoints = np.vstack((checkpoints, checkpoints_nxt))
 
     checkpoint_ctr = 0  # Initialize visited checkpoints counter.
-Add goal to list of goals and 
+    # Add goal to list of goals and 
     # Get robot position in map coordinates.
     rospy.sleep(5)  # Wait for cache to fill.
     trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
@@ -216,8 +213,7 @@ Add goal to list of goals and
             for rot_idx in np.arange(NUM_ROTATIONS):
 
                 # Safety sleep.
-                rospy.sleep(0.5)
-
+                rospy.sleep(0.8)
 
                 ## IMAGE PROCESSING STREAM SCAN START ###
                 sf.flag = 1
@@ -230,7 +226,7 @@ Add goal to list of goals and
                 ## IMAGE PROCESSING STREAM SCAN END ###
 
                 # Safety sleep.
-                rospy.sleep(0.5)
+                rospy.sleep(0.8)
 
                 # ROTATE
                 start_rot_time = time.time()
@@ -294,9 +290,12 @@ Add goal to list of goals and
                                     # If QR code detected, build classifier.
                                     if qr_detected != '':
                                         sound_client.say('1qr_code_detected')
+                                        
+                                        import pdb
+                                        pdb.set_trace()
 
                                         data_url = qr_detected
-                                        clf, color_dict = clf.fit(data_url)
+                                        clf = clf.fit(data_url)
                                         classifier_built = True
 
                                     elif found_pattern:
@@ -326,7 +325,7 @@ Add goal to list of goals and
 
                                         # Build classifier and classify pattern.
                                         data_url = qr_detected
-                                        clf, color_dict = clf.fit(data_url)
+                                        clf = clf.fit(data_url)
                                         classifier_built = True
                                         return int(clf.predict(np.array(found_pattern)[np.newaxis])[0]), detected_ellipses_list
 

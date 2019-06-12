@@ -74,15 +74,16 @@ def changePermission(data):
 
     # If recieved signal to stop scanning and if buffer contains more than 5 elements,
     # add mediann to buffer.
-    if scan_flag == 0 and buff2_ptr > 5:
+    if scan_flag == 0 and buff2_ptr > 2:
         res = np.median(buff2[:buff2_ptr, :], 0)
         buff[buff_ptr] = res
         buff_ptr += 1
         buff2_ptr = 0
 
+
         ### DEBUGGING VISUALIZATION ###
-        # tm.push_position(res[:3], 'green')
-        # tm.push_position(res[3:6], 'red')
+        #tm.push_position(res[:3])
+        #tm.push_position(res[3:6])
         ### /DEBUGGING VISUALIZATION ###
 
 
@@ -152,7 +153,6 @@ def callback(data):
                 break
 
             # Check if ellipse already in buffer.
-            # NOTE: ALREADY IMPLEMENTED IN CLIENT
             """
             if buff2_ptr > 0:
                 if np.any((lambda x1, x2: np.sqrt(np.sum(np.abs(x1 - x2)**2, 1)))(np.array([pos_nxt_transformed.pose.position.x, pos_nxt_transformed.pose.position.y]), buff2[:, :2]) < DIFF_THRESH):
@@ -191,12 +191,9 @@ def callback(data):
             # Get goal point in front of the face of the ellipse.
             pos_nxt_approach_pt = PoseStamped()
 
-            # TODO play here
-
-
             # Increment/Decrement x and y to get position in front of the ellipse perpendicular to its face.
             pos_nxt_approach_pt.pose.position.x = pos_nxt.pose.position.x + dx1 #if data.agl[ell_idx] < 0 else pos_nxt.pose.position.x + dx2
-            pos_nxt_approach_pt.pose.position.y = pos_nxt.pose.position.y # TODO what happens without + dx1*k ??? #if data.agl[ell_idx] < 0 else pos_nxt.pose.position.y + dx2*k # TODO
+            pos_nxt_approach_pt.pose.position.y = pos_nxt.pose.position.y + dx1*k #if data.agl[ell_idx] < 0 else pos_nxt.pose.position.y + dx2*k
             pos_nxt_approach_pt.pose.position.z = data.perp_agl[ell_idx]
 
             # Transform approach goal position to map coordinate system.
@@ -212,8 +209,8 @@ def callback(data):
         
 
             ### DEBUGGING VISUALIZATION ###
-            tm.push_position(res[:3], 'green')
-            tm.push_position(res[3:], 'blue')
+            # tm.push_position(res[:3])
+            # tm.push_position(res[3:])
             ### /DEBUGGING VISUALIZATION ###
 
             # Add data to buffer and increment buffer pointer.
