@@ -176,7 +176,7 @@ if __name__ == '__main__':
     
     # Go over ring colours.
     for colour in trainer.colour_dict.keys():
-        if colour == 0:
+        if colour == 0 or colour == 1 or colour == 2:
             continue
 	
     
