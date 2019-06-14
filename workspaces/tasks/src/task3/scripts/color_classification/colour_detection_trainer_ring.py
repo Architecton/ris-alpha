@@ -176,94 +176,92 @@ if __name__ == '__main__':
     
     # Go over ring colours.
     for colour in trainer.colour_dict.keys():
+        if colour == 0:
+            continue
+	
     
         # Countdown to start of training data recording.
-        countdown_val = 10
+        countdown_val = 15
         while(countdown_val >= 1):
             print("Starting recording of {0} ring training data (1. session) in:".format(trainer.colour_dict[colour]))
             print("{0}".format(countdown_val))
             countdown_val -= 1
             rospy.sleep(1)
-            os.system('clear')
 
         # Set target value, subscribe to topic and initialize recording timeout.
         trainer.set_target(colour)
         trainer.subscribe()
-        recording_timeout = 0.1*60
+        recording_timeout = 15
 
         # Record training data for specified duration.
         while(recording_timeout >= 1):
-            print("Recording {0} ring training data:".format(trainer.colour_dict[colour]))
+            #print("Recording {0} ring training data:".format(trainer.colour_dict[colour]))
             print("{0}".format(recording_timeout))
             recording_timeout -= 1
             rospy.sleep(1)
-            os.system('clear')
 
         # Countdown to start of training data recording.
         trainer.unsubscribe()
-        countdown_val = 10
+        countdown_val = 15
         while(countdown_val >= 1):
             print("Starting recording of {0} ring training data (2. session) in:".format(trainer.colour_dict[colour]))
             print("{0}".format(countdown_val))
             countdown_val -= 1
             rospy.sleep(1)
-            os.system('clear')
 
         # Record training data for specified duration.
-        recording_timeout = 0.1*60
+        recording_timeout = 15
         trainer.subscribe()
         while(recording_timeout >= 1):
-            print("Recording {0} ring training data:".format(trainer.colour_dict[colour]))
+            #print("Recording {0} ring training data:".format(trainer.colour_dict[colour]))
             print("{0}".format(recording_timeout))
             recording_timeout -= 1
             rospy.sleep(1)
-            os.system('clear')
 
         # Countdown to start of training data recording.
         trainer.unsubscribe()
-        countdown_val = 10
+        countdown_val = 15
         while(countdown_val >= 1):
-            print("Starting recording of {0} ring training data (3. session) in:".format(trainer.colour_dict[colour]))
+            # print("Starting recording of {0} ring training data (3. session) in:".format(trainer.colour_dict[colour]))
             print("{0}".format(countdown_val))
             countdown_val -= 1
             rospy.sleep(1)
-            os.system('clear')
 
         # Record training data for specified duration.
         trainer.subscribe()
-        recording_timeout = 0.1*60
+        recording_timeout = 15
         while(recording_timeout >= 1):
-            print("Recording {0} ring training data:".format(trainer.colour_dict[colour]))
+            # print("Recording {0} ring training data:".format(trainer.colour_dict[colour]))
             print("{0}".format(recording_timeout))
             recording_timeout -= 1
             rospy.sleep(1)
-            os.system('clear')
 
         # Countdown to start of training data recording.
         trainer.unsubscribe()
-        countdown_val = 10
+        countdown_val = 15
         while(countdown_val >= 1):
-            print("Starting recording of {0} ring training data (4. session) in:".format(trainer.colour_dict[colour]))
+            # print("Starting recording of {0} ring training data (4. session) in:".format(trainer.colour_dict[colour]))
             print("{0}".format(countdown_val))
             countdown_val -= 1
             rospy.sleep(1)
-            os.system('clear')
 
         # Record training data for specified duration.
         trainer.subscribe()
-        recording_timeout = 0.1*60
+        recording_timeout = 15
         while(recording_timeout >= 1):
-            print("Recording {0} ring training data:".format(trainer.colour_dict[colour]))
+            # print("Recording {0} ring training data:".format(trainer.colour_dict[colour]))
             print("{0}".format(recording_timeout))
             recording_timeout -= 1
             rospy.sleep(1)
-            os.system('clear')
 
         # Unsubscribe from training data flow topic and get next blocks of
         # features vectors and target vector.
         trainer.unsubscribe()
         trainer.get_data()
-        countdown_val = 1
+        import pdb
+        pdb.set_trace()
+
+    
     
     # Get classifier.
     clf = trainer.get_classifier()
@@ -275,6 +273,5 @@ if __name__ == '__main__':
     sio.savemat('training_data.mat', {'data' : trainer._features_mat})
     sio.savemat('training_data_target.mat', { 'data' : trainer._target_vec})
     # print "saving training images"
-    # pdb.set_trace()
     # trainer.save_obj(trainer.training_imgs, 'training_images')
 

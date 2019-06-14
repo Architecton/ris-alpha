@@ -15,7 +15,7 @@ class ColourDetectorRing:
 	self._clf = clf
         self._ring_image = np.empty(0, dtype=np.uint8)
         self._cv_bridge = CvBridge()	
-        # rospy.init_node('test', anonymous=True)
+        rospy.init_node('test', anonymous=True)
 
     def _depth_callback(self, data):
 
