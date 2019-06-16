@@ -74,7 +74,7 @@ def changePermission(data):
 
     # If recieved signal to stop scanning and if buffer contains more than 5 elements,
     # add mediann to buffer.
-    if scan_flag == 0 and buff2_ptr > 2:
+    if scan_flag == 0 and buff2_ptr > 6:
         res = np.median(buff2[:buff2_ptr, :], 0)
         buff[buff_ptr] = res
         buff_ptr += 1
