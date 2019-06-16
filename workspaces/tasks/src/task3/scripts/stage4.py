@@ -411,7 +411,21 @@ def stage_four(goal_color, hints_list):
                                             # If already failed to detect/interpret before, redo approach.
                                             if failed_attempt:
                                                 map_detection_serv(1)
-                                                doah.approach_procedure_alt()
+                                                doah.forward() 
+                                                doah.left()
+                                                rospy.sleep(1)
+                                                doah.left()
+                                                rospy.sleep(1)
+                                                doah.right()
+                                                rospy.sleep(1)
+                                                doah.right()
+                                                rospy.sleep(1)
+                                                doah.right()
+                                                rospy.sleep(1)
+                                                doah.right()
+                                                red = map_detection_serv(0)
+
+
                                             else:
                                                 # Try to interpret map.
                                                 map_detection_serv(1)
