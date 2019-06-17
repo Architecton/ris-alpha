@@ -369,8 +369,6 @@ def stage_three(goal_color):
     tf2_buffer = tf2_ros.Buffer()
     tf2_listener = tf2_ros.TransformListener(tf2_buffer)
 
-    sound_client.say('3starting_search')
-
     # Wait for map cache to fill.
     rospy.sleep(5)
 
