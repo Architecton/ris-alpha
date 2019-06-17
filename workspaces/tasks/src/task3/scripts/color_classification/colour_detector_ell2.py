@@ -15,7 +15,7 @@ class ColourDetectorEll:
 	self._clf = clf
         self._ring_image = np.empty(0, dtype=np.uint8)
         self._cv_bridge = CvBridge()
-    	#rospy.init_node('colour_detection_test', anonymous=True)
+    	rospy.init_node('test', anonymous=True)
 
 
     def _depth_callback(self, data):
@@ -94,7 +94,7 @@ class ColourDetectorEll:
 
 if __name__ == '__main__':
     clf = load('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/ellipse_colour_classifier.joblib')
-    NUM_BINS = 100
+    NUM_BINS = 50
     cdt = ColourDetectorEll(clf, NUM_BINS)
     while True:
         cdt.subscribe()

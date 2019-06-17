@@ -7,6 +7,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 import cv2 as cv
 
+import matplotlib as plt
+import time
+
 class ColourClassifier:
 
 
@@ -31,7 +34,7 @@ class ColourClassifier:
         # Initialize learner.
         # learner = RandomForestClassifier(n_estimators=100, random_state=0, max_depth=5)
         # learner = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(7, 2), random_state=1)
-        learner = SVC(gamma='auto')
+        learner = SVC(gamma='auto', tol=1e-6)
         # learner = RandomForestClassifier(n_estimators=100, random_state=0, max_depth=5)
         self.clf = learner.fit(self.scaler.transform(data), target)  # Train classifier.
         return self
@@ -116,16 +119,32 @@ class ColourFeatureGenerator:
            Array[np.int64] -- matrix of colour features that can be used to train classifier
            Array[np.int64] -- vector of target values corresponding to each image
         """
-        colour_features_mat = np.empty((self._img_counter, self._num_bins*3), dtype=np.int)  # Allocate matrix for storing feature vectors.
+
+        colour_features_mat = np.empty((self._img_counter, self._num_bins*3), dtype=np.float)  # Allocate matrix for storing feature vectors.
         target = np.empty(self._img_counter, dtype=np.int)  # Allocate vector for storing target values.
         for img_idx in self._img_dict.keys():
+
+            ### DEBUG ###
+            #plt.ion()
+            #time.sleep(0.5)
+            #plt.imshow(self._img_dict[img_idx])
+            #plt.show()
+            #plt.pause(0.01)
+            #rospy.sleep(2)
+            #plt.clf()
+            #############
+
+
 	    img_nxt = cv.cvtColor(self._img_dict[img_idx], cv.COLOR_BGR2HSV)
-            img_nxt[20:img_nxt.shape[0]-20, 20:img_nxt.shape[1]-20, :] = 0
-            hist_b, _ = np.histogram(img_nxt[:, :, 0], bins=self._num_bins)
-            hist_g, _ = np.histogram(img_nxt[:, :, 1], bins=self._num_bins)
-            hist_r, _ = np.histogram(img_nxt[:, :, 2], bins=self._num_bins)
+            img_nxt[15:img_nxt.shape[0]-15, 15:img_nxt.shape[1]-15, :] = 0
+            hist_b, _ = np.histogram(img_nxt[:, :, 0], bins=self._num_bins+1)
+            hist_b = hist_b[1:]
+            hist_g, _ = np.histogram(img_nxt[:, :, 1], bins=self._num_bins+1)
+            hist_g = hist_g[1:]
+            hist_r, _ = np.histogram(img_nxt[:, :, 2], bins=self._num_bins+1)
+            hist_r = hist_r[1:]
             feature = np.hstack((hist_b, hist_g, hist_r))  # Compute feature from channel histograms.
-            feature = feature/np.sum(feature)
+            feature = feature.astype(np.float)/np.sum(feature)	
             colour_features_mat[img_idx, :] = feature  # Add feature to features matrix.
             target[img_idx] = self._target_dict[img_idx]  # Add target value to vector of target values.
 
@@ -146,10 +165,13 @@ class ColourFeatureGenerator:
         colour_features_mat = np.empty((self._img_counter, self._num_bins*3), dtype=np.int)  # Allocate matrix for storing feature vectors.
         for img_idx in self._img_dict.keys():
 	    img_nxt = cv.cvtColor(self._img_dict[img_idx], cv.COLOR_BGR2HSV)
-            img_nxt[20:img_nxt.shape[0]-20, 20:img_nxt.shape[1]-20, :] = 0
-            hist_b, _ = np.histogram(img_nxt[:, :, 0], bins=self._num_bins)
-            hist_g, _ = np.histogram(img_nxt[:, :, 1], bins=self._num_bins)
-            hist_r, _ = np.histogram(img_nxt[:, :, 2], bins=self._num_bins)
+            img_nxt[15:img_nxt.shape[0]-15, 15:img_nxt.shape[1]-15, :] = 0
+            hist_b, _ = np.histogram(img_nxt[:, :, 0], bins=self._num_bins+1)
+            hist_b = hist_b[1:]
+            hist_g, _ = np.histogram(img_nxt[:, :, 1], bins=self._num_bins+1)
+            hist_g = hist_g[1:]
+            hist_r, _ = np.histogram(img_nxt[:, :, 2], bins=self._num_bins+1)
+            hist_r = hist_r[1:]
             feature = np.hstack((hist_b, hist_g, hist_r))  # Compute feature from channel histograms.
             feature = feature/np.sum(feature)
             colour_features_mat[img_idx, :] = feature  # Add feature to features matrix.
@@ -212,12 +234,14 @@ class RingImageProcessor:
 
         # Compute channel histograms.
 	cropped_img = cv.cvtColor(cropped_img, cv.COLOR_BGR2HSV)
-        hist_b, _ = np.histogram(cropped_img[:, :, 0], bins=self._num_bins)
-        hist_g, _ = np.histogram(cropped_img[:, :, 1], bins=self._num_bins)
-        hist_r, _ = np.histogram(cropped_img[:, :, 2], bins=self._num_bins)
+        hist_b, _ = np.histogram(cropped_img[:, :, 0], bins=self._num_bins+1)
+        hist_b = hist_b[1:]
+        hist_g, _ = np.histogram(cropped_img[:, :, 1], bins=self._num_bins+1)
+        hist_g = hist_g[1:]
+        hist_r, _ = np.histogram(cropped_img[:, :, 2], bins=self._num_bins+1)
+        hist_r = hist_r[1:]
         feature = np.hstack((hist_r, hist_g, hist_b))  # Return computed colour feature.
-        feature = feature/np.sum(feature)
-        return feature 
+        return feature.astype(np.float)/np.sum(feature)
 
     def img_to_feature(self, img, l_u, r_d):
         """
@@ -303,12 +327,15 @@ class CylinderImageProcessor:
 
         # Compute channel histograms.
 	cropped_img_hsv = cv.cvtColor(cropped_img, cv.COLOR_BGR2HSV)
-        cropped_img_hsv[30:cropped_img_hsv.shape[0]-30, 30:cropped_img_hsv.shape[1]-30, :] = 0
-        hist_b, _ = np.histogram(cropped_img_hsv[:, :, 0], bins=self._num_bins)
-        hist_g, _ = np.histogram(cropped_img_hsv[:, :, 1], bins=self._num_bins)
-        hist_r, _ = np.histogram(cropped_img_hsv[:, :, 2], bins=self._num_bins)
+        cropped_img_hsv[15:cropped_img_hsv.shape[0]-15, 15:cropped_img_hsv.shape[1]-15, :] = 0
+        hist_b, _ = np.histogram(cropped_img_hsv[:, :, 0], bins=self._num_bins+1)
+        hist_b = hist_b[1:]
+        hist_g, _ = np.histogram(cropped_img_hsv[:, :, 1], bins=self._num_bins+1)
+        hist_g = hist_g[1:]
+        hist_r, _ = np.histogram(cropped_img_hsv[:, :, 2], bins=self._num_bins+1)
+        hist_r = hist_r[1:]
         feature = np.hstack((hist_r, hist_g, hist_b))  # Return computed colour feature.
-        return feature/np.sum(feature)
+        return feature.astype(np.float)/snp.sum(feature)
 
     def img_to_feature(self, img, l_u, r_d):
         """

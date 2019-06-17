@@ -43,7 +43,7 @@ class SoundPlayer:
              self._soundhandle.playWave('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/sound/three.wav', self._volume)
         if data.text == '1rotation':
              self._soundhandle.playWave('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/sound/rotation.wav', self._volume)
-        if data.text == '1next_teckpoint':
+        if data.text == '1next_checkpoint':
              self._soundhandle.playWave('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/sound/next_checkpoint.wav', self._volume)
 
 
@@ -117,16 +117,14 @@ class SoundPlayer:
              self._soundhandle.playWave('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/sound/4black.wav', self._volume)
         if data.text == '4blue':
              self._soundhandle.playWave('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/sound/4blue.wav', self._volume)
+        if data.text == '4resolving_hints':
+             self._soundhandle.playWave('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/sound/4hints_resolution.wav', self._volume)
 
         # STAGE 5
-        if data.text == '5start':  # TODO
+        if data.text == '5start':
              self._soundhandle.playWave('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/sound/5start.wav', self._volume)
-        if data.text == '5finish':  # TODO
+        if data.text == '5finish':
              self._soundhandle.playWave('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/sound/5finish.wav', self._volume)
-
-
-        # TODO detecting ellipse color
-        # TODO detecting cylinder color
 
 
 

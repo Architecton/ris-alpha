@@ -40,7 +40,7 @@ class DetectionObjectiveApproachHandler:
 
     def _approach(self, goal_dist):
         self._laser_sub = rospy.Subscriber("/scan", LaserScan, self._scan_callback)
-        DURATION_FORWARD = 3.0
+        DURATION_FORWARD = 6.0
         msg = Twist()
         msg.linear.x = 0.1 
         start_time = time.time()
@@ -77,6 +77,38 @@ class DetectionObjectiveApproachHandler:
     def reverse(self):
         REVERSE_DURATION = 0.7
         self._reverse(REVERSE_DURATION)
+
+    # go forward until specified distance from obstacle
+    def forward(self):
+        self._laser_sub = rospy.Subscriber("/scan", LaserScan, self._scan_callback)
+        goal_dist = 0.01
+        DURATION_FORWARD = 6.0
+        msg = Twist()
+        msg.linear.x = 0.1 
+        start_time = time.time()
+        while self._dist_to_wall > goal_dist and time.time() - start_time < DURATION_FORWARD:
+            self._vel_pub.publish(msg)
+        self._dist_to_wall = 100 
+        self._laser_sub.unregister()
+
+    # slight counterclockwise rotation
+    def left(self):
+        DURATION = 0.5
+        msg = Twist()
+        msg.linear.z = 0.1 
+        start_time = time.time()
+        while time.time() - start_time < DURATION:
+            self._vel_pub.publish(msg)
+
+    # slight clockwise rotation
+    def right(self):
+        DURATION = 0.5
+        msg = Twist()
+        msg.linear.z = 0.1 
+        start_time = time.time()
+        while time.time() - start_time < DURATION:
+            self._vel_pub.publish(msg)
+
 
 if __name__ == '__main__':
     rospy.init_node('master')

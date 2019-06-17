@@ -6,8 +6,6 @@ from geometry_msgs.msg import Twist
 from task2.msg import TerminalApproachFeedback
 from task2.srv import TerminalApproach
 
-import pdb
-
 class TerminalApproachHandler:
 
     """

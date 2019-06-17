@@ -74,7 +74,7 @@ def changePermission(data):
 
     # If recieved signal to stop scanning and if buffer contains more than 5 elements,
     # add mediann to buffer.
-    if scan_flag == 0 and buff2_ptr > 5:
+    if scan_flag == 0 and buff2_ptr > 6:
         res = np.median(buff2[:buff2_ptr, :], 0)
         buff[buff_ptr] = res
         buff_ptr += 1
@@ -82,8 +82,8 @@ def changePermission(data):
 
 
         ### DEBUGGING VISUALIZATION ###
-        tm.push_position(res[:3])
-        tm.push_position(res[3:6])
+        #tm.push_position(res[:3])
+        #tm.push_position(res[3:6])
         ### /DEBUGGING VISUALIZATION ###
 
 
@@ -179,7 +179,7 @@ def callback(data):
             
             c = 0.83
             # alternative: b = a*k + m
-            #k = np.tan(data.perp_agl[ell_idx])
+            # k = np.tan(data.perp_agl[ell_idx])
             #m = pos_nxt.pose.position.y - k*pos_nxt.pose.position.y 
             # m = data.perp_y_itrcpt[ell_idx]
 

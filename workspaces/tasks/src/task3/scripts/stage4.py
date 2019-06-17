@@ -56,7 +56,7 @@ params:
 """
 
 
-def stage_four(goal_color):
+def stage_four(goal_color, hints_list):
 
     ### INITIALIZATIONS ###
 
@@ -93,9 +93,9 @@ def stage_four(goal_color):
     tm = TargetMarker()
     
     # Initialize colour detector.
-    clf = load('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/ellipse_colour_classifier.joblib')
-    NUM_BINS = 100
-    cdt = ColourDetectorEll(clf, NUM_BINS) 
+    # clf = load('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/ellipse_colour_classifier.joblib')
+    NUM_BINS = 50
+    # cdt = ColourDetectorEll(clf, NUM_BINS) 
 
     # Initialize action clients
     ac_chkpnts = actionlib.SimpleActionClient("move_base", MoveBaseAction)
@@ -123,7 +123,6 @@ def stage_four(goal_color):
 
     # Initialize sound client.
     sound_client = SoundClient()
-
 
     # Initialize coordinate transforms buffer.
     tf2_buffer = tf2_ros.Buffer()
@@ -159,6 +158,107 @@ def stage_four(goal_color):
     robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z]) 
 
     ### /INITIALIZATIONS ###
+
+
+    ## HINTS RESOLUTION ###################################################
+
+    sound_client.say('4resolving_hints')
+    import pdb
+    pdb.set_trace()
+
+
+
+    for goal_ell in hints_list:
+
+        # Add ellipse to matrix of resolved ellipse data.
+        resolved_ell = np.vstack((resolved_ell, np.array([goal_ell.target_pose.pose.position.x, goal_ell.target_pose.pose.position.y, 0, 0, 0, 0])))
+
+        ac_ellipses.send_goal(goal_ell)
+        goal_nxt_ell_status = GoalStatus.LOST
+        while not goal_nxt_ell_status == GoalStatus.SUCCEEDED:
+            ac_ellipses.wait_for_result(rospy.Duration(0.5))
+            goal_nxt_ell_status = ac_ellipses.get_state()
+
+            if goal_nxt_ell_status == GoalStatus.ABORTED or goal_nxt_ell_status == GoalStatus.REJECTED:
+                rospy.loginfo("Ellipse resolution goal aborted")
+                break
+            elif goal_nxt_ell_status == GoalStatus.SUCCEEDED:
+
+                # Try to detect both the QR code and the pattern.
+
+                qr_detection_serv(1)
+                digit_detection_serv(1)
+                doah.approach_procedure_alt()
+                qr_detected = qr_detection_serv(0).res
+                found_pattern = digit_detection_serv(0).result
+                
+                # If QR code detected, build classifier.
+                if qr_detected != '':
+                    pass
+                elif found_pattern:
+                    pass
+                else:
+                    # Here if map found.
+                    # Classify color of ellipse.
+
+                    sound_client.say('4detecting')
+
+                    #cdt.subscribe()
+                    #rospy.sleep(2)
+                    #color_classification_result = cdt.get_ellipse_color()
+
+                    #if color_classification_result == 'red':
+                    #    sound_client.say("4red")
+                    #if color_classification_result == 'green':
+                    #    sound_client.say("4green")
+                    #if color_classification_result == 'blue':
+                    #    sound_client.say("4blue")
+                    #if color_classification_result == 'yellow':
+                    #    sound_client.say("4yellow")
+                    #if color_classification_result == 'black':
+                    #    sound_client.say("4black")
+                    
+                    # If color correct, try to detect map.
+                    if color_classification_result == goal_color:
+                        sound_client.say('4map_interpretation')
+
+                        # flag that is set to True if there was
+                        # a failed attempt to interpret the map.
+                        failed_attempt = False
+                        failed_attempt_counter = 0
+
+                        ### MAP INTERPRETATION ###
+
+                        # Loop in which attemps to interpret the map are made.
+                        while True:
+
+                            # If already failed to detect/interpret before, redo approach.
+                            if failed_attempt:
+                                map_detection_serv(1)
+                                doah.approach_procedure_alt()
+                            else:
+                                # Try to interpret map.
+                                map_detection_serv(1)
+                                rospy.sleep(3)
+                            res = map_detection_serv(0)
+
+                            # If map successfuly interpreted, return coordinates.
+                            if res.treasure_x != -999 or res.treasure_y != -999:
+                                sound_client.say('4map_success')
+                                doah.reverse()  # Reverse to clear robot from wall.
+                                return res.treasure_x, res.treasure_y
+                            else:
+                                # If failed to interpret map, reverse and set failed attempt flag to True.
+                                doah.reverse()
+                                failed_attempt = True
+                                failed_attempt_counter += 1
+                                if failed_attempt_counter > 2:
+                                    break
+                    else:
+                        pass
+
+    ########################################################################
+
 
     # Loop until return hit.
     while True:
@@ -262,9 +362,6 @@ def stage_four(goal_color):
                                 break
                             elif goal_nxt_ell_status == GoalStatus.SUCCEEDED:
 
-
-                                ### TODO TODO TODO ##########################################################################
-
                                 # Try to detect both the QR code and the pattern.
 
                                 qr_detection_serv(1)
@@ -281,28 +378,24 @@ def stage_four(goal_color):
                                 else:
                                     # Here if map found.
                                     # Classify color of ellipse.
-
-                                    # TODO say that map has been detected.
-                                    # TODO say that classifying colour of ellipse. (same audio file)
                                     sound_client.say('4detecting')
+                                    # cdt.subscribe()
+                                    # rospy.sleep(2)
+                                    # color_classification_result = cdt.get_ellipse_color()
 
-                                    cdt.subscribe()
-                                    rospy.sleep(2)
-                                    color_classification_result = cdt.get_ellipse_color()
-
-                                    if color_classification_result == 'red':
-                                        sound_client.say("4red")
-                                    if color_classification_result == 'green':
-                                        sound_client.say("4green")
-                                    if color_classification_result == 'blue':
-                                        sound_client.say("4blue")
-                                    if color_classification_result == 'yellow':
-                                        sound_client.say("4yellow")
-                                    if color_classification_result == 'black':
-                                        sound_client.say("4black")
+                                    # if color_classification_result == 'red':
+                                    #     sound_client.say("4red")
+                                    # if color_classification_result == 'green':
+                                    #     sound_client.say("4green")
+                                    # if color_classification_result == 'blue':
+                                    #     sound_client.say("4blue")
+                                    # if color_classification_result == 'yellow':
+                                    #     sound_client.say("4yellow")
+                                    # if color_classification_result == 'black':
+                                    #     sound_client.say("4black")
                                     
                                     # If color correct, try to detect map.
-                                    if color_classification_result == goal_color:
+                                    if True: #color_classification_result == goal_color:
                                     	sound_client.say('4map_interpretation')
 
                                         # flag that is set to True if there was
@@ -318,20 +411,30 @@ def stage_four(goal_color):
                                             # If already failed to detect/interpret before, redo approach.
                                             if failed_attempt:
                                                 map_detection_serv(1)
-                                                doah.approach_procedure_alt()
+                                                doah.forward() 
+                                                doah.left()
+                                                rospy.sleep(1)
+                                                doah.left()
+                                                rospy.sleep(1)
+                                                doah.right()
+                                                rospy.sleep(1)
+                                                doah.right()
+                                                rospy.sleep(1)
+                                                doah.right()
+                                                rospy.sleep(1)
+                                                doah.right()
+                                                red = map_detection_serv(0)
+
+
                                             else:
                                                 # Try to interpret map.
                                                 map_detection_serv(1)
                                                 rospy.sleep(3)
-                                            res = map_detection_serv(0)
+                                                res = map_detection_serv(0)
 
                                             # If map successfuly interpreted, return coordinates.
                                             if res.treasure_x != -999 or res.treasure_y != -999:
-                                                import pdb
-                                                pdb.set_trace()
-
                                                 sound_client.say('4map_success')
-
                                                 doah.reverse()  # Reverse to clear robot from wall.
                                                 return res.treasure_x, res.treasure_y
                                             else:
@@ -342,15 +445,11 @@ def stage_four(goal_color):
                                                 if failed_attempt_counter > 2:
                                                     break
                                     else:
-                                        # TODO say that colour is not correct.
                                         pass
 
 
                                         ### /MAP INTERPRETATION ###
                                
-
-                                ### TODO TODO TODO ##########################################################################
-
                                 # Sleep
                                 rospy.sleep(1.0)
 

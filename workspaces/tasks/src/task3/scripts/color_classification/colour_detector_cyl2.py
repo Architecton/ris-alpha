@@ -15,7 +15,7 @@ class ColourDetectorCyl:
 	self._clf = clf
         self._cylinder_image = np.empty(0, dtype=np.uint8)
         self._cv_bridge = CvBridge()
-        #rospy.init_node('test', anonymous=True)
+        rospy.init_node('test', anonymous=True)
 
 
     def _depth_callback(self, data):
@@ -94,7 +94,7 @@ class ColourDetectorCyl:
 
 if __name__ == '__main__':
     clf = load('cylinder_colour_classifier.joblib')
-    NUM_BINS = 100
+    NUM_BINS = 50
     cdt = ColourDetectorCyl(clf, NUM_BINS)
     while True:
         cdt.subscribe()

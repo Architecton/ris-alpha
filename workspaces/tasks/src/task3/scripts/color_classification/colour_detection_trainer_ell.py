@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 import numpy as np
 import rospy
-from colour_detection2 import ColourFeatureGenerator, ColourClassifier
+from color_classification.colour_detection2 import ColourFeatureGenerator, ColourClassifier
 from task3.msg import EllipseImageFeedback
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
@@ -172,7 +172,7 @@ if __name__ == '__main__':
     # Clear terminal.
    
     # Set number of bins to use
-    NUM_BINS = 100
+    NUM_BINS = 50
     
     # Initialize trainer
     trainer = ColourDetectionTrainer(num_bins=NUM_BINS)
@@ -181,9 +181,9 @@ if __name__ == '__main__':
     for colour in trainer.colour_dict.keys():
     
         # Countdown to start of training data recording.
-        countdown_val = 20
+        countdown_val = 15
         while(countdown_val >= 1):
-            print("Starting recording of {0} ellipse training data in:".format(trainer.colour_dict[colour]))
+            print("Starting recording of {0} ellipse training data (1. session) in:".format(trainer.colour_dict[colour]))
             print("{0}".format(countdown_val))
             countdown_val -= 1
             rospy.sleep(1)
@@ -200,11 +200,68 @@ if __name__ == '__main__':
             recording_timeout -= 1
             rospy.sleep(1)
 
+        trainer.unsubscribe()
+        countdown_val = 15
+        while(countdown_val >= 1):
+            print("Starting recording of {0} ellipse training data (2. session) in:".format(trainer.colour_dict[colour]))
+            print("{0}".format(countdown_val))
+            countdown_val -= 1
+            rospy.sleep(1)
+
+        trainer.subscribe()
+        recording_timeout = 0.5*60
+
+        # Record training data for specified duration.
+        while(recording_timeout >= 1):
+            print("Recording {0} ellipse training data:".format(trainer.colour_dict[colour]))
+            print("{0}".format(recording_timeout))
+            recording_timeout -= 1
+            rospy.sleep(1)
+
+        trainer.unsubscribe()
+        countdown_val = 15
+        while(countdown_val >= 1):
+            print("Starting recording of {0} ellipse training data (3. session) in:".format(trainer.colour_dict[colour]))
+            print("{0}".format(countdown_val))
+            countdown_val -= 1
+            rospy.sleep(1)
+
+        trainer.subscribe()
+        recording_timeout = 0.5*60
+
+        # Record training data for specified duration.
+        while(recording_timeout >= 1):
+            print("Recording {0} ellipse training data:".format(trainer.colour_dict[colour]))
+            print("{0}".format(recording_timeout))
+            recording_timeout -= 1
+            rospy.sleep(1)
+
+        trainer.unsubscribe()
+        countdown_val = 15
+        while(countdown_val >= 1):
+            print("Starting recording of {0} ellipse training data (4. session) in:".format(trainer.colour_dict[colour]))
+            print("{0}".format(countdown_val))
+            countdown_val -= 1
+            rospy.sleep(1)
+
+        trainer.subscribe()
+        recording_timeout = 0.5*60
+
+        # Record training data for specified duration.
+        while(recording_timeout >= 1):
+            print("Recording {0} ellipse training data:".format(trainer.colour_dict[colour]))
+            print("{0}".format(recording_timeout))
+            recording_timeout -= 1
+            rospy.sleep(1)
+
         # Unsubscribe from training data flow topic and get next blocks of
         # features vectors and target vector.
         trainer.unsubscribe()
         trainer.get_data()
         countdown_val = 1
+
+        import pdb
+        pdb.set_trace()
     
     # Get classifier.
     clf = trainer.get_classifier()
