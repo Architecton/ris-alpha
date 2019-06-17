@@ -15,7 +15,7 @@ class ColourDetectorCyl:
 	self._clf = clf
         self._cylinder_image = np.empty(0, dtype=np.uint8)
         self._cv_bridge = CvBridge()
-        rospy.init_node('test', anonymous=True)
+        #rospy.init_node('test', anonymous=True)
 
 
     def _depth_callback(self, data):
@@ -93,11 +93,22 @@ class ColourDetectorCyl:
      
 
 if __name__ == '__main__':
+    from sound.sound_client import SoundClient
+    sc = SoundClient()
     clf = load('cylinder_colour_classifier.joblib')
-    NUM_BINS = 50
+    NUM_BINS = 100
     cdt = ColourDetectorCyl(clf, NUM_BINS)
     while True:
         cdt.subscribe()
-        rospy.sleep(5)
-        print cdt.get_cylinder_color()
+        rospy.sleep(3)
+        color = cdt.get_cylinder_color()
+        if color == 'red':
+            sc.say('2red')
+        elif color == 'green':
+            sc.say('2green')
+        elif color == 'blue':
+            sc.say('2blue')
+        elif color == 'yellow':
+            sc.say('2black')
+
 

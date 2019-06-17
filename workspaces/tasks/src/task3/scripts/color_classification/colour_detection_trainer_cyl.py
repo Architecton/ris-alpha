@@ -163,8 +163,6 @@ if __name__ == '__main__':
     #  Script used to record training data and produce classifier
     ###
     
-    # Clear terminal.
-    os.system('clear')
    
     # Set number of bins to use
     NUM_BINS = 100
@@ -174,15 +172,16 @@ if __name__ == '__main__':
     
     # Go over cylinder colours.
     for colour in trainer.colour_dict.keys():
+        if colour == 0 or colour == 1 or colour == 2:
+            continue
     
         # Countdown to start of training data recording.
-        countdown_val = 15
+        countdown_val = 10
         while(countdown_val >= 1):
             print("Starting recording of {0} cylinder training data in:".format(trainer.colour_dict[colour]))
             print("{0}".format(countdown_val))
             countdown_val -= 1
             rospy.sleep(1)
-            os.system('clear')
 
         # Set target value, subscribe to topic and initialize recording timeout.
         trainer.set_target(colour)
@@ -195,13 +194,15 @@ if __name__ == '__main__':
             print("{0}".format(recording_timeout))
             recording_timeout -= 1
             rospy.sleep(1)
-            os.system('clear')
 
         # Unsubscribe from training data flow topic and get next blocks of
         # features vectors and target vector.
         trainer.unsubscribe()
         trainer.get_data()
         countdown_val = 1
+        
+        import pdb
+        pdb.set_trace()
     
     # Get classifier.
     clf = trainer.get_classifier()

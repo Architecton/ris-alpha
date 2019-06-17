@@ -324,7 +324,17 @@ def stage_one():
                                         data_url = qr_detected
                                         clf = clf.fit(data_url)
                                         classifier_built = True
-                                        return int(clf.predict(np.array(found_pattern)[np.newaxis])[0]), detected_ellipses_list
+                                        res = int(clf.predict(np.array(found_pattern)[np.newaxis])[0]), detected_ellipses_list
+                                        if res == 0:
+                                            sound_client.say('1zero')
+                                        elif res == 1:
+                                            sound_client.say('1one')
+                                        elif res == 2:
+                                            sound_client.say('1two')
+                                        elif res == 3:
+                                            sound_client.say('1three')
+
+                                        return res, detected_ellipses_list
 
                                 # if pattern not yet found...
                                 elif not found_pattern:

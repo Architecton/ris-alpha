@@ -169,7 +169,7 @@ def callback(data):
             # Get line equation
             k = pos_nxt.pose.position.y/pos_nxt.pose.position.x
 
-            # quat_orientation = quaternion_from_euler(0, 0, k)
+            quat_orientation = quaternion_from_euler(0, 0, k)
 
 
             # Solve quadratic equation to get point a specified distance perpendicular to the
@@ -181,7 +181,7 @@ def callback(data):
             # k -- tan of the angle of the line perpendicular to the face of the ellipse 
             # m -- y intercept of the line perpendicular to the face of the ellipse 
             
-            c = 0.83
+            c = 0.75
             # alternative: b = a*k + m
             # k = np.tan(data.perp_agl[ell_idx])
             #m = pos_nxt.pose.position.y - k*pos_nxt.pose.position.y 
@@ -199,6 +199,10 @@ def callback(data):
             pos_nxt_approach_pt.pose.position.x = pos_nxt.pose.position.x + dx1 #if data.agl[ell_idx] < 0 else pos_nxt.pose.position.x + dx2
             pos_nxt_approach_pt.pose.position.y = pos_nxt.pose.position.y + dx1*k #if data.agl[ell_idx] < 0 else pos_nxt.pose.position.y + dx2*k
             pos_nxt_approach_pt.pose.position.z = data.perp_agl[ell_idx]
+            pos_nxt_approach_pt.pose.orientation.x = quat_orientation[0]
+            pos_nxt_approach_pt.pose.orientation.y = quat_orientation[1]
+            pos_nxt_approach_pt.pose.orientation.z = quat_orientation[2]
+            pos_nxt_approach_pt.pose.orientation.w = quat_orientation[3]
 
             # Transform approach goal position to map coordinate system.
             pos_nxt_approach_transformed = tf2_geometry_msgs.do_transform_pose(pos_nxt_approach_pt, trans)
@@ -210,7 +214,7 @@ def callback(data):
             res[:3] = np.array([pos_nxt_transformed.pose.position.x, pos_nxt_transformed.pose.position.y, pos_nxt_transformed.pose.position.z])
             res[3:6] = np.array([pos_nxt_approach_transformed.pose.position.x, pos_nxt_approach_transformed.pose.position.y, pos_nxt_approach_transformed.pose.position.z])
             #res[6:] = np.array([trans.transform.rotation.x, trans.transform.rotation.y, trans.transform.rotation.z, trans.transform.rotation.w])
-            res[6:] = np.array([trans.transform.rotation.x, trans.transform.rotation.y, trans.transform.rotation.z, trans.transform.rotation.w])
+            res[6:] = np.array([pos_nxt_approach_transformed.pose.orientation.x, pos_nxt_approach_transformed.pose.orientation.y, pos_nxt_approach_transformed.pose.orientation.z, pos_nxt_approach_transformed.pose.orientation.w])
         
 
             ### DEBUGGING VISUALIZATION ###

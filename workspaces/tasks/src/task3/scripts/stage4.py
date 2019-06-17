@@ -93,9 +93,9 @@ def stage_four(goal_color, hints_list):
     tm = TargetMarker()
     
     # Initialize colour detector.
-    # clf = load('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/ellipse_colour_classifier.joblib')
+    clf = load('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/ellipse_colour_classifier.joblib')
     NUM_BINS = 50
-    # cdt = ColourDetectorEll(clf, NUM_BINS) 
+    cdt = ColourDetectorEll(clf, NUM_BINS) 
 
     # Initialize action clients
     ac_chkpnts = actionlib.SimpleActionClient("move_base", MoveBaseAction)
@@ -203,20 +203,20 @@ def stage_four(goal_color, hints_list):
 
                     sound_client.say('4detecting')
 
-                    #cdt.subscribe()
-                    #rospy.sleep(2)
-                    #color_classification_result = cdt.get_ellipse_color()
+                    cdt.subscribe()
+                    rospy.sleep(2)
+                    color_classification_result = cdt.get_ellipse_color()
 
-                    #if color_classification_result == 'red':
-                    #    sound_client.say("4red")
-                    #if color_classification_result == 'green':
-                    #    sound_client.say("4green")
-                    #if color_classification_result == 'blue':
-                    #    sound_client.say("4blue")
-                    #if color_classification_result == 'yellow':
-                    #    sound_client.say("4yellow")
-                    #if color_classification_result == 'black':
-                    #    sound_client.say("4black")
+                    if color_classification_result == 'red':
+                        sound_client.say("4red")
+                    if color_classification_result == 'green':
+                        sound_client.say("4green")
+                    if color_classification_result == 'blue':
+                        sound_client.say("4blue")
+                    if color_classification_result == 'yellow':
+                        sound_client.say("4yellow")
+                    if color_classification_result == 'black':
+                        sound_client.say("4black")
                     
                     # If color correct, try to detect map.
                     if color_classification_result == goal_color:
@@ -379,23 +379,23 @@ def stage_four(goal_color, hints_list):
                                     # Here if map found.
                                     # Classify color of ellipse.
                                     sound_client.say('4detecting')
-                                    # cdt.subscribe()
-                                    # rospy.sleep(2)
-                                    # color_classification_result = cdt.get_ellipse_color()
+                                    cdt.subscribe()
+                                    doah.approach_procedure_alt()
+                                    color_classification_result = cdt.get_ellipse_color()
 
-                                    # if color_classification_result == 'red':
-                                    #     sound_client.say("4red")
-                                    # if color_classification_result == 'green':
-                                    #     sound_client.say("4green")
-                                    # if color_classification_result == 'blue':
-                                    #     sound_client.say("4blue")
-                                    # if color_classification_result == 'yellow':
-                                    #     sound_client.say("4yellow")
-                                    # if color_classification_result == 'black':
-                                    #     sound_client.say("4black")
+                                    if color_classification_result == 'red':
+                                        sound_client.say("4red")
+                                    if color_classification_result == 'green':
+                                        sound_client.say("4green")
+                                    if color_classification_result == 'blue':
+                                        sound_client.say("4blue")
+                                    if color_classification_result == 'yellow':
+                                        sound_client.say("4yellow")
+                                    if color_classification_result == 'black':
+                                        sound_client.say("4black")
                                     
                                     # If color correct, try to detect map.
-                                    if True: #color_classification_result == goal_color:
+                                    if color_classification_result == goal_color:
                                     	sound_client.say('4map_interpretation')
 
                                         # flag that is set to True if there was
@@ -465,6 +465,9 @@ def stage_four(goal_color, hints_list):
 
             ## /HANDLE ELLIPSE DATA COLLECTED IN BUFFER ##
 
+            # Remove checkpoint from checkpoints array
+            checkpoints = np.delete(checkpoints, (idx_nxt), axis=0)
+
             # Get robot position in map coordinates.
             trans = tf2_buffer.lookup_transform('map', 'base_link', rospy.Time(0))
             robot_pos = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z])
@@ -481,6 +484,4 @@ def stage_four(goal_color, hints_list):
             checkpoints_nxt = np.array([[point.x, point.y, point.z]])
             checkpoints = np.vstack((checkpoints, checkpoints_nxt))
 
-        checkpoint_ctr = 0  # Reinitialize visited checkpoints counter.
-
-
+        checkpoint_ctr = 0  # Reinitialize visited checkpoints cou

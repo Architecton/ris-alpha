@@ -15,7 +15,7 @@ class ColourDetectorEll:
 	self._clf = clf
         self._ring_image = np.empty(0, dtype=np.uint8)
         self._cv_bridge = CvBridge()
-    	rospy.init_node('test', anonymous=True)
+    	#rospy.init_node('test', anonymous=True)
 
 
     def _depth_callback(self, data):
@@ -93,11 +93,23 @@ class ColourDetectorEll:
      
 
 if __name__ == '__main__':
+    from sound.sound_client import SoundClient
     clf = load('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/ellipse_colour_classifier.joblib')
     NUM_BINS = 50
     cdt = ColourDetectorEll(clf, NUM_BINS)
+    sc = SoundClient()
     while True:
         cdt.subscribe()
         rospy.sleep(3)
-        print cdt.get_ellipse_color()
+        color = cdt.get_ellipse_color()
+        if color == 'red':
+            sc.say('4red')
+        if color == 'green':
+            sc.say('4green')
+        if color == 'blue':
+            sc.say('4blue')
+        if color == 'black':
+            sc.say('4black')
+        if color == 'yellow':
+            sc.say('4yellow')
 

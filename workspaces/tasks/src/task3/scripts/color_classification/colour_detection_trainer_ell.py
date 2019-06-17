@@ -90,7 +90,6 @@ class ColourDetectionTrainer:
 
         if self._ring_image.shape[0] > 0:
             # Add image and class to feature generator instance
-            print "burek"
             self._feature_gen.add_image(self._ring_image, self._target, l_u, r_d)
 
 	    # Add cropped image to array of training samples.
@@ -179,9 +178,12 @@ if __name__ == '__main__':
     
     # Go over ring colours.
     for colour in trainer.colour_dict.keys():
+
+        if colour == 0 or colour == 1 or colour == 2 or colour == 3:
+            continue
     
         # Countdown to start of training data recording.
-        countdown_val = 15
+        countdown_val = 20
         while(countdown_val >= 1):
             print("Starting recording of {0} ellipse training data (1. session) in:".format(trainer.colour_dict[colour]))
             print("{0}".format(countdown_val))
@@ -191,7 +193,7 @@ if __name__ == '__main__':
         # Set target value, subscribe to topic and initialize recording timeout.
         trainer.set_target(colour)
         trainer.subscribe()
-        recording_timeout = 0.5*60
+        recording_timeout = 0.6*60
 
         # Record training data for specified duration.
         while(recording_timeout >= 1):
@@ -200,8 +202,9 @@ if __name__ == '__main__':
             recording_timeout -= 1
             rospy.sleep(1)
 
+        """
         trainer.unsubscribe()
-        countdown_val = 15
+        countdown_val = 20
         while(countdown_val >= 1):
             print("Starting recording of {0} ellipse training data (2. session) in:".format(trainer.colour_dict[colour]))
             print("{0}".format(countdown_val))
@@ -219,7 +222,7 @@ if __name__ == '__main__':
             rospy.sleep(1)
 
         trainer.unsubscribe()
-        countdown_val = 15
+        countdown_val = 20
         while(countdown_val >= 1):
             print("Starting recording of {0} ellipse training data (3. session) in:".format(trainer.colour_dict[colour]))
             print("{0}".format(countdown_val))
@@ -237,7 +240,7 @@ if __name__ == '__main__':
             rospy.sleep(1)
 
         trainer.unsubscribe()
-        countdown_val = 15
+        countdown_val = 20
         while(countdown_val >= 1):
             print("Starting recording of {0} ellipse training data (4. session) in:".format(trainer.colour_dict[colour]))
             print("{0}".format(countdown_val))
@@ -253,6 +256,7 @@ if __name__ == '__main__':
             print("{0}".format(recording_timeout))
             recording_timeout -= 1
             rospy.sleep(1)
+        """
 
         # Unsubscribe from training data flow topic and get next blocks of
         # features vectors and target vector.

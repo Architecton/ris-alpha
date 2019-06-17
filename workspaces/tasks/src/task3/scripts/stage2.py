@@ -73,9 +73,9 @@ def stage_two(goal_color):
 
 
     # Initialize cylinder colour detector.
-    NUM_BINS = 50
-    # clf = load('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/cylinder_colour_classifier.joblib')
-    # cdt = ColourDetectorCyl(clf, NUM_BINS)
+    NUM_BINS = 100
+    clf = load('/home/team_alpha/ris-alpha/workspaces/tasks/src/task3/scripts/color_classification/cylinder_colour_classifier.joblib')
+    cdt = ColourDetectorCyl(clf, NUM_BINS)
 
 
     # /// publishers ///
@@ -276,6 +276,7 @@ def stage_two(goal_color):
                 cylinder_data = cyl_buff[cyl_buff_ptr, :]
                 cyl_buff_ptr -= 1
                 cyl_buff = np.delete(cyl_buff, (idx_nxt_cyl), axis=0)
+                cylinders = np.delete(cylinders, (idx_nxt_cyl), axis=0)
 
                 ### DEBUGGING VISUALIZATION ###
                 # tm.push_position(np.array(cylinder_data[:3]))
@@ -302,7 +303,6 @@ def stage_two(goal_color):
 
                     if goal_nxt_cyl_status == GoalStatus.ABORTED or goal_nxt_cyl_status == GoalStatus.REJECTED:
                         rospy.loginfo("Cylinder resolution goal aborted")
-                        break
                     elif goal_nxt_cyl_status == GoalStatus.SUCCEEDED:
 
 
@@ -312,11 +312,10 @@ def stage_two(goal_color):
 
                         sound_client.say('2detecting')
 
-                        #cdt.subscribe()
+                        cdt.subscribe()
                         doah.approach_procedure_alt()
-                        #detected_cylinder_color = cdt.get_cylinder_color()
+                        detected_cylinder_color = cdt.get_cylinder_color()
 
-			"""
                         if detected_cylinder_color == 'red':
                             sound_client.say('2red_cyl')
                         if detected_cylinder_color == 'green':
@@ -325,10 +324,9 @@ def stage_two(goal_color):
                             sound_client.say('2blue_cyl')
                         if detected_cylinder_color == 'yellow':
                             sound_client.say('2yellow_cyl')
-			"""
                         
                         # If detected correct color:
-                        if True: #detected_cylinder_color == goal_color:
+                        if detected_cylinder_color == goal_color:
                             sound_client.say('2detecting_qr_code')
 
                             res = ''
@@ -351,7 +349,8 @@ def stage_two(goal_color):
                                         sound_client.say('2black')
 
                                     return res
-
+                        else:
+                            doah.reverse()
 
 
                             ### TODO TODO TODO ##########################################################################
@@ -361,7 +360,7 @@ def stage_two(goal_color):
                             rospy.sleep(1.0)
 
                             # Add found cylinder to matrix of resolved cylinders.
-                            resolved_cyl = np.vstack((resolved_cyl, np.array([cylinder_data[0], cylinder_data[1]])))
+                            # resolved_cyl = np.vstack((resolved_cyl, np.array([cylinder_data[0], cylinder_data[1]])))
 
             ## /HANDLE CYLINDER DATA COLLECTED IN BUFFER ##
 
