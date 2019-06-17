@@ -84,8 +84,8 @@ def changePermission(data):
 
 
         ### DEBUGGING VISUALIZATION ###
-        #tm.push_position(res[:3])
-        #tm.push_position(res[3:6])
+        tm.push_position(res[:3], 'yellow')
+        tm.push_position(res[3:6], 'green')
         ### /DEBUGGING VISUALIZATION ###
 
 
