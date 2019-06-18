@@ -3,7 +3,7 @@
   <include file="$(find rins_navigation)/launch/minimal.launch">
   </include>
 
-  <param name="/turtlebot_node/odom_angular_scale_correction" value="0.997334" />
+  <param name="/turtlebot_node/odom_angular_scale_correction" value="1.000584" />
 
 </launch>
 
