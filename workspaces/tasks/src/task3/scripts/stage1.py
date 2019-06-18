@@ -35,8 +35,6 @@ from sound.sound_client import SoundClient
 import time
 import sys
 
-import pdb
-
 ### /IMPORTS ###
 
 
@@ -75,10 +73,10 @@ def stage_one():
     ROTATION_SPEED_X = 1.0
     ROTATION_SPEED_Y = 1.0
     ROTATION_SPEED_Z = 1.0
-    rotation_dur_callib = 0.01 # Constant used to calibrate rotation duration.
+    rotation_dur_callib = 0.2 # Constant used to calibrate rotation duration.
     # Duration for which to publish specified rotation velocity to get rotation_agl angle.
     rotation_dur = (rotation_agl/ROTATION_SPEED_X)*rotation_dur_callib 
-    ROTATION_SLEEP_DURATION = 0.8
+    ROTATION_SLEEP_DURATION = 1.0
     rot = Twist()
     rot.angular.x = ROTATION_SPEED_X
     rot.angular.y = ROTATION_SPEED_Y

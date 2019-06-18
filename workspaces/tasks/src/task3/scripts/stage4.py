@@ -78,7 +78,7 @@ def stage_four(goal_color, hints_list):
     ROTATION_SPEED_X = 1.0
     ROTATION_SPEED_Y = 1.0
     ROTATION_SPEED_Z = 1.0
-    rotation_dur_callib = 0.3 # Constant used to calibrate rotation duration.
+    rotation_dur_callib = 0.2 # Constant used to calibrate rotation duration.
     # Duration for which to publish specified rotation velocity to get rotation_agl angle.
     rotation_dur = (rotation_agl/ROTATION_SPEED_X)*rotation_dur_callib 
     ROTATION_SLEEP_DURATION = 1.0
@@ -163,10 +163,6 @@ def stage_four(goal_color, hints_list):
     ## HINTS RESOLUTION ###################################################
 
     sound_client.say('4resolving_hints')
-    import pdb
-    pdb.set_trace()
-
-
 
     for goal_ell in hints_list:
 
@@ -235,7 +231,18 @@ def stage_four(goal_color, hints_list):
                             # If already failed to detect/interpret before, redo approach.
                             if failed_attempt:
                                 map_detection_serv(1)
-                                doah.approach_procedure_alt()
+                                doah.forward() 
+                                doah.left()
+                                rospy.sleep(1)
+                                doah.left()
+                                rospy.sleep(1)
+                                doah.right()
+                                rospy.sleep(1)
+                                doah.right()
+                                rospy.sleep(1)
+                                doah.right()
+                                rospy.sleep(1)
+                                doah.right()
                             else:
                                 # Try to interpret map.
                                 map_detection_serv(1)
@@ -302,7 +309,7 @@ def stage_four(goal_color, hints_list):
             for rot_idx in np.arange(NUM_ROTATIONS):
 
                 # Safety sleep.
-                rospy.sleep(0.2)
+                rospy.sleep(0.8)
 
                 ## IMAGE PROCESSING STREAM SCAN START ###
                 sf.flag = 1
@@ -315,7 +322,7 @@ def stage_four(goal_color, hints_list):
                 ## IMAGE PROCESSING STREAM SCAN END ###
 
                 # Safety sleep.
-                rospy.sleep(0.2)
+                rospy.sleep(0.8)
 
                 # ROTATE
                 start_rot_time = time.time()
@@ -423,14 +430,11 @@ def stage_four(goal_color, hints_list):
                                                 doah.right()
                                                 rospy.sleep(1)
                                                 doah.right()
-                                                red = map_detection_serv(0)
-
-
                                             else:
                                                 # Try to interpret map.
                                                 map_detection_serv(1)
                                                 rospy.sleep(3)
-                                                res = map_detection_serv(0)
+                                            res = map_detection_serv(0)
 
                                             # If map successfuly interpreted, return coordinates.
                                             if res.treasure_x != -999 or res.treasure_y != -999:
@@ -444,10 +448,9 @@ def stage_four(goal_color, hints_list):
                                                 failed_attempt_counter += 1
                                                 if failed_attempt_counter > 2:
                                                     break
+
                                     else:
-                                        pass
-
-
+                                        doah.reverse()
                                         ### /MAP INTERPRETATION ###
                                
                                 # Sleep
