@@ -93,7 +93,6 @@ class ColourDetectorRing:
 
 if __name__ == '__main__':
     from sound.sound_client import SoundClient 
-
     clf = load('ring_colour_classifier.joblib')
     NUM_BINS = 50
     cdt = ColourDetectorRing(clf, NUM_BINS)
